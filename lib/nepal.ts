@@ -18,6 +18,16 @@ export const ACTS = {
   electronic: {
     act: { ne: "विद्युतीय कारोबार ऐन, २०६३", en: "Electronic Transactions Act, 2063" },
   },
+  partnership: { act: { ne: "साझेदारी ऐन, २०२०", en: "Partnership Act, 2020" } },
+  criminalCode: { act: { ne: "मुलुकी अपराध संहिता, २०७४", en: "Muluki Criminal Code, 2074" } },
+  civilProcedure: {
+    act: { ne: "मुलुकी देवानी कार्यविधि संहिता, २०७४", en: "Muluki Civil Procedure Code, 2074" },
+  },
+  patentDesign: {
+    act: { ne: "पेटेन्ट, डिजाइन र ट्रेडमार्क ऐन, २०२२", en: "Patent, Design and Trade Mark Act, 2022" },
+  },
+  incomeTax: { act: { ne: "आयकर ऐन, २०५८", en: "Income Tax Act, 2058" } },
+  vat: { act: { ne: "मूल्य अभिवृद्धि कर ऐन, २०५२", en: "Value Added Tax Act, 2052" } },
 } as const;
 
 export function cite(
@@ -32,6 +42,45 @@ export function cite(
 export const CONTRACT = cite(ACTS.civilCode, "दफा ५०४", "§504");
 export const LEASE = cite(ACTS.civilCode, "दफा ५८३", "§583");
 export const LOAN = cite(ACTS.civilCode, "दफा ५६२", "§562");
+
+/*
+ * Subject-level citations.
+ *
+ * Where the exact section is not confirmed, the citation names the Act and the subject
+ * rather than a number. A wrong section number reads as authoritative and is more
+ * dangerous than an absent one — the reviewing advocate pins these down before launch.
+ */
+export const AGENCY = cite(
+  ACTS.civilCode,
+  "अख्तियारनामा सम्बन्धी व्यवस्था",
+  "provisions on power of attorney",
+);
+export const SUCCESSION = cite(
+  ACTS.civilCode,
+  "इच्छापत्र तथा हकवाला सम्बन्धी व्यवस्था",
+  "provisions on wills and succession",
+);
+export const SALE = cite(ACTS.civilCode, "किनबेच सम्बन्धी व्यवस्था", "provisions on sale");
+export const AGENCY_SERVICE = cite(
+  ACTS.civilCode,
+  "सेवा करार सम्बन्धी व्यवस्था",
+  "provisions on contracts for services",
+);
+export const PARTNERSHIP = cite(
+  ACTS.partnership,
+  "साझेदारी दर्ता सम्बन्धी व्यवस्था",
+  "provisions on partnership registration",
+);
+export const TRADEMARK = cite(
+  ACTS.patentDesign,
+  "ट्रेडमार्क दर्ता सम्बन्धी व्यवस्था",
+  "provisions on trade mark registration",
+);
+export const DIGITAL_SIGNATURE = cite(
+  ACTS.electronic,
+  "विद्युतीय हस्ताक्षर सम्बन्धी व्यवस्था",
+  "provisions on digital signatures",
+);
 
 /** Labour Act 2074 provisions used by the employment template. */
 export const LABOUR = {

@@ -4,6 +4,13 @@ import { residentialLease } from "./lease";
 import { nda } from "./nda";
 import { loanAgreement } from "./loan";
 import { memorandumOfAssociation } from "./moa";
+import {
+  partnershipDeed,
+  serviceAgreement,
+  saleOfGoods,
+  freelanceAgreement,
+} from "./commercial";
+import { powerOfAttorney, will } from "./personal";
 
 /**
  * Template registry.
@@ -13,11 +20,21 @@ import { memorandumOfAssociation } from "./moa";
  * never the clause text itself.
  */
 export const TEMPLATES: Template[] = [
+  // Employment
   employmentContract,
+  freelanceAgreement,
+  // Property
   residentialLease,
+  // Business
+  memorandumOfAssociation,
+  partnershipDeed,
+  serviceAgreement,
+  saleOfGoods,
   loanAgreement,
   nda,
-  memorandumOfAssociation,
+  // Family and personal
+  powerOfAttorney,
+  will,
 ];
 
 export function getTemplate(slug: string): Template | undefined {
@@ -49,19 +66,31 @@ export const CATEGORIES: { id: Category; label: Bilingual; blurb: Bilingual }[] 
     id: "business",
     label: { ne: "व्यापार", en: "Business" },
     blurb: {
-      ne: "व्यावसायिक करार, गोपनीयता र ऋण सम्झौता।",
-      en: "Commercial contracts, confidentiality and lending.",
+      ne: "कम्पनी दर्ता, साझेदारी, व्यावसायिक करार र ऋण सम्झौता।",
+      en: "Incorporation, partnership, commercial contracts and lending.",
     },
   },
   {
     id: "family",
     label: { ne: "पारिवारिक", en: "Family" },
     blurb: {
-      ne: "अंशबन्डा, इच्छापत्र र पारिवारिक कागजात — तयारीमा।",
-      en: "Partition, wills and family documents — in preparation.",
+      ne: "अख्तियारनामा, इच्छापत्र र पारिवारिक कागजात।",
+      en: "Powers of attorney, wills and family documents.",
     },
   },
 ];
 
-export { employmentContract, residentialLease, nda, loanAgreement, memorandumOfAssociation };
+export {
+  employmentContract,
+  residentialLease,
+  nda,
+  loanAgreement,
+  memorandumOfAssociation,
+  partnershipDeed,
+  serviceAgreement,
+  saleOfGoods,
+  freelanceAgreement,
+  powerOfAttorney,
+  will,
+};
 export { POST_REGISTRATION_CHAIN, OCR_FACTS } from "./moa";

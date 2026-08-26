@@ -16,7 +16,8 @@
       "Bash(xargs -I{} echo \"{} files changed/added\")",
       "Bash(git checkout *)",
       "Bash(git add *)",
-      "Bash(xargs -I{} echo \"staged: {} paths\")"
+      "Bash(xargs -I{} echo \"staged: {} paths\")",
+      "Bash(git commit *)"
     ]
   }
 }
