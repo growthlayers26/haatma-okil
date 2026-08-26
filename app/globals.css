@@ -1,26 +1,156 @@
 @import "tailwindcss";
 
+/*
+ * Palette drawn from paubha pigments — lapis, malachite, orpiment, cinnabar —
+ * rather than a generic legal-blue. Neutrals carry a slight lapis bias so greys
+ * read as chosen rather than inherited.
+ */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
+  --lapis: #20458c;
+  --lapis-lift: #3767be;
+  --orpiment: #b8862a;
+  --malachite: #1d6b58;
+  --cinnabar: #b03a2e;
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --ground: #fbfbf9;
+  --surface: #ffffff;
+  --surface-2: #f2f3f0;
+  --ink: #151a24;
+  --ink-2: #3f4653;
+  --ink-3: #6b7280;
+  --rule: #dfe1dc;
+  --rule-strong: #c4c8c1;
+
+  --accent: var(--lapis);
+  --accent-soft: rgba(32, 69, 140, 0.09);
+
+  --serif: var(--font-fraunces), Georgia, "Times New Roman", serif;
+  --deva: var(--font-noto-devanagari), var(--font-fraunces), Georgia, serif;
+  --sans: var(--font-source-sans), -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --mono: var(--font-jetbrains), ui-monospace, Menlo, Consolas, monospace;
 }
 
 @media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+  :root:not([data-theme="light"]) {
+    --lapis: #7ea3e8;
+    --lapis-lift: #a3c0f5;
+    --orpiment: #dcae52;
+    --malachite: #4fb498;
+    --cinnabar: #e07a6c;
+
+    --ground: #0e1219;
+    --surface: #151b25;
+    --surface-2: #1c2430;
+    --ink: #e9ecf1;
+    --ink-2: #b4bcc9;
+    --ink-3: #7f8899;
+    --rule: #28313e;
+    --rule-strong: #3a4553;
+
+    --accent: var(--lapis);
+    --accent-soft: rgba(126, 163, 232, 0.13);
   }
 }
 
+:root[data-theme="dark"] {
+  --lapis: #7ea3e8;
+  --lapis-lift: #a3c0f5;
+  --orpiment: #dcae52;
+  --malachite: #4fb498;
+  --cinnabar: #e07a6c;
+
+  --ground: #0e1219;
+  --surface: #151b25;
+  --surface-2: #1c2430;
+  --ink: #e9ecf1;
+  --ink-2: #b4bcc9;
+  --ink-3: #7f8899;
+  --rule: #28313e;
+  --rule-strong: #3a4553;
+
+  --accent: var(--lapis);
+  --accent-soft: rgba(126, 163, 232, 0.13);
+}
+
+@theme inline {
+  --color-ground: var(--ground);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+  --color-ink: var(--ink);
+  --color-ink-2: var(--ink-2);
+  --color-ink-3: var(--ink-3);
+  --color-rule: var(--rule);
+  --color-rule-strong: var(--rule-strong);
+  --color-accent: var(--accent);
+  --color-accent-soft: var(--accent-soft);
+  --color-lapis: var(--lapis);
+  --color-orpiment: var(--orpiment);
+  --color-malachite: var(--malachite);
+  --color-cinnabar: var(--cinnabar);
+
+  --font-serif: var(--serif);
+  --font-sans: var(--sans);
+  --font-mono: var(--mono);
+  --font-deva: var(--deva);
+}
+
+* {
+  box-sizing: border-box;
+}
+
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--ground);
+  color: var(--ink);
+  font-family: var(--sans);
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+}
+
+/*
+ * Devanagari runs taller than Latin at the same size, so line-height and tap
+ * targets are set from the Devanagari metrics and Latin inherits the extra room.
+ */
+[lang="ne"] {
+  font-family: var(--deva);
+  line-height: 1.85;
+}
+
+[lang="ne"] .font-serif,
+[lang="ne"] h1,
+[lang="ne"] h2,
+[lang="ne"] h3 {
+  font-family: var(--deva);
+}
+
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/*
+ * Print is the PDF path for now: the browser's own engine already shapes
+ * Devanagari correctly, which a JS PDF library will not do without an embedded
+ * font and a shaping pass. Revisit when server-side generation is needed.
+ */
+@media print {
+  .no-print {
+    display: none !important;
+  }
+  body {
+    background: #fff;
+    color: #000;
+  }
+  .print-document {
+    max-width: none;
+    padding: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
 }
