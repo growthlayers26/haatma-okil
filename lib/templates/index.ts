@@ -11,6 +11,13 @@ import {
   freelanceAgreement,
 } from "./commercial";
 import { powerOfAttorney, will } from "./personal";
+import {
+  shareTransferDeed,
+  boardResolution,
+  articlesOfAssociation,
+  foundersAgreement,
+} from "./corporate";
+import { rentTerminationNotice, salaryCertificate, experienceLetter } from "./notices";
 
 /**
  * Template registry.
@@ -18,18 +25,28 @@ import { powerOfAttorney, will } from "./personal";
  * Templates are code rather than database rows so that a change to legal content
  * goes through review and version control. The database stores what a user answered,
  * never the clause text itself.
+ *
+ * Order within each category is roughly by how often the document is actually needed,
+ * since the catalogue page renders them in this order.
  */
 export const TEMPLATES: Template[] = [
   // Employment
   employmentContract,
   freelanceAgreement,
+  salaryCertificate,
+  experienceLetter,
   // Property
   residentialLease,
+  rentTerminationNotice,
   // Business
   memorandumOfAssociation,
+  articlesOfAssociation,
   partnershipDeed,
+  foundersAgreement,
   serviceAgreement,
   saleOfGoods,
+  shareTransferDeed,
+  boardResolution,
   loanAgreement,
   nda,
   // Family and personal
@@ -50,24 +67,24 @@ export const CATEGORIES: { id: Category; label: Bilingual; blurb: Bilingual }[] 
     id: "employment",
     label: { ne: "रोजगारी", en: "Employment" },
     blurb: {
-      ne: "श्रम ऐन, २०७४ बमोजिम अनिवार्य लिखित करार।",
-      en: "Written contracts made mandatory by the Labour Act, 2074.",
+      ne: "श्रम ऐन, २०७४ बमोजिम अनिवार्य लिखित करार तथा कर्मचारी प्रमाणपत्र।",
+      en: "Contracts made mandatory by the Labour Act, 2074, and the certificates employees ask for.",
     },
   },
   {
     id: "property",
     label: { ne: "घरजग्गा", en: "Property" },
     blurb: {
-      ne: "घरबहाल तथा सम्पत्ति सम्बन्धी सम्झौता।",
-      en: "Tenancy and property agreements.",
+      ne: "घरबहाल सम्झौता र बहाल अन्त्यको सूचना।",
+      en: "Tenancy agreements and notices to end them.",
     },
   },
   {
     id: "business",
     label: { ne: "व्यापार", en: "Business" },
     blurb: {
-      ne: "कम्पनी दर्ता, साझेदारी, व्यावसायिक करार र ऋण सम्झौता।",
-      en: "Incorporation, partnership, commercial contracts and lending.",
+      ne: "कम्पनी दर्ता, साझेदारी, सञ्चालन व्यवस्था र व्यावसायिक करार।",
+      en: "Incorporation, partnership, corporate governance and commercial contracts.",
     },
   },
   {
@@ -92,5 +109,12 @@ export {
   freelanceAgreement,
   powerOfAttorney,
   will,
+  shareTransferDeed,
+  boardResolution,
+  articlesOfAssociation,
+  foundersAgreement,
+  rentTerminationNotice,
+  salaryCertificate,
+  experienceLetter,
 };
 export { POST_REGISTRATION_CHAIN, OCR_FACTS } from "./moa";

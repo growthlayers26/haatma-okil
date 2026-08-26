@@ -154,3 +154,21 @@ const NE_DIGITS = "०१२३४५६७८९";
 export function toNepaliDigits(input: string | number): string {
   return String(input).replace(/\d/g, (d) => NE_DIGITS[Number(d)]);
 }
+
+/* Corporate governance citations. Subject-level where the section is unconfirmed. */
+export const ARTICLES = cite(ACTS.companies, "दफा २०", "§20");
+export const SHARE_TRANSFER = cite(
+  ACTS.companies,
+  "शेयर हस्तान्तरण सम्बन्धी व्यवस्था",
+  "provisions on share transfer",
+);
+export const BOARD = cite(
+  ACTS.companies,
+  "सञ्चालक समिति सम्बन्धी व्यवस्था",
+  "provisions on the board of directors",
+);
+export const TERMINATION_NOTICE = cite(
+  ACTS.civilCode,
+  "बहाल अन्त्य सम्बन्धी व्यवस्था",
+  "provisions on termination of tenancy",
+);
