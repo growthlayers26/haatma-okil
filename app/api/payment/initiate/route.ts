@@ -30,7 +30,14 @@ const Body = z.object({
     }),
     z.object({
       type: z.literal("service"),
-      id: z.enum(["question", "consultation", "document_review", "company_registration"]),
+      id: z.enum([
+        "question",
+        "consultation",
+        "document_review",
+        "company_registration",
+        "trademark",
+        "tax_registration",
+      ]),
     }),
     z.object({
       type: z.literal("plan"),

@@ -28,14 +28,11 @@ export function SiteHeader() {
           <Link href="/templates" className="text-ink-2 transition-colors hover:text-accent">
             {t("navDocuments")}
           </Link>
-          <Link href="/register-company" className="text-ink-2 transition-colors hover:text-accent">
-            {bi({ ne: "कम्पनी दर्ता", en: "Register a company" })}
+          <Link href="/services" className="text-ink-2 transition-colors hover:text-accent">
+            {bi({ ne: "सेवा", en: "Services" })}
           </Link>
           <Link href="/advocate" className="text-ink-2 transition-colors hover:text-accent">
             {bi({ ne: "अधिवक्ता", en: "Advocates" })}
-          </Link>
-          <Link href="/review" className="text-ink-2 transition-colors hover:text-accent">
-            {bi({ ne: "करार जाँच", en: "Check a contract" })}
           </Link>
           <Link href="/pricing" className="text-ink-2 transition-colors hover:text-accent">
             {bi({ ne: "मूल्य", en: "Pricing" })}

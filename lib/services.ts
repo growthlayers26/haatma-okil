@@ -9,7 +9,13 @@ import type { Bilingual } from "./types";
  * clients directly for its own advocates' time.
  */
 
-export type ServiceId = "question" | "consultation" | "document_review" | "company_registration";
+export type ServiceId =
+  | "question"
+  | "consultation"
+  | "document_review"
+  | "company_registration"
+  | "trademark"
+  | "tax_registration";
 
 export type Service = {
   id: ServiceId;
@@ -60,6 +66,29 @@ export const SERVICES: Record<ServiceId, Service> = {
     },
     priceNpr: 9_999,
     turnaround: { ne: "५–१० कार्य दिन", en: "5–10 working days" },
+  },
+  trademark: {
+    id: "trademark",
+    title: { ne: "ट्रेडमार्क दर्ता", en: "Trademark registration" },
+    blurb: {
+      ne: "उद्योग विभागमा ट्रेडमार्क दर्ता — पूर्व-खोज, वर्ग निर्धारण र दर्ता प्रक्रिया।",
+      en: "Trademark registration at the Department of Industry — search, classification and filing.",
+    },
+    priceNpr: 12_999,
+    turnaround: {
+      ne: "दर्ता प्रक्रिया केही महिना लाग्दछ",
+      en: "Registration takes several months",
+    },
+  },
+  tax_registration: {
+    id: "tax_registration",
+    title: { ne: "PAN तथा VAT दर्ता", en: "PAN and VAT registration" },
+    blurb: {
+      ne: "आन्तरिक राजस्व कार्यालयमा स्थायी लेखा नम्बर र आवश्यक भएमा मूल्य अभिवृद्धि कर दर्ता।",
+      en: "PAN at the Inland Revenue Office, and VAT only where it is actually required.",
+    },
+    priceNpr: 4_999,
+    turnaround: { ne: "३–७ कार्य दिन", en: "3–7 working days" },
   },
 };
 
