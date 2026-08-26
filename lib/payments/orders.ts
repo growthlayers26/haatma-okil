@@ -1,6 +1,7 @@
 import { createServiceClient } from "@/lib/supabase/server";
 import { getTemplate } from "@/lib/templates";
 import { SERVICES, type ServiceId } from "@/lib/services";
+import { PLANS, planPriceNpr, type PlanId, type BillingPeriod } from "@/lib/plans";
 import { verifyKhalti } from "./khalti";
 import { verifyEsewa } from "./esewa";
 import { toPaisa, type Gateway } from "./types";
@@ -19,7 +20,8 @@ import { toPaisa, type Gateway } from "./types";
 
 export type PurchaseItem =
   | { type: "document"; slug: string; advocateReview?: boolean }
-  | { type: "service"; id: ServiceId };
+  | { type: "service"; id: ServiceId }
+  | { type: "plan"; id: PlanId; period: BillingPeriod };
 
 const ADVOCATE_REVIEW_NPR = 2_500;
 
@@ -30,6 +32,11 @@ const ADVOCATE_REVIEW_NPR = 2_500;
  * for a NPR 599 document must not be able to buy it.
  */
 export function priceNprOf(item: PurchaseItem): number | null {
+  if (item.type === "plan") {
+    // The free plan is not purchasable — there is nothing to charge for.
+    const price = planPriceNpr(item.id, item.period);
+    return price > 0 ? price : null;
+  }
   if (item.type === "service") {
     return SERVICES[item.id]?.priceNpr ?? null;
   }
@@ -39,6 +46,10 @@ export function priceNprOf(item: PurchaseItem): number | null {
 }
 
 export function describeItem(item: PurchaseItem): string {
+  if (item.type === "plan") {
+    const plan = PLANS[item.id];
+    return plan ? `${plan.name.en} plan (${item.period})` : "Subscription";
+  }
   if (item.type === "service") return SERVICES[item.id]?.title.en ?? "Legal service";
   return getTemplate(item.slug)?.title.en ?? "Legal document";
 }
@@ -72,6 +83,10 @@ export async function createPendingOrder(input: {
       gateway: input.gateway,
       amount_paisa: amountPaisa,
       status: "pending",
+      // Recorded now so the verification path knows what this payment buys without
+      // trusting anything the client sends back with the redirect.
+      plan_id: input.item.type === "plan" ? input.item.id : null,
+      billing_period: input.item.type === "plan" ? input.item.period : null,
     })
     .select("id")
     .single();
@@ -112,7 +127,9 @@ export async function verifyOrder(orderId: string): Promise<VerifyOutcome> {
 
   const { data: order, error } = await supabase
     .from("orders")
-    .select("id, gateway, amount_paisa, status, gateway_reference, document_id")
+    .select(
+      "id, user_id, gateway, amount_paisa, status, gateway_reference, document_id, plan_id, billing_period",
+    )
     .eq("id", orderId)
     .maybeSingle();
 
@@ -175,6 +192,28 @@ export async function verifyOrder(orderId: string): Promise<VerifyOutcome> {
 
   if (documentId) {
     await supabase.from("documents").update({ status: "purchased" }).eq("id", documentId);
+  }
+
+  /*
+   * Subscription activation, unlike the document update above, is NOT idempotent —
+   * activate_subscription extends the period on every call. So it runs only for the
+   * request that actually won the pending -> paid transition. Without this guard two
+   * concurrent verifications of one payment would grant two years of access.
+   */
+  if (settled && order.plan_id) {
+    const plan = PLANS[order.plan_id as PlanId];
+    if (plan) {
+      await supabase.rpc("activate_subscription", {
+        p_user: order.user_id as string,
+        p_plan: order.plan_id as string,
+        p_period: (order.billing_period as string) ?? "annual",
+        // Entitlements are snapshotted onto the subscription, so a later change to
+        // the plan catalogue does not alter what this subscriber already bought.
+        p_questions: plan.entitlements.questionsPerMonth,
+        p_reviews: plan.entitlements.reviewsPerMonth,
+        p_seats: plan.entitlements.seats,
+      });
+    }
   }
 
   return { status: "paid", orderId };

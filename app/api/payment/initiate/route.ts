@@ -32,6 +32,12 @@ const Body = z.object({
       type: z.literal("service"),
       id: z.enum(["question", "consultation", "document_review", "company_registration"]),
     }),
+    z.object({
+      type: z.literal("plan"),
+      // "free" is absent on purpose: it costs nothing, so there is nothing to buy.
+      id: z.enum(["business", "enterprise"]),
+      period: z.enum(["monthly", "annual"]),
+    }),
   ]),
 });
 

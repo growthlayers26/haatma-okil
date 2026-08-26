@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { createClient } from "@/lib/supabase/server";
 import { SERVICES, type ServiceId } from "@/lib/services";
+import { consumeQuota, releaseQuota, linkQuotaToEnquiry } from "./subscription";
 
 /**
  * The advocate desk.
@@ -25,7 +26,13 @@ export type Advocate = {
 };
 
 export type ConflictResult =
-  | { cleared: true; enquiryId: string; advocate: Advocate | null }
+  | {
+      cleared: true;
+      enquiryId: string;
+      advocate: Advocate | null;
+      /** True when the subscriber's monthly allowance covered this matter. */
+      coveredByPlan: boolean;
+    }
   | { cleared: false; reason: "conflict" | "unauthenticated" | "not_configured" | "error" };
 
 export async function listAdvocates(): Promise<Advocate[]> {
@@ -104,6 +111,18 @@ export async function screenConflict(input: {
 
   const { data: assignedId } = await supabase.rpc("assign_advocate", { p_area: areaOfLaw });
 
+  /*
+   * Try to cover this from the subscriber's monthly allowance.
+   *
+   * A live consultation is deliberately never metered — it occupies an advocate's
+   * diary rather than a slice of their writing time, so it is always billed.
+   *
+   * A false here is the ordinary path, not a failure: it means bill per matter.
+   */
+  const quotaKind = kind === "question" ? "question" : kind === "document_review" ? "review" : null;
+  const usageId = quotaKind ? await consumeQuota(auth.user.id, quotaKind) : null;
+  const coveredByPlan = usageId !== null;
+
   const dueAt = new Date();
   dueAt.setDate(dueAt.getDate() + (kind === "consultation" ? 3 : kind === "document_review" ? 2 : 1));
 
@@ -119,17 +138,25 @@ export async function screenConflict(input: {
       status: "screening",
       conflict_cleared_at: new Date().toISOString(),
       due_at: dueAt.toISOString(),
+      covered_by_plan: coveredByPlan,
     })
     .select("id")
     .single();
 
-  if (error || !enquiry) return { cleared: false, reason: "error" };
+  if (error || !enquiry) {
+    // The unit was taken before the matter existed. Since the matter could not be
+    // opened, hand it back rather than charging a subscriber for nothing.
+    if (usageId) await releaseQuota(usageId);
+    return { cleared: false, reason: "error" };
+  }
+
+  if (usageId) await linkQuotaToEnquiry(usageId, enquiry.id as string);
 
   const advocates = await listAdvocates();
   const advocate = advocates.find((a) => a.id === assignedId) ?? null;
 
   revalidatePath("/dashboard");
-  return { cleared: true, enquiryId: enquiry.id as string, advocate };
+  return { cleared: true, enquiryId: enquiry.id as string, advocate, coveredByPlan };
 }
 
 const DetailSchema = z.object({

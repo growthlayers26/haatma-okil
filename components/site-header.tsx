@@ -34,6 +34,9 @@ export function SiteHeader() {
           <Link href="/advocate" className="text-ink-2 transition-colors hover:text-accent">
             {bi({ ne: "अधिवक्ता", en: "Advocates" })}
           </Link>
+          <Link href="/pricing" className="text-ink-2 transition-colors hover:text-accent">
+            {bi({ ne: "मूल्य", en: "Pricing" })}
+          </Link>
           <Link href="/dashboard" className="text-ink-2 transition-colors hover:text-accent">
             {t("navDashboard")}
           </Link>
