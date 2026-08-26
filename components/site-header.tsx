@@ -37,6 +37,9 @@ export function SiteHeader() {
           <Link href="/pricing" className="text-ink-2 transition-colors hover:text-accent">
             {bi({ ne: "मूल्य", en: "Pricing" })}
           </Link>
+          <Link href="/team" className="text-ink-2 transition-colors hover:text-accent">
+            {bi({ ne: "टोली", en: "Team" })}
+          </Link>
           <Link href="/dashboard" className="text-ink-2 transition-colors hover:text-accent">
             {t("navDashboard")}
           </Link>

@@ -4,6 +4,7 @@ import { createClient } from "@/lib/supabase/server";
 import {
   createPendingOrder,
   attachReference,
+  approvalBlocks,
   priceNprOf,
   describeItem,
   type PurchaseItem,
@@ -86,6 +87,18 @@ export async function POST(request: Request) {
   const { data: auth } = (await supabase?.auth.getUser()) ?? { data: { user: null } };
   if (!auth.user) {
     return NextResponse.json({ message: "Sign in to complete payment.", requiresAuth: true }, { status: 401 });
+  }
+
+  // An organisation running an approval workflow gates payment, not just display.
+  if (documentId && (await approvalBlocks(documentId))) {
+    return NextResponse.json(
+      {
+        message:
+          "This document needs approval from an administrator in your organisation before it can be purchased.",
+        needsApproval: true,
+      },
+      { status: 409 },
+    );
   }
 
   const order = await createPendingOrder({

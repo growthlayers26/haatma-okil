@@ -54,6 +54,35 @@ export function describeItem(item: PurchaseItem): string {
   return getTemplate(item.slug)?.title.en ?? "Legal document";
 }
 
+/**
+ * Whether an organisation's approval workflow blocks buying this document.
+ *
+ * This is what makes the workflow real rather than decorative. Without it a member
+ * could route around their own organisation's control simply by paying — the draft
+ * would finalise and the approval queue would be a display of documents that had
+ * already gone out.
+ *
+ * A document with no organisation, or one whose organisation does not require
+ * approval, is never blocked.
+ */
+export async function approvalBlocks(documentId: string): Promise<boolean> {
+  const supabase = createServiceClient();
+  if (!supabase) return false;
+
+  const { data } = await supabase
+    .from("documents")
+    .select("approval_status, organisations!inner(require_approval)")
+    .eq("id", documentId)
+    .maybeSingle();
+
+  if (!data) return false;
+
+  const org = data.organisations as unknown as { require_approval: boolean } | null;
+  if (!org?.require_approval) return false;
+
+  return data.approval_status !== "approved";
+}
+
 export type PendingOrder = {
   id: string;
   amountPaisa: number;
