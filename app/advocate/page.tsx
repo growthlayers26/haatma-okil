@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { useEffect, useState } from "react";
 import { useLang } from "@/components/language-provider";
 import { useAuth } from "@/components/auth-provider";
@@ -287,7 +288,25 @@ export default function AdvocatePage() {
             ) : (
               <ul className="mt-3 space-y-4">
                 {advocates.map((a) => (
-                  <li key={a.id} className="border-t border-dashed border-rule-strong pt-3 first:border-0 first:pt-0">
+                  <li
+                    key={a.id}
+                    className="flex gap-3 border-t border-dashed border-rule-strong pt-3 first:border-0 first:pt-0"
+                  >
+                    {/*
+                      Rendered only when a portrait exists. A broken image on a
+                      professional profile looks worse than no photograph — the same
+                      rule the licence number follows.
+                    */}
+                    {a.photoPath && (
+                      <Image
+                        src={a.photoPath}
+                        alt=""
+                        width={56}
+                        height={72}
+                        className="h-[72px] w-[56px] flex-none border border-rule-strong object-cover object-top"
+                      />
+                    )}
+                    <div className="min-w-0 flex-1">
                     <p className="font-serif text-base font-semibold">{a.fullName[lang]}</p>
                     {/*
                       Rendered only when the firm has supplied it. A placeholder here
@@ -310,6 +329,7 @@ export default function AdvocatePage() {
                             .map((x) => bi(x!.label))
                             .join(" · ")}
                     </p>
+                    </div>
                   </li>
                 ))}
               </ul>

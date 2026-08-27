@@ -23,6 +23,8 @@ export type Advocate = {
   fullName: { ne: string; en: string };
   /** Null until the firm supplies it. Never rendered as a placeholder. */
   nbcLicence: string | null;
+  /** Path under public/. Null renders the name alone rather than a broken image. */
+  photoPath: string | null;
   practiceAreas: string[];
 };
 
@@ -42,7 +44,7 @@ export async function listAdvocates(): Promise<Advocate[]> {
 
   const { data, error } = await supabase
     .from("advocates")
-    .select("id, full_name_ne, full_name_en, nbc_licence, practice_areas")
+    .select("id, full_name_ne, full_name_en, nbc_licence, practice_areas, photo_path")
     .eq("active", true)
     .order("created_at");
 
@@ -52,6 +54,7 @@ export async function listAdvocates(): Promise<Advocate[]> {
     id: a.id as string,
     fullName: { ne: a.full_name_ne as string, en: a.full_name_en as string },
     nbcLicence: (a.nbc_licence ?? null) as string | null,
+    photoPath: (a.photo_path ?? null) as string | null,
     practiceAreas: (a.practice_areas ?? []) as string[],
   }));
 }
