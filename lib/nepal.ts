@@ -172,3 +172,32 @@ export const TERMINATION_NOTICE = cite(
   "बहाल अन्त्य सम्बन्धी व्यवस्था",
   "provisions on termination of tenancy",
 );
+
+/* Property, family and procedural citations. Subject-level where unconfirmed. */
+export const LAND_TRANSFER = cite(
+  ACTS.civilCode,
+  "घरजग्गा हक हस्तान्तरण सम्बन्धी व्यवस्था",
+  "provisions on transfer of interest in land",
+);
+export const GIFT = cite(ACTS.civilCode, "दान बकसपत्र सम्बन्धी व्यवस्था", "provisions on gift");
+export const DIVORCE = cite(
+  ACTS.civilCode,
+  "सम्बन्ध विच्छेद सम्बन्धी व्यवस्था",
+  "provisions on dissolution of marriage",
+);
+export const ADOPTION = cite(ACTS.civilCode, "धर्मपुत्र-धर्मपुत्री सम्बन्धी व्यवस्था", "provisions on adoption");
+export const AFFIDAVIT = cite(
+  ACTS.civilProcedure,
+  "स्वघोषणा सम्बन्धी व्यवस्था",
+  "provisions on sworn statements",
+);
+export const FALSE_STATEMENT = cite(
+  ACTS.criminalCode,
+  "झुट्ठा विवरण सम्बन्धी व्यवस्था",
+  "provisions on false statements",
+);
+export const RESTRAINT = cite(
+  ACTS.civilCode,
+  "व्यापार बन्देज सम्बन्धी व्यवस्था",
+  "provisions on restraint of trade",
+);

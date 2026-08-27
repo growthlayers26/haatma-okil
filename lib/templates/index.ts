@@ -18,6 +18,16 @@ import {
   foundersAgreement,
 } from "./corporate";
 import { rentTerminationNotice, salaryCertificate, experienceLetter } from "./notices";
+import { landSaleDeed, giftDeed, rentReceipt } from "./property";
+import { divorcePetition, adoptionDeed, affidavit, legalNotice } from "./family";
+import {
+  supplyAgreement,
+  distributionAgreement,
+  ipAssignment,
+  consultancyRetainer,
+  internshipAgreement,
+  nonCompete,
+} from "./agreements";
 
 /**
  * Template registry.
@@ -33,18 +43,27 @@ export const TEMPLATES: Template[] = [
   // Employment
   employmentContract,
   freelanceAgreement,
+  internshipAgreement,
+  nonCompete,
   salaryCertificate,
   experienceLetter,
   // Property
   residentialLease,
   rentTerminationNotice,
+  rentReceipt,
+  landSaleDeed,
+  giftDeed,
   // Business
   memorandumOfAssociation,
   articlesOfAssociation,
   partnershipDeed,
   foundersAgreement,
   serviceAgreement,
+  consultancyRetainer,
+  supplyAgreement,
+  distributionAgreement,
   saleOfGoods,
+  ipAssignment,
   shareTransferDeed,
   boardResolution,
   loanAgreement,
@@ -52,6 +71,10 @@ export const TEMPLATES: Template[] = [
   // Family and personal
   powerOfAttorney,
   will,
+  divorcePetition,
+  adoptionDeed,
+  affidavit,
+  legalNotice,
 ];
 
 export function getTemplate(slug: string): Template | undefined {
@@ -75,8 +98,8 @@ export const CATEGORIES: { id: Category; label: Bilingual; blurb: Bilingual }[] 
     id: "property",
     label: { ne: "घरजग्गा", en: "Property" },
     blurb: {
-      ne: "घरबहाल सम्झौता र बहाल अन्त्यको सूचना।",
-      en: "Tenancy agreements and notices to end them.",
+      ne: "घरबहाल, राजीनामा, दान बकसपत्र र सम्बन्धित कागजात।",
+      en: "Tenancy, sale deeds, gift deeds and the paperwork around them.",
     },
   },
   {
@@ -91,8 +114,8 @@ export const CATEGORIES: { id: Category; label: Bilingual; blurb: Bilingual }[] 
     id: "family",
     label: { ne: "पारिवारिक", en: "Family" },
     blurb: {
-      ne: "अख्तियारनामा, इच्छापत्र र पारिवारिक कागजात।",
-      en: "Powers of attorney, wills and family documents.",
+      ne: "अख्तियारनामा, इच्छापत्र, सम्बन्ध विच्छेद, स्वघोषणा र कानुनी सूचना।",
+      en: "Powers of attorney, wills, divorce, affidavits and legal notices.",
     },
   },
 ];
@@ -116,5 +139,18 @@ export {
   rentTerminationNotice,
   salaryCertificate,
   experienceLetter,
+  landSaleDeed,
+  giftDeed,
+  rentReceipt,
+  divorcePetition,
+  adoptionDeed,
+  affidavit,
+  legalNotice,
+  supplyAgreement,
+  distributionAgreement,
+  ipAssignment,
+  consultancyRetainer,
+  internshipAgreement,
+  nonCompete,
 };
 export { POST_REGISTRATION_CHAIN, OCR_FACTS } from "./moa";
