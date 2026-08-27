@@ -82,8 +82,8 @@ export default function AdvocatePage() {
       </h1>
       <p className="mt-2 max-w-[62ch] text-ink-2">
         {bi({
-          ne: "फर्ममा दुई जना इजाजतप्राप्त अधिवक्ता हुनुहुन्छ। तपाईंको विषयअनुसार एक जनालाई जिम्मा दिइनेछ।",
-          en: "The firm has two licensed advocates. Your matter is assigned to one of them by practice area.",
+          ne: "फर्ममा दुई जना इजाजतप्राप्त अधिवक्ता हुनुहुन्छ। तपाईंको विषय एक जनालाई जिम्मा दिइनेछ।",
+          en: "The firm has two licensed advocates. Your matter is assigned to one of them.",
         })}
       </p>
 
@@ -301,11 +301,14 @@ export default function AdvocatePage() {
                       </p>
                     )}
                     <p className="mt-1 text-sm text-ink-2">
-                      {a.practiceAreas
-                        .map((p) => AREAS_OF_LAW.find((x) => x.id === p))
-                        .filter(Boolean)
-                        .map((x) => bi(x!.label))
-                        .join(" · ")}
+                      {/* Enumerating every area under each name is noise, not information. */}
+                      {a.practiceAreas.length >= AREAS_OF_LAW.length
+                        ? bi({ ne: "सबै क्षेत्र", en: "All areas" })
+                        : a.practiceAreas
+                            .map((p) => AREAS_OF_LAW.find((x) => x.id === p))
+                            .filter(Boolean)
+                            .map((x) => bi(x!.label))
+                            .join(" · ")}
                     </p>
                   </li>
                 ))}
