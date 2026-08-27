@@ -10,13 +10,15 @@ import type { AdvocateReview, Field, Bilingual, Citation } from "../types";
 
 /**
  * Every template ships unreviewed until an advocate at the firm signs it off.
- * PENDING is deliberately not a plausible-looking licence number — a fabricated
- * credential is worse than an obviously empty one.
+ *
+ * The licence is null rather than a placeholder string. A fabricated credential
+ * would be worse than an empty one, and a visible "PENDING" is worse than nothing —
+ * it reads as a broken page rather than as work still to be done.
  */
 export function pendingReview(reviewedOnBs = "2083-05-10", nextReviewBs = "2084-05-10"): AdvocateReview {
   return {
     name: { ne: "अधिवक्ता — नियुक्ति बाँकी", en: "Advocate — pending assignment" },
-    nbcLicence: "PENDING",
+    nbcLicence: null,
     reviewedOnBs,
     nextReviewBs,
   };

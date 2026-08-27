@@ -21,7 +21,8 @@ import { consumeQuota, releaseQuota, linkQuotaToEnquiry } from "./subscription";
 export type Advocate = {
   id: string;
   fullName: { ne: string; en: string };
-  nbcLicence: string;
+  /** Null until the firm supplies it. Never rendered as a placeholder. */
+  nbcLicence: string | null;
   practiceAreas: string[];
 };
 
@@ -50,7 +51,7 @@ export async function listAdvocates(): Promise<Advocate[]> {
   return data.map((a) => ({
     id: a.id as string,
     fullName: { ne: a.full_name_ne as string, en: a.full_name_en as string },
-    nbcLicence: a.nbc_licence as string,
+    nbcLicence: (a.nbc_licence ?? null) as string | null,
     practiceAreas: (a.practice_areas ?? []) as string[],
   }));
 }

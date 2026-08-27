@@ -20,7 +20,7 @@ export const loanAgreement: Template = {
   governingAct: LOAN,
   review: {
     name: { ne: "अधिवक्ता — नियुक्ति बाँकी", en: "Advocate — pending assignment" },
-    nbcLicence: "PENDING",
+    nbcLicence: null,
     reviewedOnBs: "2083-05-10",
     nextReviewBs: "2084-05-10",
   },

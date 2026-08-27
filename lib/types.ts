@@ -82,7 +82,8 @@ export type Category = "employment" | "property" | "business" | "family";
 export type AdvocateReview = {
   name: Bilingual;
   /** Nepal Bar Council licence number. Placeholder until the firm supplies real values. */
-  nbcLicence: string;
+  /** Null until an advocate signs the template off. Never shown as a placeholder. */
+  nbcLicence: string | null;
   /** Bikram Sambat, YYYY-MM-DD. */
   reviewedOnBs: string;
   nextReviewBs: string;

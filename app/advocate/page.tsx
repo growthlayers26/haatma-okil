@@ -130,10 +130,13 @@ export default function AdvocatePage() {
                 {assigned && (
                   <p className="mt-1.5 text-sm text-ink-2">
                     {bi({ ne: "जिम्मेवार अधिवक्ता", en: "Assigned advocate" })}:{" "}
-                    <strong>{assigned.fullName[lang]}</strong>{" "}
-                    <span className="font-mono text-xs text-ink-3">
-                      ({bi({ ne: "इजाजत नं.", en: "Licence no." })} {assigned.nbcLicence})
-                    </span>
+                    <strong>{assigned.fullName[lang]}</strong>
+                    {assigned.nbcLicence && (
+                      <span className="font-mono text-xs text-ink-3">
+                        {" "}
+                        ({bi({ ne: "इजाजत नं.", en: "Licence no." })} {assigned.nbcLicence})
+                      </span>
+                    )}
                   </p>
                 )}
               </div>
@@ -286,9 +289,17 @@ export default function AdvocatePage() {
                 {advocates.map((a) => (
                   <li key={a.id} className="border-t border-dashed border-rule-strong pt-3 first:border-0 first:pt-0">
                     <p className="font-serif text-base font-semibold">{a.fullName[lang]}</p>
-                    <p className="font-mono text-xs text-ink-3">
-                      {bi({ ne: "बार काउन्सिल इजाजत नं.", en: "NBC licence no." })} {a.nbcLicence}
-                    </p>
+                    {/*
+                      Rendered only when the firm has supplied it. A placeholder here
+                      would read as an unlicensed advocate, which is worse than an
+                      absence — and most firms list advocates by name and practice
+                      area alone in any case.
+                    */}
+                    {a.nbcLicence && (
+                      <p className="font-mono text-xs text-ink-3">
+                        {bi({ ne: "बार काउन्सिल इजाजत नं.", en: "NBC licence no." })} {a.nbcLicence}
+                      </p>
+                    )}
                     <p className="mt-1 text-sm text-ink-2">
                       {a.practiceAreas
                         .map((p) => AREAS_OF_LAW.find((x) => x.id === p))
