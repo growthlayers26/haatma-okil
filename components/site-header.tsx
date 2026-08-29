@@ -20,8 +20,13 @@ export function SiteHeader() {
     <header className="no-print sticky top-0 z-30 border-b border-rule bg-surface/95 backdrop-blur">
       <div className="mx-auto flex max-w-6xl flex-wrap items-center gap-x-6 gap-y-2 px-4 py-3 sm:px-6">
         <Link href="/" className="flex items-baseline gap-2.5">
-          <span className="font-serif text-xl font-semibold tracking-[-0.02em]">Mandala Law</span>
-          <span className="font-deva text-lg font-semibold text-ink-3">मण्डल</span>
+          {/*
+            The Latin form is a transliteration of the Nepali, not a translation —
+            हातमा वकिल is the name, "lawyer in hand". They are set as one lockup
+            rather than a name and a subtitle.
+          */}
+          <span className="font-serif text-xl font-semibold tracking-[-0.02em]">Haatma Okil</span>
+          <span className="font-deva text-lg font-semibold text-ink-3">हातमा वकिल</span>
         </Link>
 
         <nav className="order-3 flex w-full flex-wrap items-center gap-x-5 gap-y-1 sm:order-none sm:w-auto">

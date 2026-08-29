@@ -68,7 +68,7 @@ export const memorandumOfAssociation: Template = {
           type: "text",
           required: true,
           label: { ne: "कम्पनीको नाम", en: "Company name" },
-          placeholder: { ne: "जस्तै: मण्डल टेक प्रा.लि.", en: "e.g. Mandala Tech Pvt. Ltd." },
+          placeholder: { ne: "जस्तै: हिमाल टेक प्रा.लि.", en: "e.g. Himal Tech Pvt. Ltd." },
           citation: COMPANIES.incorporation,
           help: {
             ne: "प्राइभेट कम्पनीको नामको अन्त्यमा 'प्राइभेट लिमिटेड' वा 'प्रा.लि.' हुनुपर्दछ।",

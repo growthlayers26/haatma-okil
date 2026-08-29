@@ -72,7 +72,7 @@ export const employmentContract: Template = {
           type: "text",
           required: true,
           label: { ne: "रोजगारदाताको नाम", en: "Employer name" },
-          placeholder: { ne: "जस्तै: मण्डल टेक प्रा.लि.", en: "e.g. Mandala Tech Pvt. Ltd." },
+          placeholder: { ne: "जस्तै: हिमाल टेक प्रा.लि.", en: "e.g. Himal Tech Pvt. Ltd." },
         },
         {
           id: "employerRegNo",

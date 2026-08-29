@@ -10,8 +10,8 @@ export function SiteFooter() {
     <footer className="no-print border-t border-rule bg-surface">
       <div className="mx-auto max-w-6xl px-4 py-8 sm:px-6">
         <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
-          <span className="font-serif text-base font-semibold">Mandala Law</span>
-          <span className="font-deva text-sm text-accent">मण्डल ल फर्म</span>
+          <span className="font-serif text-base font-semibold">Haatma Okil</span>
+          <span className="font-deva text-sm text-accent">हातमा वकिल</span>
         </div>
 
         <p className="mt-3 max-w-[62ch] text-sm text-ink-2">{t("disclaimer")}</p>

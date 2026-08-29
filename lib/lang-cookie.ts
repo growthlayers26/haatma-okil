@@ -12,7 +12,7 @@ import type { Lang } from "./types";
  * A cookie is sent with the request, so the first byte is already correct.
  */
 
-export const LANG_COOKIE = "mandala.lang";
+export const LANG_COOKIE = "haatmaokil.lang";
 
 // Nepali is the default: it is the language the documents are executed in and the
 // one most users read most comfortably.

@@ -10,8 +10,8 @@
  * own site, which is a worse problem than an incomplete footer.
  */
 export const FIRM = {
-  nameEn: "Mandala Law",
-  nameNe: "मण्डल ल फर्म",
+  nameEn: "Haatma Okil",
+  nameNe: "हातमा वकिल",
 
   /** Shared inbox. Also the From and Reply-To on everything the product sends. */
   email: "mandalalawfirm00@gmail.com",

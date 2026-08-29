@@ -11,7 +11,7 @@ import { toNepaliDigits } from "@/lib/nepal";
 import { usePersistentState } from "@/lib/use-persistent-state";
 import type { Answers, Field, ValidationIssue } from "@/lib/types";
 
-export const draftKey = (slug: string) => `mandala.draft.${slug}`;
+export const draftKey = (slug: string) => `haatmaokil.draft.${slug}`;
 
 // Module-level so the fallback identity is stable across renders.
 const EMPTY_ANSWERS: Answers = {};

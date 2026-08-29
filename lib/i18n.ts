@@ -8,7 +8,7 @@ import type { Lang, Bilingual } from "./types";
  * language for the documents themselves.
  */
 const STRINGS = {
-  brandName: { ne: "मण्डल ल", en: "Mandala Law" },
+  brandName: { ne: "हातमा वकिल", en: "Haatma Okil" },
   brandTagline: {
     ne: "नेपाली कानुनअनुसार तयार पारिएका कागजात",
     en: "Legal documents built for Nepali law",

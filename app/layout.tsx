@@ -33,7 +33,7 @@ const jetbrains = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "मण्डल ल — Mandala Law",
+  title: "हातमा वकिल — Haatma Okil",
   description:
     "Nepali legal documents with every clause tied to the statute it comes from, reviewed by Nepal Bar Council registered advocates.",
 };

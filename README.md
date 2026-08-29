@@ -1,6 +1,6 @@
-# Mandala Law — मण्डल ल
+# हातमा वकिल — Haatma Okil
 
-A legal document platform for Nepal, built for Mandala Law Firm. Modelled on Rocket
+A legal document platform for Nepal. Modelled on Rocket
 Lawyer's business, rebuilt against Nepali statute rather than translated from the
 American product.
 
@@ -19,7 +19,7 @@ Full reasoning: the build plan and wireframes published alongside this repo.
 
 ## Stack
 
-Next.js 15 (App Router) · TypeScript · Tailwind v4 · Supabase (Postgres + RLS)
+Next.js 16 (App Router) · React 19 · TypeScript · Tailwind v4 · Supabase (Postgres + RLS) · Vitest
 
 ## Architecture
 
@@ -120,34 +120,88 @@ Two unit mismatches worth knowing, both handled inside the gateway modules: Khal
 quotes **paisa**, eSewa quotes **rupees**, and eSewa's HMAC-SHA256 signature covers
 exactly the fields in `signed_field_names`, *in that order*.
 
+## Contract review
+
+Paste a contract, get back points to raise with an advocate. The architecture is the
+point: a language model asked to review a contract will eventually cite a section
+that does not exist, and an invented citation in a legal product is worse than no
+product. So the work is split.
+
+The model **extracts only** — its output schema has no field for an opinion, a risk
+level or a statutory reference, and it reports null rather than guessing a figure
+that is absent. Deterministic rules in `lib/review/rules.ts` **judge**, comparing
+those figures against the constants in `lib/nepal.ts`. A citation cannot be
+fabricated, because the component that writes citations is not the component that
+reads the document.
+
+Findings are phrased as questions for an advocate, never conclusions. Only a Bar
+Council–licensed advocate may advise, and software telling a user their contract is
+"illegal" is doing exactly that. A test greps the findings for that vocabulary so the
+constraint fails a build rather than relying on memory.
+
+The pasted contract is never stored. It may be privileged, it names third parties who
+never consented to be here, and it is useless once the facts are extracted.
+
+## Organisations
+
+Seats, roles and an approval workflow. Seat limits are atomic — `add_org_member`
+locks the organisation row, so two invitations accepted together serialise rather
+than overshooting the plan. Approval gates **payment**, not display: a workflow a
+member can walk around by paying is decorative. Nobody may approve their own draft.
+
+Organisation templates are **overlays**, not documents. An overlay may preset answers
+and append clauses; it may not carry `locked` or `citation`, and may not reuse a base
+clause id. That boundary is why the feature can exist at all without reopening the
+legal-content-in-code rule.
+
+## Signing
+
+Two routes are modelled and one ships working. **Wet ink** — print, sign, record where
+the executed original is held — is legally effective today. **Digital certificate** is
+modelled in full and cannot complete until the firm selects an OCC-licensed certifying
+authority.
+
+There is deliberately no click-wrap. Under ETA 2063 a typed name is not a recognised
+signature, and the impossibility is enforced in `complete_envelope` rather than in the
+UI, so the guarantee does not depend on this application being correct.
+
+## Reconciliation
+
+`POST /api/payment/reconcile`, guarded by a shared secret and meant for a cron. Without
+it a payment only settled if the buyer returned to the return page — a closed tab or a
+dropped mobile connection left money taken and nothing released. It also drains the
+notification queue in the same pass.
+
 ## Status
 
-| Phase | Scope | State |
-| --- | --- | --- |
-| 1 | Document engine, wizard, bilingual rendering, BS dates | **Built** |
-| 2 | Auth, server-side documents, Khalti + eSewa, verification | **Built** |
-| 3 | Advocate desk, conflict screening, two-advocate routing | **Built** |
-| 4 | Company formation, MOA, post-registration chain | **Built** |
-| 5 | Licensed-CA digital signing | Not started (see below) |
+| Item | State |
+| --- | --- |
+| Document engine, wizard, bilingual rendering, BS dates | **Built** |
+| Auth, server-side documents, Khalti + eSewa, verification | **Built** |
+| Advocate desk, conflict screening, two-advocate routing | **Built** |
+| Company formation, trademark, PAN/VAT filings | **Built** |
+| Subscription tiers with metered quota | **Built** |
+| Contract review | **Built** |
+| Organisations, seats, approval, overlay templates | **Built** |
+| Signature envelopes, signatory access | **Built** |
+| Payment reconciliation, notification queue | **Built** |
+| Licensed-CA digital signing | Structure only — see below |
 
-Five templates: employment contract, residential lease, loan agreement, NDA, and
-memorandum of association.
+**31 templates** across employment, property, business and family. 14 migrations.
+33 tests (`npm test`).
 
 ### Not built, deliberately
 
-- **E-signature.** ETA 2063 recognises a signature only when it carries a certificate
-  from an OCC-licensed authority. A click-wrap "sign" button would produce documents
-  that are void, which is worse than having no feature.
-- **Subscriptions.** Per-document purchase is the entry point; tiers are priced in the
-  build plan but not implemented, and shouldn't be until per-document volume proves
-  there's something to subscribe to.
-- **Fonepay and cards.** The initiate route returns a clear "not enabled" for both
-  rather than pretending.
-- **AI contract review.** Rocket Lawyer's Copilot has no counterpart here yet.
+- **Click-wrap e-signature.** ETA 2063 recognises a signature only with a certificate
+  from an OCC-licensed authority. A "sign" button would produce void documents, which
+  is worse than having no feature.
+- **Fonepay and cards.** The initiate route returns a clear "not enabled" rather than
+  pretending.
+- **A notification provider.** The queue records everything and dispatches when a
+  sender is configured, so nothing is lost in the meantime.
 
-PDF output is browser print for now — the browser shapes Devanagari correctly, which a
-JS PDF library will not do without an embedded font and a shaping pass. Revisit when
-server-side generation is needed.
+PDF output is browser print — the browser shapes Devanagari correctly, which a JS PDF
+library will not without an embedded font and a shaping pass.
 
 ## Before this goes live
 
