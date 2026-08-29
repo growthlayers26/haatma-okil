@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { createClient, createServiceClient } from "@/lib/supabase/server";
 import type { ServiceId } from "@/lib/services";
+import { queue } from "@/lib/notify";
 
 /**
  * The advocate's side of the desk.
@@ -108,7 +109,45 @@ export async function answerEnquiry(input: {
   });
   if (error) return { ok: false, reason: "error" };
 
+  // Only on a real transition — re-answering an already-closed matter must not
+  // send the client a second message.
+  if (data === "ok") void notifyClientOfAnswer(parsed.data.enquiryId);
+
   revalidatePath("/desk");
   revalidatePath("/dashboard");
   return { ok: data === "ok", reason: (data as string) ?? "error" };
+}
+
+/** Queue the "your answer is ready" message for whoever asked. */
+async function notifyClientOfAnswer(enquiryId: string): Promise<void> {
+  const service = createServiceClient();
+  if (!service) return;
+
+  const { data } = await service
+    .from("enquiries")
+    .select("user_id, kind")
+    .eq("id", enquiryId)
+    .maybeSingle();
+
+  const userId = data?.user_id as string | undefined;
+  if (!userId) return;
+
+  const { data: account } = await service.auth.admin.getUserById(userId);
+  const email = account?.user?.email;
+  if (!email) return;
+
+  await queue({
+    channel: "email",
+    recipient: email,
+    kind: "enquiry_answered",
+    subject: "An advocate has answered your question",
+    // The answer itself is deliberately not in the email. It is legal advice about a
+    // named dispute, and mail is neither private nor under the firm's control once
+    // sent.
+    body:
+      "One of the firm's advocates has answered your question.\n\n" +
+      "Sign in and open your dashboard to read it.",
+    userId,
+    enquiryId,
+  });
 }

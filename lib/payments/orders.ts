@@ -250,3 +250,90 @@ export async function verifyOrder(orderId: string): Promise<VerifyOutcome> {
 
   return { status: "paid", orderId };
 }
+
+/* ------------------------------------------------------------------ reconciliation */
+
+/**
+ * How long to leave an order alone before chasing it.
+ *
+ * A user still at the gateway is not abandoned. Verifying too eagerly asks the
+ * gateway about a transaction that has not happened yet and burns the call.
+ */
+const RECONCILE_AFTER_MINUTES = 3;
+
+/**
+ * How long an unresolved order stays worth chasing.
+ *
+ * Beyond this a wallet session is long dead. The order is failed so it stops being
+ * swept forever — but note this only closes OUR record. It never asserts that money
+ * did not move, which is why the failure is recorded rather than the row deleted.
+ */
+const ABANDON_AFTER_HOURS = 24;
+
+export type ReconcileReport = {
+  checked: number;
+  paid: number;
+  failed: number;
+  stillPending: number;
+  abandoned: number;
+};
+
+/**
+ * Settle orders whose buyer never came back.
+ *
+ * Verification previously ran only when the user returned to /payment/return. Close
+ * the tab mid-Khalti — or lose signal, which is the normal case on a Nepali mobile
+ * connection — and the money left the wallet while the order sat `pending` forever.
+ * The document was never released and nobody was told. That is a refund dispute the
+ * firm would lose.
+ *
+ * This sweeps them. It is safe to run repeatedly: verifyOrder is idempotent and
+ * conditions the paid transition on the row still being pending.
+ */
+export async function reconcilePendingOrders(limit = 50): Promise<ReconcileReport> {
+  const supabase = createServiceClient();
+  const report: ReconcileReport = {
+    checked: 0,
+    paid: 0,
+    failed: 0,
+    stillPending: 0,
+    abandoned: 0,
+  };
+  if (!supabase) return report;
+
+  const now = Date.now();
+  const ripe = new Date(now - RECONCILE_AFTER_MINUTES * 60_000).toISOString();
+  const deadline = new Date(now - ABANDON_AFTER_HOURS * 3_600_000).toISOString();
+
+  const { data: stale } = await supabase
+    .from("orders")
+    .select("id, created_at")
+    .eq("status", "pending")
+    .lt("created_at", ripe)
+    .gte("created_at", deadline)
+    .order("created_at")
+    .limit(limit);
+
+  for (const order of stale ?? []) {
+    report.checked += 1;
+    const outcome = await verifyOrder(order.id as string);
+    if (outcome.status === "paid") report.paid += 1;
+    else if (outcome.status === "failed") report.failed += 1;
+    else report.stillPending += 1;
+  }
+
+  /*
+   * Anything older than the window is closed out. Deliberately a separate statement
+   * rather than folded into the sweep: these are not being verified, they are being
+   * given up on, and conflating the two would hide how often it happens.
+   */
+  const { data: abandoned } = await supabase
+    .from("orders")
+    .update({ status: "failed" })
+    .eq("status", "pending")
+    .lt("created_at", deadline)
+    .select("id");
+
+  report.abandoned = abandoned?.length ?? 0;
+  return report;
+}

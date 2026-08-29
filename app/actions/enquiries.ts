@@ -5,6 +5,8 @@ import { z } from "zod";
 import { createClient } from "@/lib/supabase/server";
 import { SERVICES, type ServiceId } from "@/lib/services";
 import { consumeQuota, releaseQuota, linkQuotaToEnquiry } from "./subscription";
+import { queue } from "@/lib/notify";
+import { createServiceClient } from "@/lib/supabase/server";
 
 /**
  * The advocate desk.
@@ -200,8 +202,42 @@ export async function submitEnquiryDetail(input: {
   if (error) return { ok: false, reason: error.message };
   if (!data) return { ok: false, reason: "not_screened" };
 
+  /*
+   * Tell the advocate. Deliberately after the update and never awaited into the
+   * result: the matter is saved either way, and a notification that cannot be
+   * written must not fail a submission the client has already paid for.
+   */
+  void notifyAdvocateOfMatter(parsed.data.enquiryId);
+
   revalidatePath("/dashboard");
   return { ok: true };
+}
+
+/** Queue the "new matter" message for whichever advocate holds it. */
+async function notifyAdvocateOfMatter(enquiryId: string): Promise<void> {
+  const service = createServiceClient();
+  if (!service) return;
+
+  const { data } = await service
+    .from("enquiries")
+    .select("id, kind, area_of_law, due_at, advocates(email, full_name_en)")
+    .eq("id", enquiryId)
+    .maybeSingle();
+
+  const advocate = data?.advocates as unknown as { email: string | null } | null;
+  if (!advocate?.email) return;
+
+  await queue({
+    channel: "email",
+    recipient: advocate.email,
+    kind: "matter_assigned",
+    subject: "A new matter is waiting on the desk",
+    body:
+      `A ${String(data?.kind ?? "matter").replace(/_/g, " ")} in ${data?.area_of_law} has been ` +
+      `assigned to you${data?.due_at ? `, due ${new Date(data.due_at as string).toDateString()}` : ""}.\n\n` +
+      `Open the desk to read and answer it.`,
+    enquiryId,
+  });
 }
 
 export type ClientEnquiry = {
