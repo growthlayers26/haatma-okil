@@ -6,7 +6,7 @@ import { useLang } from "./language-provider";
 import { DocumentPreview } from "./document-preview";
 import { Checkout } from "./checkout";
 import { getTemplate } from "@/lib/templates";
-import { validate, issuesForStep, hasBlockingIssues, completionPercent } from "@/lib/render";
+import { validate, issuesForStep, hasBlockingIssues } from "@/lib/render";
 import { toNepaliDigits } from "@/lib/nepal";
 import { usePersistentState } from "@/lib/use-persistent-state";
 import type { Answers, Field, ValidationIssue } from "@/lib/types";
@@ -57,7 +57,6 @@ export function Wizard({ slug }: { slug: string }) {
   const step = template.steps[stepIndex];
   const stepIssues = isCheckout ? [] : issuesForStep(template, stepIndex, issues);
   const stepBlocked = hasBlockingIssues(stepIssues);
-  const percent = isCheckout ? 100 : Math.round((stepIndex / totalSteps) * 100);
 
   const num = (n: number) => (lang === "ne" ? toNepaliDigits(n) : String(n));
 
@@ -93,36 +92,59 @@ export function Wizard({ slug }: { slug: string }) {
       {/* Progress */}
       <div className="no-print">
         <div className="flex flex-wrap items-baseline justify-between gap-2">
-          <div>
-            <h1 className="font-serif text-2xl font-semibold tracking-tight">
-              {bi(template.title)}
-            </h1>
-            <p className="mt-1 font-mono text-xs text-ink-3">
-              {t("stepOf")} {num(stepIndex + 1)} {t("of")} {num(totalSteps)} ·{" "}
-              {num(completionPercent(template, answers))}%
-            </p>
-          </div>
-          <span className="font-mono text-xs text-ink-3">{t("saveDraft")} ✓</span>
+          <h1 className="font-serif text-3xl font-semibold tracking-[-0.02em]">
+            {bi(template.title)}
+          </h1>
+          <span className="font-mono text-[0.7rem] uppercase tracking-wider text-ink-3">
+            {t("saveDraft")} ✓
+          </span>
         </div>
 
-        <div
-          className="mt-3 h-1 w-full bg-surface-2"
-          role="progressbar"
-          aria-valuenow={percent}
-          aria-valuemin={0}
-          aria-valuemax={100}
+        {/*
+          A named stepper rather than "Step 1 of 3 · 0%". A percentage says how much
+          of a form is filled; the step names say what the document still wants to
+          know, which is the question someone actually has. Completed steps stay
+          reachable — people go back to check what they typed.
+        */}
+        <nav
+          aria-label={t("stepOf")}
+          className="mt-5 flex flex-wrap items-center gap-x-6 gap-y-2 border-t border-rule pt-4"
         >
-          <div className="h-full bg-accent transition-all" style={{ width: `${percent}%` }} />
-        </div>
+          {template.steps.map((s, i) => {
+            const done = i < stepIndex;
+            const current = i === stepIndex;
+            return (
+              <button
+                key={s.id}
+                type="button"
+                onClick={() => goTo(i)}
+                disabled={i > stepIndex}
+                aria-current={current ? "step" : undefined}
+                className={`flex items-baseline gap-2 font-mono text-[0.72rem] uppercase tracking-[0.08em] transition-colors ${
+                  current
+                    ? "text-accent"
+                    : done
+                      ? "text-ink-2 hover:text-accent"
+                      : "cursor-default text-ink-3/60"
+                }`}
+              >
+                <span className="tabular-nums">{done ? "✓" : num(i + 1)}</span>
+                {bi(s.title)}
+              </button>
+            );
+          })}
+        </nav>
       </div>
 
-      <div className="mt-8 grid gap-8 lg:grid-cols-2">
+      <div className="mt-10 grid gap-10 lg:grid-cols-[1.15fr_1fr] lg:gap-14">
         {/* Questions */}
         <div className="no-print">
-          <h2 className="font-serif text-xl font-semibold tracking-tight">{bi(step.title)}</h2>
-          {step.intro && <p className="mt-1.5 max-w-[52ch] text-sm text-ink-2">{bi(step.intro)}</p>}
+          <h2 className="font-serif text-2xl font-semibold tracking-tight">{bi(step.title)}</h2>
+          {step.intro && (
+            <p className="mt-2 max-w-[56ch] leading-relaxed text-ink-2">{bi(step.intro)}</p>
+          )}
 
-          <div className="mt-6 space-y-5">
+          <div className="mt-8 space-y-7">
             {step.fields.map((field) => (
               <FieldInput
                 key={field.id}
@@ -190,36 +212,7 @@ export function Wizard({ slug }: { slug: string }) {
             </div>
           </div>
 
-          <WhyPanel fields={step.fields} />
         </div>
-      </div>
-    </div>
-  );
-}
-
-/** The "why this is asked" panel — the education layer that justifies the price. */
-function WhyPanel({ fields }: { fields: Field[] }) {
-  const { t, bi, lang } = useLang();
-  const explained = fields.filter((f) => f.help);
-  if (explained.length === 0) return null;
-
-  return (
-    <div className="no-print border-l-2 border-accent bg-surface p-4">
-      <p className="font-mono text-xs font-semibold uppercase tracking-wider text-accent">
-        {t("whyAsked")}
-      </p>
-      <div className="mt-3 space-y-3">
-        {explained.map((field) => (
-          <div key={field.id}>
-            <p className="text-sm font-semibold">{bi(field.label)}</p>
-            <p className="mt-0.5 text-sm text-ink-2">{bi(field.help!)}</p>
-            {field.citation && (
-              <p className="mt-1 font-mono text-[0.7rem] text-ink-3">
-                → {field.citation.act[lang]} {field.citation.section[lang]}
-              </p>
-            )}
-          </div>
-        ))}
       </div>
     </div>
   );
@@ -306,6 +299,22 @@ function FieldInput({
           />
         )}
       </div>
+
+      {/*
+        The explanation sits with its field rather than in a side panel.
+        This is the layer that justifies paying for a document a friend could
+        forward — putting it in the far column on desktop and behind a collapsed
+        toggle on mobile was hiding the reason to buy.
+      */}
+      {field.help && !blocking && (
+        <p className="mt-2 max-w-[58ch] text-sm leading-relaxed text-ink-3">{bi(field.help)}</p>
+      )}
+
+      {field.citation && (
+        <p className="mt-1.5 font-mono text-[0.7rem] leading-tight text-ink-3">
+          → {field.citation.act[lang]} {field.citation.section[lang]}
+        </p>
+      )}
 
       {(blocking ?? warning) && (
         <p
