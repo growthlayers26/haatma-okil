@@ -1,21 +1,16 @@
 -- Haatma Okil — a third advocate, and Pratap's desk login
 --
--- DOMAIN DISCREPANCY, UNRESOLVED. The firm has supplied addresses on two spellings:
+-- The domain is haatmaokil.com — हातमा, two a's — confirmed by the firm. One address
+-- had arrived as hatmaokil.com and has been corrected here.
 --
---   bishnu@haatmaokil.com     (haatma — two a's)
---   prashray@haatmaokil.com   (haatma — two a's)
---   pratap@hatmaokil.com      (hatma  — one a)
---
--- Both are plausible transliterations of हातमा. Each address is recorded exactly as
--- given rather than normalised to a guess, because sign-in is by emailed one-time
--- link: a wrong domain does not error, it simply never matches, and that advocate
--- finds an empty desk with nothing to explain why. Confirm the domain and correct
--- whichever is wrong.
+-- Worth recording why that mattered: sign-in is by emailed one-time link, so a wrong
+-- domain does not error. It simply never matches, and the advocate opens an empty
+-- desk with nothing on screen to explain why.
 
 -- ---------------------------------------------------------------- Pratap
 
 update public.advocates
-set email = 'pratap@hatmaokil.com'
+set email = 'pratap@haatmaokil.com'
 where full_name_en = 'Pratap Ratna Shrestha';
 
 -- ---------------------------------------------------------------- Prashray
