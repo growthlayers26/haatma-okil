@@ -49,17 +49,19 @@ export function DocumentPreview({
       )}
 
       <div className="px-6 py-8 sm:px-10 sm:py-10">
-        <header className="border-b border-rule pb-5 text-center">
-          <h1 className="font-serif text-2xl font-semibold tracking-tight">{doc.title}</h1>
-          <p className="mt-2 font-mono text-xs text-ink-3">
+        <header className="border-b border-rule pb-7 text-center">
+          <h1 className="font-serif text-3xl font-semibold leading-tight tracking-[-0.015em] sm:text-[2.1rem]">
+            {doc.title}
+          </h1>
+          <p className="mt-3 font-mono text-[0.7rem] uppercase tracking-[0.1em] text-ink-3">
             {bi({ ne: "मिति", en: "Date" })}: {formatBsLong(today, lang)}
           </p>
         </header>
 
-        <div className="mt-6 space-y-6">
+        <div className="mt-8 space-y-8">
           {doc.clauses.map((clause, index) => (
             <section key={clause.id}>
-              <h2 className="flex flex-wrap items-baseline gap-x-2 font-serif text-base font-semibold tracking-tight">
+              <h2 className="flex flex-wrap items-baseline gap-x-2 font-serif text-lg font-semibold tracking-tight">
                 <span className="font-mono text-xs text-accent">{index + 1}.</span>
                 {clause.heading}
                 {clause.locked && (
@@ -69,12 +71,12 @@ export function DocumentPreview({
                 )}
               </h2>
 
-              <p className="mt-1.5 whitespace-pre-line text-[0.95rem] leading-relaxed text-ink-2">
+              <p className="mt-2.5 max-w-[68ch] whitespace-pre-line text-[1.0625rem] leading-[1.75] text-ink-2">
                 {clause.body}
               </p>
 
               {clause.citation && (
-                <p className="mt-1.5 font-mono text-[0.7rem] text-ink-3">
+                <p className="mt-2 font-mono text-[0.7rem] leading-relaxed text-ink-3">
                   → {clause.citation.act[lang]} {clause.citation.section[lang]}
                 </p>
               )}

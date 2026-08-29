@@ -19,31 +19,31 @@ export function SiteHeader() {
   return (
     <header className="no-print sticky top-0 z-30 border-b border-rule bg-surface/95 backdrop-blur">
       <div className="mx-auto flex max-w-6xl flex-wrap items-center gap-x-6 gap-y-2 px-4 py-3 sm:px-6">
-        <Link href="/" className="flex items-baseline gap-2">
-          <span className="font-serif text-lg font-semibold tracking-tight">Mandala Law</span>
-          <span className="font-deva text-base font-semibold text-accent">मण्डल</span>
+        <Link href="/" className="flex items-baseline gap-2.5">
+          <span className="font-serif text-xl font-semibold tracking-[-0.02em]">Mandala Law</span>
+          <span className="font-deva text-lg font-semibold text-ink-3">मण्डल</span>
         </Link>
 
-        <nav className="order-3 flex w-full items-center gap-5 text-sm sm:order-none sm:w-auto">
-          <Link href="/templates" className="text-ink-2 transition-colors hover:text-accent">
+        <nav className="order-3 flex w-full flex-wrap items-center gap-x-5 gap-y-1 sm:order-none sm:w-auto">
+          <Link href="/templates" className="font-mono text-[0.72rem] uppercase tracking-[0.08em] text-ink-2 transition-colors hover:text-accent">
             {t("navDocuments")}
           </Link>
-          <Link href="/services" className="text-ink-2 transition-colors hover:text-accent">
+          <Link href="/services" className="font-mono text-[0.72rem] uppercase tracking-[0.08em] text-ink-2 transition-colors hover:text-accent">
             {bi({ ne: "सेवा", en: "Services" })}
           </Link>
-          <Link href="/advocate" className="text-ink-2 transition-colors hover:text-accent">
+          <Link href="/advocate" className="font-mono text-[0.72rem] uppercase tracking-[0.08em] text-ink-2 transition-colors hover:text-accent">
             {bi({ ne: "अधिवक्ता", en: "Advocates" })}
           </Link>
-          <Link href="/pricing" className="text-ink-2 transition-colors hover:text-accent">
+          <Link href="/pricing" className="font-mono text-[0.72rem] uppercase tracking-[0.08em] text-ink-2 transition-colors hover:text-accent">
             {bi({ ne: "मूल्य", en: "Pricing" })}
           </Link>
-          <Link href="/sign" className="text-ink-2 transition-colors hover:text-accent">
+          <Link href="/sign" className="font-mono text-[0.72rem] uppercase tracking-[0.08em] text-ink-2 transition-colors hover:text-accent">
             {bi({ ne: "हस्ताक्षर", en: "Signing" })}
           </Link>
-          <Link href="/team" className="text-ink-2 transition-colors hover:text-accent">
+          <Link href="/team" className="font-mono text-[0.72rem] uppercase tracking-[0.08em] text-ink-2 transition-colors hover:text-accent">
             {bi({ ne: "टोली", en: "Team" })}
           </Link>
-          <Link href="/dashboard" className="text-ink-2 transition-colors hover:text-accent">
+          <Link href="/dashboard" className="font-mono text-[0.72rem] uppercase tracking-[0.08em] text-ink-2 transition-colors hover:text-accent">
             {t("navDashboard")}
           </Link>
         </nav>
