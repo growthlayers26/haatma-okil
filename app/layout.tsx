@@ -1,9 +1,11 @@
 import type { Metadata } from "next";
+import { cookies } from "next/headers";
 import { Fraunces, Source_Sans_3, Noto_Serif_Devanagari, JetBrains_Mono } from "next/font/google";
 import { LanguageProvider } from "@/components/language-provider";
 import { AuthProvider } from "@/components/auth-provider";
 import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
+import { LANG_COOKIE, toLang } from "@/lib/lang-cookie";
 import "./globals.css";
 
 const fraunces = Fraunces({
@@ -36,13 +38,17 @@ export const metadata: Metadata = {
     "Nepali legal documents with every clause tied to the statute it comes from, reviewed by Nepal Bar Council registered advocates.",
 };
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default async function RootLayout({ children }: { children: React.ReactNode }) {
+  // Read before render, so the markup that leaves the server is already in the
+  // reader's language rather than being corrected after hydration.
+  const lang = toLang((await cookies()).get(LANG_COOKIE)?.value);
+
   return (
-    <html lang="ne" suppressHydrationWarning>
+    <html lang={lang} suppressHydrationWarning>
       <body
         className={`${fraunces.variable} ${sourceSans.variable} ${notoDevanagari.variable} ${jetbrains.variable} antialiased`}
       >
-        <LanguageProvider>
+        <LanguageProvider initialLang={lang}>
           <AuthProvider>
             <div className="flex min-h-screen flex-col">
               <SiteHeader />

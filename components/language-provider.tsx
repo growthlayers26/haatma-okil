@@ -1,9 +1,17 @@
 "use client";
 
-import { createContext, useCallback, useContext, useEffect, useMemo, type ReactNode } from "react";
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+  type ReactNode,
+} from "react";
 import type { Lang, Bilingual } from "@/lib/types";
 import { t as translate, type StringKey } from "@/lib/i18n";
-import { usePersistentState } from "@/lib/use-persistent-state";
+import { LANG_COOKIE, LANG_COOKIE_ATTRS } from "@/lib/lang-cookie";
 
 type LanguageContextValue = {
   lang: Lang;
@@ -17,15 +25,18 @@ type LanguageContextValue = {
 
 const LanguageContext = createContext<LanguageContextValue | null>(null);
 
-const STORAGE_KEY = "mandala.lang";
-
-// Nepali is the default: it is the language the documents are executed in and the
-// one most users read most comfortably.
-const DEFAULT_LANG: Lang = "ne";
-
-export function LanguageProvider({ children }: { children: ReactNode }) {
-  const [stored, setStored] = usePersistentState<Lang>(STORAGE_KEY, DEFAULT_LANG);
-  const lang: Lang = stored === "en" ? "en" : "ne";
+/**
+ * Seeded from the cookie the server already read, so the first paint is in the
+ * reader's language. See lib/lang-cookie.ts for why this cannot be localStorage.
+ */
+export function LanguageProvider({
+  children,
+  initialLang,
+}: {
+  children: ReactNode;
+  initialLang: Lang;
+}) {
+  const [lang, setLangState] = useState<Lang>(initialLang);
 
   // Keeping the document language attribute in sync is a write to an external
   // system, which is what an effect is for.
@@ -33,7 +44,11 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
     document.documentElement.lang = lang;
   }, [lang]);
 
-  const setLang = useCallback((next: Lang) => setStored(next), [setStored]);
+  const setLang = useCallback((next: Lang) => {
+    setLangState(next);
+    // Written so the next request — and every server render in it — starts correct.
+    document.cookie = `${LANG_COOKIE}=${next}; ${LANG_COOKIE_ATTRS}`;
+  }, []);
 
   const value = useMemo<LanguageContextValue>(
     () => ({
