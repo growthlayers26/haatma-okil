@@ -110,3 +110,33 @@ export async function linkQuotaToEnquiry(usageId: string, enquiryId: string): Pr
   if (!service) return;
   await service.from("quota_usage").update({ enquiry_id: enquiryId }).eq("id", usageId);
 }
+
+/**
+ * Claim one paid, unspent order for a service.
+ *
+ * Same shape as consumeQuota and for the same reason: claim before the work, hand
+ * back if the work fails. Returns null when the user has nothing paid to spend,
+ * which means the caller must ask for payment rather than proceed.
+ */
+export async function claimServiceOrder(
+  userId: string,
+  serviceId: string,
+): Promise<string | null> {
+  const service = createServiceClient();
+  if (!service) return null;
+
+  const { data, error } = await service.rpc("claim_service_order", {
+    p_user: userId,
+    p_service: serviceId,
+  });
+
+  if (error || !data) return null;
+  return data as string;
+}
+
+/** Return a claimed order to the unspent pool. */
+export async function releaseServiceOrder(orderId: string): Promise<void> {
+  const service = createServiceClient();
+  if (!service) return;
+  await service.rpc("release_service_order", { p_order: orderId });
+}

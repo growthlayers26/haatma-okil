@@ -5,7 +5,7 @@ import { z } from "zod";
 import { createClient } from "@/lib/supabase/server";
 import { extractFacts, isReviewConfigured } from "@/lib/review/extract";
 import { evaluate, summarise, type Finding } from "@/lib/review/rules";
-import { consumeQuota, releaseQuota } from "./subscription";
+import { consumeQuota, releaseQuota, claimServiceOrder, releaseServiceOrder } from "./subscription";
 import { SERVICES } from "@/lib/services";
 
 /**
@@ -30,8 +30,17 @@ export type ReviewOutcome =
     }
   | {
       ok: false;
-      reason: "not_configured" | "too_long" | "refused" | "unparsed" | "unauthenticated" | "error";
+      reason:
+        | "not_configured"
+        | "too_long"
+        | "refused"
+        | "unparsed"
+        | "unauthenticated"
+        | "payment_required"
+        | "error";
       message?: string;
+      /** Set on payment_required so the caller can show the price without guessing. */
+      priceNpr?: number;
     };
 
 const InputSchema = z.object({
@@ -53,14 +62,32 @@ export async function reviewContract(input: { text: string }): Promise<ReviewOut
   const { data: auth } = await supabase.auth.getUser();
   if (!auth.user) return { ok: false, reason: "unauthenticated" };
 
-  // Take the allowance first so two reviews fired together cannot both use the last
-  // unit — then hand it back if the analysis does not complete.
+  /*
+   * A review must be paid for, by allowance or by order, before the model is called.
+   *
+   * Without this the analysis ran for anyone with an account: no order was ever
+   * created, the price was displayed and never charged, and every submission spent
+   * real API credit. That is a revenue hole and an unbounded cost in one function.
+   *
+   * Allowance first, since a subscriber should not be asked to pay twice.
+   */
   const usageId = await consumeQuota(auth.user.id, "review");
+  const orderId = usageId ? null : await claimServiceOrder(auth.user.id, "document_review");
+
+  if (!usageId && !orderId) {
+    return {
+      ok: false,
+      reason: "payment_required",
+      priceNpr: SERVICES.document_review.priceNpr,
+    };
+  }
 
   const extracted = await extractFacts(parsed.data.text);
 
   if (!extracted.ok) {
+    // Hand back whatever was spent — nobody pays for an analysis that errored.
     if (usageId) await releaseQuota(usageId);
+    if (orderId) await releaseServiceOrder(orderId);
     return { ok: false, reason: extracted.reason, message: extracted.message };
   }
 
@@ -80,6 +107,7 @@ export async function reviewContract(input: { text: string }): Promise<ReviewOut
       missing_count: summary.missing,
       check_count: summary.check,
       covered_by_plan: usageId !== null,
+      order_id: orderId,
     })
     .select("id")
     .maybeSingle();

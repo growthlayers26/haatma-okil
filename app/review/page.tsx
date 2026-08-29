@@ -8,6 +8,23 @@ import { useAuth } from "@/components/auth-provider";
 import { reviewContract, type ReviewOutcome } from "@/app/actions/review";
 import type { Severity } from "@/lib/review/rules";
 import { formatNpr, toNepaliDigits } from "@/lib/nepal";
+import type { Handoff } from "@/lib/payments/types";
+
+/** eSewa takes a signed form POST rather than a redirect; the signature is server-side. */
+function submitGatewayForm(action: string, fields: Record<string, string>) {
+  const form = document.createElement("form");
+  form.method = "POST";
+  form.action = action;
+  for (const [name, value] of Object.entries(fields)) {
+    const input = document.createElement("input");
+    input.type = "hidden";
+    input.name = name;
+    input.value = value;
+    form.appendChild(input);
+  }
+  document.body.appendChild(form);
+  form.submit();
+}
 
 const SEVERITY_STYLE: Record<Severity, { border: string; text: string }> = {
   breach: { border: "border-cinnabar", text: "text-cinnabar" },
@@ -31,6 +48,34 @@ export default function ReviewPage() {
     missing: bi({ ne: "छुटेको व्यवस्था", en: "Missing provision" }),
     check: bi({ ne: "हेर्नुपर्ने", en: "Worth checking" }),
   };
+
+  async function payForReview() {
+    setBusy(true);
+    try {
+      const response = await fetch("/api/payment/initiate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          gateway: "khalti",
+          item: { type: "service", id: "document_review" },
+        }),
+      });
+      const data = (await response.json()) as { handoff?: Handoff; requiresAuth?: boolean };
+      if (data.requiresAuth) {
+        router.push("/login?next=/review");
+        return;
+      }
+      if (data.handoff?.mode === "redirect") {
+        window.location.href = data.handoff.url;
+        return;
+      }
+      if (data.handoff?.mode === "form") {
+        submitGatewayForm(data.handoff.action, data.handoff.fields);
+      }
+    } finally {
+      setBusy(false);
+    }
+  }
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
@@ -121,7 +166,42 @@ export default function ReviewPage() {
       </form>
 
       {/* ---------------- results ---------------- */}
-      {result && !result.ok && (
+      {result && !result.ok && result.reason === "payment_required" && (
+        <div className="mt-6 border-l-2 border-accent bg-surface p-5">
+          <p className="font-mono text-xs font-semibold uppercase tracking-wider text-accent">
+            {bi({ ne: "भुक्तानी आवश्यक", en: "Payment needed" })}
+          </p>
+          <p className="mt-1.5 max-w-[60ch] text-sm text-ink-2">
+            {bi({
+              ne: "करार जाँच प्रति पटक शुल्क लाग्दछ। व्यवसाय वा संस्थागत योजनामा हरेक महिना केही जाँच समावेश हुन्छन्।",
+              en: "A contract check is charged per review. The Business and Enterprise plans include a number of them each month.",
+            })}
+          </p>
+          <div className="mt-4 flex flex-wrap items-center gap-3">
+            <button
+              type="button"
+              onClick={payForReview}
+              disabled={busy}
+              className="bg-accent px-5 py-2.5 text-sm font-semibold text-white transition-opacity hover:opacity-90 disabled:opacity-40"
+            >
+              {busy
+                ? "…"
+                : `${bi({ ne: "भुक्तानी गर्नुहोस्", en: "Pay" })} — ${formatNpr(result.priceNpr ?? 0, lang)}`}
+            </button>
+            <Link href="/pricing" className="text-sm text-accent underline">
+              {bi({ ne: "योजना हेर्नुहोस्", en: "See plans" })}
+            </Link>
+          </div>
+          <p className="mt-3 font-mono text-xs text-ink-3">
+            {bi({
+              ne: "भुक्तानीपछि यही पृष्ठमा फर्केर पाठ फेरि टाँस्नुहोस्।",
+              en: "After paying, return here and paste the text again — your payment is held until a check completes.",
+            })}
+          </p>
+        </div>
+      )}
+
+      {result && !result.ok && result.reason !== "payment_required" && (
         <p className="mt-6 border-l-2 border-cinnabar bg-surface p-4 text-sm text-ink-2" role="alert">
           {result.reason === "not_configured"
             ? bi({

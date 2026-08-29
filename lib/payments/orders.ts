@@ -116,6 +116,9 @@ export async function createPendingOrder(input: {
       // trusting anything the client sends back with the redirect.
       plan_id: input.item.type === "plan" ? input.item.id : null,
       billing_period: input.item.type === "plan" ? input.item.period : null,
+      // Without this a paid review is indistinguishable from a paid consultation,
+      // and nothing downstream can check that a service was actually bought.
+      service_id: input.item.type === "service" ? input.item.id : null,
     })
     .select("id")
     .single();
