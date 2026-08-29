@@ -1,4 +1,5 @@
 import { createServiceClient } from "@/lib/supabase/server";
+import { FIRM } from "@/lib/firm";
 
 /**
  * Outbound messages.
@@ -47,6 +48,14 @@ export interface NotificationSender {
 export function getSender(): NotificationSender | null {
   return null;
 }
+
+/**
+ * The address everything is sent from, and replied to.
+ *
+ * A reply-to that nobody reads is worse than no email at all: someone answering a
+ * notification about their own legal matter must reach the firm, not a void.
+ */
+export const SENDER_ADDRESS = FIRM.email;
 
 export function isDispatchConfigured(): boolean {
   return getSender() !== null;
