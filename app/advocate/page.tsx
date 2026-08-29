@@ -7,7 +7,8 @@ import { useLang } from "@/components/language-provider";
 import { useAuth } from "@/components/auth-provider";
 import { listAdvocates, screenConflict, submitEnquiryDetail, type Advocate } from "@/app/actions/enquiries";
 import { SERVICES, AREAS_OF_LAW, type ServiceId } from "@/lib/services";
-import { formatNpr } from "@/lib/nepal";
+import { formatNpr, toNepaliDigits } from "@/lib/nepal";
+import { FIRM } from "@/lib/firm";
 
 type Stage = "intake" | "detail" | "done" | "conflict";
 
@@ -83,8 +84,10 @@ export default function AdvocatePage() {
       </h1>
       <p className="mt-4 max-w-[62ch] text-lg leading-relaxed text-ink-2">
         {bi({
-          ne: "फर्ममा दुई जना इजाजतप्राप्त अधिवक्ता हुनुहुन्छ। तपाईंको विषय एक जनालाई जिम्मा दिइनेछ।",
-          en: "The firm has two licensed advocates. Your matter is assigned to one of them.",
+          // Counted from the roster once it loads, so the page cannot claim more
+          // advocates than the firm has; the constant is only the pre-load fallback.
+          ne: `फर्ममा ${toNepaliDigits(advocates.length || FIRM.advocateCount)} जना इजाजतप्राप्त अधिवक्ता हुनुहुन्छ। तपाईंको विषय एक जनालाई जिम्मा दिइनेछ।`,
+          en: `The firm has ${advocates.length || FIRM.advocateCount} licensed advocates. Your matter is assigned to one of them.`,
         })}
       </p>
 
@@ -311,7 +314,7 @@ export default function AdvocatePage() {
           )}
         </section>
 
-        {/* ---------------- the two advocates ---------------- */}
+        {/* ---------------- the firm's advocates ---------------- */}
         <aside className="space-y-4">
           <div className="border border-rule bg-surface p-4">
             <p className="font-mono text-[0.7rem] font-semibold uppercase tracking-wider text-ink-3">

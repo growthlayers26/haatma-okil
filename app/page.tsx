@@ -6,6 +6,7 @@ import { useState } from "react";
 import { useLang } from "@/components/language-provider";
 import { TEMPLATES, CATEGORIES, getTemplate } from "@/lib/templates";
 import { formatNpr, toNepaliDigits } from "@/lib/nepal";
+import { FIRM } from "@/lib/firm";
 
 /**
  * The documents people actually arrive looking for.
@@ -50,7 +51,7 @@ export default function HomePage() {
    */
   const proof = [
     { value: num(TEMPLATES.length), label: bi({ ne: "कागजात", en: "Documents" }) },
-    { value: num(2), label: bi({ ne: "इजाजतप्राप्त अधिवक्ता", en: "Licensed advocates" }) },
+    { value: num(FIRM.advocateCount), label: bi({ ne: "इजाजतप्राप्त अधिवक्ता", en: "Licensed advocates" }) },
     { value: "100%", label: bi({ ne: "दफा उल्लेख सहित", en: "Clauses cited to statute" }) },
     // Bilingual output is a genuine differentiator here: the competition is either
     // an English template nobody can execute or a Nepali one nobody drafted.

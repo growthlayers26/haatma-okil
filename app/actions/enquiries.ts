@@ -11,7 +11,7 @@ import { createServiceClient } from "@/lib/supabase/server";
 /**
  * The advocate desk.
  *
- * The firm has two practising advocates. An enquiry is assigned to one of them by
+ * An enquiry is assigned to one of the firm's practising advocates by
  * practice area with a load-balanced fallback — it is not escalated between tiers,
  * because both are licensed counsel.
  *

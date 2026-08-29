@@ -14,6 +14,7 @@ import { listDocuments, claimLocalDrafts, type SavedDocument } from "@/app/actio
 import { listMyEnquiries, type ClientEnquiry } from "@/app/actions/enquiries";
 import { SERVICES, AREAS_OF_LAW } from "@/lib/services";
 import { PageHeader, SectionLabel, Callout, Rows, Empty, type Tone } from "@/components/ui";
+import { FIRM } from "@/lib/firm";
 import type { Answers, Bilingual } from "@/lib/types";
 
 // Stable across renders — TEMPLATES is a module constant.
@@ -382,8 +383,8 @@ export default function DashboardPage() {
             <SectionLabel as="h3">{bi({ ne: "अधिवक्ता डेस्क", en: "Advocate desk" })}</SectionLabel>
             <p className="mt-2 text-sm leading-relaxed text-ink-2">
               {bi({
-                ne: "फर्मका दुई जना इजाजतप्राप्त अधिवक्तामध्ये एक जनाले हेर्नुहुनेछ।",
-                en: "One of the firm's two licensed advocates will take it.",
+                ne: `फर्मका ${toNepaliDigits(FIRM.advocateCount)} जना इजाजतप्राप्त अधिवक्तामध्ये एक जनाले हेर्नुहुनेछ।`,
+                en: `One of the firm's ${FIRM.advocateCount} licensed advocates will take it.`,
               })}
             </p>
             <p className="mt-2 font-mono text-[0.7rem] text-ink-3">

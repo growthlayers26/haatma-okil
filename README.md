@@ -87,9 +87,8 @@ losing work by logging in would be the worst possible moment to lose it.
 
 ## The advocate desk
 
-The firm has **two practising advocates**. This is not a tiered support desk — both
-are licensed counsel, so a matter is *assigned* to one of them rather than escalated
-between them. `assign_advocate()` prefers a practice-area match, then the lighter open
+The firm's advocates are all licensed counsel — this is not a tiered support desk, so
+a matter is *assigned* to one of them rather than escalated between them. `assign_advocate()` prefers a practice-area match, then the lighter open
 caseload, so neither advocate silently accumulates the whole queue.
 
 Conflict screening runs **before** the matter is described, and that ordering is a

@@ -16,6 +16,16 @@ export const FIRM = {
   /** Shared inbox. Also the From and Reply-To on everything the product sends. */
   email: "mandalalawfirm00@gmail.com",
 
+  /**
+   * Practising advocates at the firm.
+   *
+   * Duplicated from the advocates table on purpose: the homepage renders without a
+   * database configured, so it cannot count rows. MUST be kept in step with
+   * supabase/migrations — a figure claiming more advocates than the firm has is a
+   * misrepresentation, not a stale cache.
+   */
+  advocateCount: 3,
+
   /** Not yet supplied. The footer omits each of these until it is. */
   phone: null as string | null,
   address: null as string | null,
