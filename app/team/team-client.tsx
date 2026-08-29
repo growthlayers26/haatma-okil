@@ -11,7 +11,8 @@ import {
   type OrgState,
   type QueuedDocument,
 } from "@/app/actions/organisation";
-import { getTemplate } from "@/lib/templates";
+import { TEMPLATES, getTemplate } from "@/lib/templates";
+import { createOrgTemplate } from "@/app/actions/organisation";
 import { toNepaliDigits } from "@/lib/nepal";
 
 type Props = {
@@ -26,6 +27,213 @@ type Props = {
  * these props update on their own — a state copy would go stale the moment someone
  * else on the team acted.
  */
+/**
+ * Builds an organisation template.
+ *
+ * An overlay, not a document: it picks a base from the reviewed registry, presets
+ * answers on that base's own fields, and appends the organisation's own terms. It
+ * cannot touch a locked clause or attach a citation — see lib/org-templates.ts for
+ * why that boundary is the reason this feature can exist at all, and the server
+ * revalidates every one of those rules regardless of what this form sends.
+ */
+function OverlayBuilder() {
+  const { bi } = useLang();
+  const [open, setOpen] = useState(false);
+  const [baseSlug, setBaseSlug] = useState("");
+  const [name, setName] = useState("");
+  const [defaults, setDefaults] = useState<Record<string, string>>({});
+  const [clauseHeading, setClauseHeading] = useState("");
+  const [clauseBody, setClauseBody] = useState("");
+  const [busy, setBusy] = useState(false);
+  const [problem, setProblem] = useState("");
+
+  const base = baseSlug ? getTemplate(baseSlug) : undefined;
+
+  // Only plain text fields are worth presetting — a date or a currency default would
+  // be stale or wrong more often than it would be useful.
+  const presettable = (base?.steps ?? [])
+    .flatMap((step) => step.fields)
+    .filter((f) => f.type === "text" || f.type === "textarea");
+
+  async function submit(e: React.FormEvent) {
+    e.preventDefault();
+    setBusy(true);
+    setProblem("");
+    try {
+      const filled = Object.fromEntries(
+        Object.entries(defaults).filter(([, v]) => v.trim().length > 0),
+      );
+
+      const result = await createOrgTemplate({
+        baseSlug,
+        name: name.trim(),
+        defaultAnswers: filled,
+        extraClauses: clauseHeading.trim()
+          ? [
+              {
+                // Derived from the heading so an admin never has to invent an id,
+                // and prefixed so it cannot collide with a base clause.
+                id: `org-${clauseHeading.trim().toLowerCase().replace(/[^a-z0-9]+/g, "-").slice(0, 40)}`,
+                heading: { ne: clauseHeading.trim(), en: clauseHeading.trim() },
+                body: { ne: clauseBody.trim(), en: clauseBody.trim() },
+              },
+            ]
+          : [],
+      });
+
+      if (result.ok) {
+        setOpen(false);
+        setBaseSlug("");
+        setName("");
+        setDefaults({});
+        setClauseHeading("");
+        setClauseBody("");
+      } else {
+        setProblem(
+          result.problems?.join(", ") ??
+            bi({ ne: "बनाउन सकिएन।", en: "Could not create it." }),
+        );
+      }
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  if (!open) {
+    return (
+      <button
+        type="button"
+        onClick={() => setOpen(true)}
+        className="mt-3 border border-accent px-4 py-2 text-sm font-semibold text-accent transition-colors hover:bg-accent-soft"
+      >
+        + {bi({ ne: "नयाँ ढाँचा", en: "New template" })}
+      </button>
+    );
+  }
+
+  return (
+    <form onSubmit={submit} className="mt-3 space-y-5 border border-rule bg-surface p-5">
+      <div>
+        <label htmlFor="baseSlug" className="block text-sm font-semibold">
+          {bi({ ne: "आधार कागजात", en: "Base document" })}
+        </label>
+        <select
+          id="baseSlug"
+          required
+          value={baseSlug}
+          onChange={(e) => {
+            setBaseSlug(e.target.value);
+            setDefaults({});
+          }}
+          className="mt-2 w-full border border-rule-strong bg-surface px-3 py-2.5 outline-none focus:border-accent"
+        >
+          <option value="">{bi({ ne: "छान्नुहोस्…", en: "Choose…" })}</option>
+          {TEMPLATES.map((tpl) => (
+            <option key={tpl.slug} value={tpl.slug}>
+              {bi(tpl.title)}
+            </option>
+          ))}
+        </select>
+        <p className="mt-2 max-w-[58ch] text-sm text-ink-3">
+          {bi({
+            ne: "तपाईंको ढाँचाले यसमा थप सर्त र पूर्वनिर्धारित उत्तर जोड्दछ। कानुनद्वारा निर्धारित सर्त जस्ताको तस्तै रहन्छ।",
+            en: "Your template adds terms and preset answers on top of this one. Anything fixed by statute stays exactly as it is.",
+          })}
+        </p>
+      </div>
+
+      <div>
+        <label htmlFor="tplName" className="block text-sm font-semibold">
+          {bi({ ne: "ढाँचाको नाम", en: "Name your template" })}
+        </label>
+        <input
+          id="tplName"
+          required
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          placeholder={bi({ ne: "जस्तै: हाम्रो मानक रोजगार करार", en: "e.g. Our standard employment contract" })}
+          className="mt-2 w-full border border-rule-strong bg-surface px-3 py-2.5 outline-none focus:border-accent"
+        />
+      </div>
+
+      {presettable.length > 0 && (
+        <div>
+          <p className="text-sm font-semibold">
+            {bi({ ne: "पूर्वनिर्धारित उत्तर", en: "Preset answers" })}
+          </p>
+          <p className="mt-1 max-w-[58ch] text-sm text-ink-3">
+            {bi({
+              ne: "खाली छोड्न सकिन्छ। भरेमा यो ढाँचाबाट सुरु गर्ने सबैका लागि पहिले नै भरिएको आउँछ।",
+              en: "Optional. Anything filled in here arrives already answered for whoever starts from this template.",
+            })}
+          </p>
+          <div className="mt-3 grid gap-3 sm:grid-cols-2">
+            {presettable.slice(0, 8).map((f) => (
+              <div key={f.id}>
+                <label htmlFor={`pre-${f.id}`} className="block text-xs text-ink-2">
+                  {bi(f.label)}
+                </label>
+                <input
+                  id={`pre-${f.id}`}
+                  value={defaults[f.id] ?? ""}
+                  onChange={(e) => setDefaults((d) => ({ ...d, [f.id]: e.target.value }))}
+                  className="mt-1 w-full border border-rule-strong bg-surface px-2.5 py-2 text-sm outline-none focus:border-accent"
+                />
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      <div className="border-t border-dashed border-rule-strong pt-5">
+        <p className="text-sm font-semibold">{bi({ ne: "आफ्नो थप सर्त", en: "Your own clause" })}</p>
+        <p className="mt-1 max-w-[58ch] text-sm text-ink-3">
+          {bi({
+            ne: "खाली छोड्न सकिन्छ। थपिएको सर्त आधार कागजातका सबै सर्तपछि आउँछ।",
+            en: "Optional. An added clause appears after everything in the base document.",
+          })}
+        </p>
+        <input
+          value={clauseHeading}
+          onChange={(e) => setClauseHeading(e.target.value)}
+          placeholder={bi({ ne: "सर्तको शीर्षक", en: "Clause heading" })}
+          className="mt-3 w-full border border-rule-strong bg-surface px-3 py-2.5 text-sm outline-none focus:border-accent"
+        />
+        <textarea
+          rows={3}
+          value={clauseBody}
+          onChange={(e) => setClauseBody(e.target.value)}
+          placeholder={bi({ ne: "सर्तको व्यहोरा", en: "Clause text" })}
+          className="mt-2 w-full border border-rule-strong bg-surface px-3 py-2.5 text-sm outline-none focus:border-accent"
+        />
+      </div>
+
+      {problem && (
+        <p className="border-l-2 border-cinnabar bg-surface p-3 text-sm text-cinnabar" role="alert">
+          {problem}
+        </p>
+      )}
+
+      <div className="flex flex-wrap gap-2">
+        <button
+          type="submit"
+          disabled={busy || !baseSlug || !name.trim()}
+          className="bg-accent px-5 py-2.5 text-sm font-semibold text-white transition-opacity hover:opacity-90 disabled:opacity-40"
+        >
+          {busy ? "…" : bi({ ne: "बनाउनुहोस्", en: "Create template" })}
+        </button>
+        <button
+          type="button"
+          onClick={() => setOpen(false)}
+          className="border border-rule-strong px-4 py-2.5 text-sm text-ink-2 transition-colors hover:border-accent hover:text-accent"
+        >
+          {bi({ ne: "रद्द", en: "Cancel" })}
+        </button>
+      </div>
+    </form>
+  );
+}
+
 export function TeamClient({ org, queue, templates }: Props) {
   const { bi, lang } = useLang();
   const [notice, setNotice] = useState("");
@@ -302,6 +510,8 @@ export function TeamClient({ org, queue, templates }: Props) {
               en: "An organisation template adds your own terms and preset answers on top of one of the firm's documents. It cannot remove or rewrite anything fixed by statute.",
             })}
           </p>
+          {org.canUseCustomTemplates && <OverlayBuilder />}
+
           {templates.length === 0 ? (
             <p className="mt-3 border border-dashed border-rule-strong p-5 text-sm text-ink-2">
               {org.canUseCustomTemplates

@@ -23,6 +23,8 @@ export type EnvelopeSummary = {
   subject: string;
   method: SigningMethod;
   status: "draft" | "sent" | "completed" | "voided";
+  /** False when the caller is a named signatory rather than the sender. */
+  isOwner: boolean;
   signatories: {
     id: string;
     fullName: string;
@@ -117,6 +119,11 @@ export async function createEnvelope(
   return { ok: true, envelopeId: envelope.id as string };
 }
 
+/**
+ * Envelopes the caller can see: the ones they opened, and the ones they are named
+ * on. The filter is deliberately absent — RLS decides, so a signatory sees exactly
+ * what migration 0013 grants and nothing depends on this query getting it right.
+ */
 export async function listEnvelopes(): Promise<EnvelopeSummary[]> {
   const supabase = await createClient();
   if (!supabase) return [];
@@ -127,9 +134,8 @@ export async function listEnvelopes(): Promise<EnvelopeSummary[]> {
   const { data } = await supabase
     .from("signature_envelopes")
     .select(
-      "id, document_id, subject, method, status, created_at, documents(template_slug), signatories(id, full_name, capacity, status, signed_at, order_index)",
+      "id, document_id, subject, method, status, created_at, created_by, documents(template_slug), signatories(id, full_name, capacity, status, signed_at, order_index)",
     )
-    .eq("created_by", auth.user.id)
     .order("created_at", { ascending: false });
 
   return (data ?? []).map((e) => {
@@ -150,6 +156,7 @@ export async function listEnvelopes(): Promise<EnvelopeSummary[]> {
       subject: e.subject as string,
       method: e.method as SigningMethod,
       status: e.status as EnvelopeSummary["status"],
+      isOwner: e.created_by === auth.user!.id,
       signatories: [...sigs]
         .sort((a, b) => a.order_index - b.order_index)
         .map((s) => ({
