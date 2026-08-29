@@ -86,6 +86,38 @@ export async function saveDocument(input: {
   return { ok: true, id: data.id };
 }
 
+/**
+ * One document belonging to the caller.
+ *
+ * Returns null rather than throwing when it is missing or someone else's — the
+ * caller renders a not-found page either way, and distinguishing the two would tell
+ * a stranger that a given id exists.
+ */
+export async function getDocument(id: string): Promise<SavedDocument | null> {
+  const supabase = await createClient();
+  if (!supabase) return null;
+
+  const { data: auth } = await supabase.auth.getUser();
+  if (!auth.user) return null;
+
+  const { data, error } = await supabase
+    .from("documents")
+    .select("id, template_slug, answers, status, updated_at")
+    .eq("id", id)
+    .eq("user_id", auth.user.id)
+    .maybeSingle();
+
+  if (error || !data) return null;
+
+  return {
+    id: data.id as string,
+    templateSlug: data.template_slug as string,
+    answers: (data.answers ?? {}) as Answers,
+    status: data.status as "draft" | "purchased",
+    updatedAt: data.updated_at as string,
+  };
+}
+
 export async function listDocuments(): Promise<SavedDocument[]> {
   const supabase = await createClient();
   if (!supabase) return [];

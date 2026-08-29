@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useLang } from "./language-provider";
 import { useAuth } from "./auth-provider";
 import { DocumentPreview } from "./document-preview";
+import { ExecutionNotice } from "./execution-notice";
 import { validate, hasBlockingIssues } from "@/lib/render";
 import { formatNpr } from "@/lib/nepal";
 import { parseBsString, formatBsShort } from "@/lib/bs-date";
@@ -284,24 +285,10 @@ export function Checkout({
 
           {/*
             Execution requirements appear before payment, never after. Nobody should
-            believe a download is an executed instrument.
+            believe a download is an executed instrument. Shared with the finished
+            document view, which repeats them at the moment they matter most.
           */}
-          <div className="border-l-2 border-orpiment bg-surface p-4">
-            <p className="font-mono text-xs font-semibold uppercase tracking-wider text-orpiment">
-              {t("executionTitle")}
-            </p>
-            <p className="mt-1.5 text-sm text-ink-2">{t("executionNote")}</p>
-            <ul className="mt-3 space-y-2">
-              {template.execution.map((item, i) => (
-                <li key={i} className="flex gap-2 text-sm text-ink-2">
-                  <span aria-hidden className="text-orpiment">
-                    {i + 1}.
-                  </span>
-                  {bi(item)}
-                </li>
-              ))}
-            </ul>
-          </div>
+          <ExecutionNotice template={template} />
         </aside>
       </div>
     </div>

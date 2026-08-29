@@ -145,7 +145,16 @@ export default function DashboardPage() {
               {documents.map((doc) => (
                 <Link
                   key={doc.key}
-                  href={`/create/${doc.template.slug}`}
+                  /*
+                   * A purchased document goes to its finished, unwatermarked copy;
+                   * a draft goes back to the wizard. Sending a buyer to the wizard
+                   * was why paying appeared to change nothing.
+                   */
+                  href={
+                    doc.status === "purchased"
+                      ? `/documents/${doc.key}`
+                      : `/create/${doc.template.slug}`
+                  }
                   className="group flex flex-wrap items-center gap-3 bg-surface p-4 transition-colors hover:bg-accent-soft"
                 >
                   <div className="min-w-0 flex-1">
