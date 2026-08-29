@@ -109,8 +109,8 @@ function PaymentReturn() {
       <Shell title={bi({ ne: "भुक्तानी प्रक्रियामा छ", en: "Payment still processing" })} tone="warn">
         <p className="text-ink-2">
           {bi({
-            ne: "भुक्तानी सेवाले अझै पुष्टि गरेको छैन। रकम कटेको भए केही समयमै तपाईंको खातामा देखिनेछ — दोहोर्‍याएर भुक्तानी नगर्नुहोस्।",
-            en: "The provider hasn't confirmed yet. If money left your account it will appear shortly — please don't pay again.",
+            ne: "भुक्तानी सेवाले अझै पुष्टि गरेको छैन। रकम कटेको भए केही समयमै तपाईंको खातामा देखिनेछ। दोहोर्‍याएर भुक्तानी नगर्नुहोस्।",
+            en: "The provider hasn't confirmed yet. If money left your account it will appear shortly. Please don't pay again.",
           })}
         </p>
         <p className="mt-3 font-mono text-xs text-ink-3">

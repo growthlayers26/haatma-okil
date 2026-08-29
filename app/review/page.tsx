@@ -115,7 +115,7 @@ export default function ReviewPage() {
         </p>
         <p className="mt-1.5 max-w-[62ch] text-sm text-ink-2">
           {bi({
-            ne: "यहाँ देखिने बुँदाहरू कानुनी राय होइनन् — ती अधिवक्तासँग सोध्नका लागि तयार पारिएका प्रश्न हुन्। कानुनी राय नेपाल बार काउन्सिलबाट इजाजतप्राप्त अधिवक्ताले मात्र दिन सक्नुहुन्छ।",
+            ne: "यहाँ देखिने बुँदाहरू कानुनी राय होइनन्। ती अधिवक्तासँग सोध्नका लागि तयार पारिएका प्रश्न हुन्। कानुनी राय नेपाल बार काउन्सिलबाट इजाजतप्राप्त अधिवक्ताले मात्र दिन सक्नुहुन्छ।",
             en: "What appears below are questions prepared for an advocate, not conclusions about your position. Only an advocate licensed by the Nepal Bar Council can advise you on it.",
           })}
         </p>
@@ -140,8 +140,8 @@ export default function ReviewPage() {
           <p className="mt-1.5 flex flex-wrap justify-between gap-2 font-mono text-xs text-ink-3">
             <span>
               {bi({
-                ne: "हामी तपाईंको कागजात भण्डारण गर्दैनौं — जाँचपछि पाठ मेटिन्छ।",
-                en: "We do not store your document — the text is discarded after the check.",
+                ne: "हामी तपाईंको कागजात भण्डारण गर्दैनौं। जाँचपछि पाठ मेटिन्छ।",
+                en: "We do not store your document. The text is discarded after the check.",
               })}
             </span>
             <span className="tabular-nums">{num(text.length)}</span>
@@ -186,7 +186,7 @@ export default function ReviewPage() {
             >
               {busy
                 ? "…"
-                : `${bi({ ne: "भुक्तानी गर्नुहोस्", en: "Pay" })} — ${formatNpr(result.priceNpr ?? 0, lang)}`}
+                : `${bi({ ne: "भुक्तानी गर्नुहोस्", en: "Pay" })} ${formatNpr(result.priceNpr ?? 0, lang)}`}
             </button>
             <Link href="/pricing" className="text-sm text-accent underline">
               {bi({ ne: "योजना हेर्नुहोस्", en: "See plans" })}
@@ -195,7 +195,7 @@ export default function ReviewPage() {
           <p className="mt-3 font-mono text-xs text-ink-3">
             {bi({
               ne: "भुक्तानीपछि यही पृष्ठमा फर्केर पाठ फेरि टाँस्नुहोस्।",
-              en: "After paying, return here and paste the text again — your payment is held until a check completes.",
+              en: "After paying, return here and paste the text again. Your payment is held until a check completes.",
             })}
           </p>
         </div>
@@ -211,7 +211,7 @@ export default function ReviewPage() {
             : result.reason === "too_long"
               ? bi({
                   ne: "कागजात धेरै लामो भयो। कृपया भागमा विभाजन गरेर जाँच गर्नुहोस्।",
-                  en: "That document is too long to check in one pass. Split it and check each part — we refuse rather than read only half of it.",
+                  en: "That document is too long to check in one pass. Split it and check each part. We refuse rather than read only half of it.",
                 })
               : result.reason === "refused"
                 ? bi({
@@ -251,8 +251,8 @@ export default function ReviewPage() {
           {result.findings.length === 0 ? (
             <p className="mt-6 border border-dashed border-rule-strong p-6 text-sm text-ink-2">
               {bi({
-                ne: "हामीले जाँच गर्ने सीमाहरूसँग कुनै स्पष्ट बाझिने कुरा भेटिएन। यसको अर्थ कागजात ठीक छ भन्ने होइन — हामीले जाँच्न सक्ने कुरा सीमित छन्।",
-                en: "Nothing conflicted with the limits we check. That does not mean the document is sound — what we can check is narrow, and only an advocate can read it properly.",
+                ne: "हामीले जाँच गर्ने सीमाहरूसँग कुनै स्पष्ट बाझिने कुरा भेटिएन। यसको अर्थ कागजात ठीक छ भन्ने होइन। हामीले जाँच्न सक्ने कुरा सीमित छन्।",
+                en: "Nothing conflicted with the limits we check. That does not mean the document is sound. What we can check is narrow, and only an advocate can read it properly.",
               })}
             </p>
           ) : (

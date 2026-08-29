@@ -55,7 +55,7 @@ export default function HomePage() {
     { value: "100%", label: bi({ ne: "दफा उल्लेख सहित", en: "Clauses cited to statute" }) },
     // Bilingual output is a genuine differentiator here: the competition is either
     // an English template nobody can execute or a Nepali one nobody drafted.
-    { value: num(2), label: bi({ ne: "भाषा — नेपाली र अङ्ग्रेजी", en: "Languages, Nepali and English" }) },
+    { value: num(2), label: bi({ ne: "नेपाली र अङ्ग्रेजी भाषा", en: "Languages, Nepali and English" }) },
   ];
 
   return (

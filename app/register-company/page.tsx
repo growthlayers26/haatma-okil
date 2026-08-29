@@ -99,7 +99,7 @@ export default function RegisterCompanyPage() {
             <p className="mt-1.5 max-w-[60ch] text-sm text-ink-2">
               {bi({
                 ne: "नाम स्वीकृत नभई पेस गरिएका कागजात पुन: तयार गर्नुपर्ने हुन्छ। त्यसैले नाम स्वीकृति पहिले गरिन्छ, मस्यौदा पछि।",
-                en: "A rejected name means redrafting and refiling everything behind it. That's why we clear the name first and draft second — the opposite order is the most common and most expensive mistake.",
+                en: "A rejected name means redrafting and refiling everything behind it. That's why we clear the name first and draft second. The opposite order is the most common and most expensive mistake.",
               })}
             </p>
           </div>

@@ -247,7 +247,7 @@ export const boardResolution: Template = {
           label: { ne: "पारित निर्णय", en: "Resolution passed" },
           help: {
             ne: "निर्णय स्पष्ट र कार्यान्वयनयोग्य भाषामा लेख्नुहोस्। बैंकले यसैको आधारमा काम गर्दछ।",
-            en: "Write the resolution in clear, actionable terms — a bank will act on this wording alone.",
+            en: "Write the resolution in clear, actionable terms. A bank will act on this wording alone.",
           },
         },
         nameField("authorisedPerson", {
@@ -520,8 +520,8 @@ export const foundersAgreement: Template = {
           required: true,
           label: { ne: "संस्थापकको नाम र शेयर प्रतिशत", en: "Founders and equity split" },
           placeholder: {
-            ne: "जस्तै: सीता श्रेष्ठ — ६०%\nराम थापा — ४०%",
-            en: "e.g. Sita Shrestha — 60%\nRam Thapa — 40%",
+            ne: "जस्तै: सीता श्रेष्ठ ६०%\nराम थापा ४०%",
+            en: "e.g. Sita Shrestha 60%\nRam Thapa 40%",
           },
         },
         {
@@ -537,7 +537,7 @@ export const foundersAgreement: Template = {
       title: { ne: "भेस्टिङ", en: "Vesting" },
       intro: {
         ne: "भेस्टिङ नभएमा सुरुमै छाडेर जाने संस्थापकले पनि पूरा शेयर लिएर जान्छ।",
-        en: "Without vesting, a founder who leaves in month three keeps their full stake — which is how early companies become unfundable.",
+        en: "Without vesting, a founder who leaves in month three keeps their full stake, which is how early companies become unfundable.",
       },
       fields: [
         {

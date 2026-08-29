@@ -71,8 +71,8 @@ export const SERVICES: Record<ServiceId, Service> = {
     id: "trademark",
     title: { ne: "ट्रेडमार्क दर्ता", en: "Trademark registration" },
     blurb: {
-      ne: "उद्योग विभागमा ट्रेडमार्क दर्ता — पूर्व-खोज, वर्ग निर्धारण र दर्ता प्रक्रिया।",
-      en: "Trademark registration at the Department of Industry — search, classification and filing.",
+      ne: "उद्योग विभागमा ट्रेडमार्क दर्ता। पूर्व-खोज, वर्ग निर्धारण र दर्ता प्रक्रिया।",
+      en: "Trademark registration at the Department of Industry, covering search, classification and filing.",
     },
     priceNpr: 12_999,
     turnaround: {

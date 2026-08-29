@@ -36,7 +36,7 @@ export default function ServicesPage() {
       <p className="mt-3 max-w-[64ch] text-lg text-ink-2">
         {bi({
           ne: "कागजातभन्दा बाहेक फर्मले गर्ने काम। अधिवक्ताको प्रत्यक्ष सेवा र सरकारी दर्ता प्रक्रिया छुट्टाछुट्टै राखिएका छन्।",
-          en: "What the firm does beyond handing over a document — advocate's work and government filings, kept separate because they buy different things.",
+          en: "What the firm does beyond handing over a document. Advocate's work and government filings are kept separate, because they buy different things.",
         })}
       </p>
 

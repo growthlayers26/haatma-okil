@@ -42,7 +42,7 @@ export function SignClient({ envelopes, documents }: Props) {
     }),
     certificate_not_verified: bi({
       ne: "प्रमाणपत्र प्रमाणित नभएकाले पूरा गर्न मिलेन।",
-      en: "Cannot complete — a certificate has not been verified.",
+      en: "Cannot complete. A certificate has not been verified.",
     }),
     incomplete: bi({
       ne: "सबै पक्षले हस्ताक्षर गरिसकेका छैनन्।",
@@ -242,8 +242,8 @@ export function SignClient({ envelopes, documents }: Props) {
                     value={names}
                     onChange={(e) => setNames(e.target.value)}
                     placeholder={bi({
-                      ne: "प्रत्येक लाइनमा एक जना — नाम, हैसियत\nजस्तै: सीता श्रेष्ठ, सञ्चालक",
-                      en: "One per line — name, capacity\ne.g. Sita Shrestha, Director",
+                      ne: "प्रत्येक लाइनमा एक जना, नाम र हैसियत\nजस्तै: सीता श्रेष्ठ, सञ्चालक",
+                      en: "One per line, name then capacity\ne.g. Sita Shrestha, Director",
                     })}
                     className="mt-1.5 w-full border border-rule-strong bg-surface px-3 py-2.5 font-mono text-sm outline-none focus:border-accent"
                   />

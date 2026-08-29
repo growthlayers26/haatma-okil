@@ -17,7 +17,7 @@ import type { AdvocateReview, Field, Bilingual, Citation } from "../types";
  */
 export function pendingReview(reviewedOnBs = "2083-05-10", nextReviewBs = "2084-05-10"): AdvocateReview {
   return {
-    name: { ne: "अधिवक्ता — नियुक्ति बाँकी", en: "Advocate — pending assignment" },
+    name: { ne: "अधिवक्ता नियुक्ति बाँकी", en: "Advocate not yet assigned" },
     nbcLicence: null,
     reviewedOnBs,
     nextReviewBs,

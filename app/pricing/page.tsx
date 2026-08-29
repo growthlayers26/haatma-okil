@@ -315,7 +315,7 @@ export default function PricingPage() {
         </Callout>
         <Callout tone="note" label={bi({ ne: "मासिक कोटा नपुगे", en: "If you run out mid-month" })}>
           {bi({
-            ne: "कोटा सकिएमा सेवा बन्द हुँदैन — थप विषय प्रति विषय शुल्कमा लिन सकिन्छ।",
+            ne: "कोटा सकिएमा सेवा बन्द हुँदैन। थप विषय प्रति विषय शुल्कमा लिन सकिन्छ।",
             en: "Nothing stops working. Further matters are simply charged per matter at the usual rate.",
           })}
         </Callout>

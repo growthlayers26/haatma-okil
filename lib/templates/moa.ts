@@ -30,7 +30,7 @@ export const memorandumOfAssociation: Template = {
   },
   governingAct: COMPANIES.memorandum,
   review: {
-    name: { ne: "अधिवक्ता — नियुक्ति बाँकी", en: "Advocate — pending assignment" },
+    name: { ne: "अधिवक्ता नियुक्ति बाँकी", en: "Advocate not yet assigned" },
     nbcLicence: null,
     reviewedOnBs: "2083-05-10",
     nextReviewBs: "2084-05-10",
@@ -72,7 +72,7 @@ export const memorandumOfAssociation: Template = {
           citation: COMPANIES.incorporation,
           help: {
             ne: "प्राइभेट कम्पनीको नामको अन्त्यमा 'प्राइभेट लिमिटेड' वा 'प्रा.लि.' हुनुपर्दछ।",
-            en: "A private company's name must end with 'Private Limited' or 'Pvt. Ltd.'. Reserve it on CAMIS before filing — a rejected name means refiling everything.",
+            en: "A private company's name must end with 'Private Limited' or 'Pvt. Ltd.'. Reserve it on CAMIS before filing. A rejected name means refiling everything.",
           },
         },
         {
@@ -162,7 +162,7 @@ export const memorandumOfAssociation: Template = {
           citation: COMPANIES.incorporation,
           help: {
             ne: `एक जना शेयरधनीले पनि प्राइभेट कम्पनी दर्ता गर्न सकिन्छ। बढीमा १०१ जनासम्म।`,
-            en: "A single shareholder is enough — a one-person private company is valid under the Companies Act 2063. The ceiling is 101.",
+            en: "A single shareholder is enough. A one-person private company is valid under the Companies Act 2063. The ceiling is 101.",
           },
           rules: [
             {
@@ -205,7 +205,7 @@ export const memorandumOfAssociation: Template = {
           },
           help: {
             ne: "प्रत्येक संस्थापकको नागरिकता नम्बर पनि खुलाउनुहोस्।",
-            en: "Include each founder's citizenship number — OCR will ask for it and the attached copies must match.",
+            en: "Include each founder's citizenship number. OCR will ask for it and the attached copies must match.",
           },
         },
       ],

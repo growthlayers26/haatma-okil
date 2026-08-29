@@ -158,8 +158,8 @@ export default function DashboardPage() {
         tone: "accent",
         label: { ne: "अधुरो कागजात", en: "A document is nearly finished" },
         detail: {
-          ne: `${d.template.title.ne} — ${toNepaliDigits(d.percent)}% पूरा`,
-          en: `${d.template.title.en} — ${d.percent}% complete`,
+          ne: `${d.template.title.ne}, ${toNepaliDigits(d.percent)}% पूरा`,
+          en: `${d.template.title.en}, ${d.percent}% complete`,
         },
         href: `/create/${d.template.slug}`,
         action: { ne: "पूरा गर्नुहोस्", en: "Finish it" },

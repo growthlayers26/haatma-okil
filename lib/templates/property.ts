@@ -64,7 +64,7 @@ export const landSaleDeed: Template = {
       title: { ne: "जग्गाको विवरण", en: "The land" },
       intro: {
         ne: "कित्ता नम्बर र क्षेत्रफल जग्गा धनी प्रमाणपुर्जासँग अक्षरशः मिल्नुपर्दछ।",
-        en: "The parcel number and area must match the ownership certificate exactly — a mismatch stops registration.",
+        en: "The parcel number and area must match the ownership certificate exactly. A mismatch stops registration.",
       },
       fields: [
         {
@@ -108,7 +108,7 @@ export const landSaleDeed: Template = {
         moneyField("priceNpr", { ne: "कुल मूल्य (रु.)", en: "Total price (NPR)" }),
         moneyField("advanceNpr", { ne: "अग्रिम भुक्तानी (रु.)", en: "Advance paid (NPR)" }, {
           ne: "दर्ताअघि दिइएको रकम यहाँ खुलाउनुहोस्।",
-          en: "Record anything paid before registration — this is what a buyer must prove if the sale falls through.",
+          en: "Record anything paid before registration. This is what a buyer must prove if the sale falls through.",
         }, false),
         bsDateField("deedDateBs", { ne: "लिखत मिति (वि.सं.)", en: "Date of the deed (BS)" }),
       ],
@@ -213,7 +213,7 @@ export const giftDeed: Template = {
     EXECUTION.twoWitnesses,
     EXECUTION.notarised,
     {
-      ne: "पैतृक सम्पत्ति दान गर्दा अंशियारको हक असर पर्न सक्दछ — अधिवक्तासँग परामर्श गर्नुहोस्।",
+      ne: "पैतृक सम्पत्ति दान गर्दा अंशियारको हक असर पर्न सक्दछ। अधिवक्तासँग परामर्श गर्नुहोस्।",
       en: "Gifting ancestral property can cut across a coparcener's partition right. Take advice before doing it.",
     },
   ],
@@ -338,7 +338,7 @@ export const rentReceipt: Template = {
   execution: [
     {
       ne: "घरधनीले हस्ताक्षर गरी बहालवालालाई दिनुपर्दछ। बहालवालाले प्रत्येक रसिद सुरक्षित राख्नुपर्दछ।",
-      en: "Signed by the landlord and given to the tenant. Keep every receipt — they are only useful as a series.",
+      en: "Signed by the landlord and given to the tenant. Keep every receipt. They are only useful as a series.",
     },
   ],
   steps: [

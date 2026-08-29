@@ -38,7 +38,7 @@ export const employmentContract: Template = {
   },
   governingAct: LABOUR.writtenContract,
   review: {
-    name: { ne: "अधिवक्ता — नियुक्ति बाँकी", en: "Advocate — pending assignment" },
+    name: { ne: "अधिवक्ता नियुक्ति बाँकी", en: "Advocate not yet assigned" },
     nbcLicence: null,
     reviewedOnBs: "2083-05-10",
     nextReviewBs: "2084-05-10",
@@ -235,7 +235,7 @@ export const employmentContract: Template = {
       title: { ne: "काम गर्ने समय", en: "Working hours" },
       intro: {
         ne: "बिदा सम्बन्धी व्यवस्था कानुनद्वारा निर्धारित छ र घटाउन मिल्दैन।",
-        en: "Leave entitlements are fixed by statute and are rendered as locked clauses — a contract may grant more, never less.",
+        en: "Leave entitlements are fixed by statute and are rendered as locked clauses. A contract may grant more, never less.",
       },
       fields: [
         {

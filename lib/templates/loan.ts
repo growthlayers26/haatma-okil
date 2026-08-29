@@ -19,7 +19,7 @@ export const loanAgreement: Template = {
   },
   governingAct: LOAN,
   review: {
-    name: { ne: "अधिवक्ता — नियुक्ति बाँकी", en: "Advocate — pending assignment" },
+    name: { ne: "अधिवक्ता नियुक्ति बाँकी", en: "Advocate not yet assigned" },
     nbcLicence: null,
     reviewedOnBs: "2083-05-10",
     nextReviewBs: "2084-05-10",
@@ -30,7 +30,7 @@ export const loanAgreement: Template = {
       en: "Signatures of both parties and two witnesses are essential. Record each witness's citizenship number and contact details.",
     },
     {
-      ne: "धितो राखिएको भए सम्बन्धित मालपोत कार्यालयमा दर्ता गर्नुपर्नेछ — यो कागजातले मात्र धितो सिर्जना गर्दैन।",
+      ne: "धितो राखिएको भए सम्बन्धित मालपोत कार्यालयमा दर्ता गर्नुपर्नेछ। यो कागजातले मात्र धितो सिर्जना गर्दैन।",
       en: "Where security is given, registration at the relevant Land Revenue Office is required. This document alone does not create a registered charge.",
     },
     {
@@ -108,7 +108,7 @@ export const loanAgreement: Template = {
           required: true,
           label: { ne: "धितो राखिएको छ?", en: "Is security provided?" },
           options: [
-            { value: "no", label: { ne: "छैन — विश्वासमा", en: "No — unsecured" } },
+            { value: "no", label: { ne: "छैन, विश्वासमा", en: "No, unsecured" } },
             { value: "yes", label: { ne: "छ", en: "Yes" } },
           ],
         },

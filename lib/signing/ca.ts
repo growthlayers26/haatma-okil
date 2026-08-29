@@ -124,5 +124,5 @@ export const SIGNING_ROUTES = {
  */
 export const NO_CLICKWRAP_NOTE: Bilingual = {
   ne: "नाम टाइप गरेर वा बटन थिचेर गरिने 'हस्ताक्षर' विद्युतीय कारोबार ऐन, २०६३ ले मान्यता दिँदैन। त्यसरी हस्ताक्षर गरिएको कागजात अदालतमा काम नलाग्न सक्दछ, त्यसैले हामी त्यस्तो सुविधा दिँदैनौं।",
-  en: "Typing your name or clicking a button is not a signature the Electronic Transactions Act, 2063 recognises, and a document executed that way may fail when it matters. We do not offer it — that is a decision, not a missing feature.",
+  en: "Typing your name or clicking a button is not a signature the Electronic Transactions Act, 2063 recognises, and a document executed that way may fail when it matters. We do not offer it. That is a decision, not a missing feature.",
 };

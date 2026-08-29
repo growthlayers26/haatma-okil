@@ -66,7 +66,7 @@ export const trademarkFiling: FilingService = {
   title: { ne: "ट्रेडमार्क दर्ता", en: "Trademark registration" },
   blurb: {
     ne: "उद्योग विभागमा ट्रेडमार्क दर्ता। वर्ग छनौट, पूर्व-खोज र दर्ता प्रक्रिया समावेश।",
-    en: "Register a trademark at the Department of Industry — search, classification, filing and follow-through.",
+    en: "Register a trademark at the Department of Industry, covering search, classification, filing and follow-through.",
   },
   authority: { ne: "उद्योग विभाग", en: "Department of Industry" },
   portal: "doind.gov.np",
@@ -145,7 +145,7 @@ export const trademarkFiling: FilingService = {
       label: { ne: "गलत वर्गमा दर्ता", en: "Filing in the wrong class" },
       detail: {
         ne: "व्यवसायले वास्तवमा बेच्ने वस्तु वा सेवा नसमेट्ने वर्गमा दर्ता गरेमा संरक्षण नाममात्रको हुन्छ। वर्ग पछि थप्न नयाँ आवेदन नै चाहिन्छ।",
-        en: "A mark registered in a class that does not cover what you actually sell gives protection in name only — and adding a class later means a fresh application, not an amendment.",
+        en: "A mark registered in a class that does not cover what you actually sell gives protection in name only, and adding a class later means a fresh application rather than an amendment.",
       },
     },
     {
@@ -243,7 +243,7 @@ export const taxRegistrationFiling: FilingService = {
       label: { ne: "आवश्यक नभई मूल्य अभिवृद्धि करमा दर्ता", en: "Registering for VAT when you did not have to" },
       detail: {
         ne: "आवश्यक नभई मूल्य अभिवृद्धि करमा दर्ता भएमा कारोबार शून्य भए पनि हरेक महिना विवरण बुझाउने स्थायी दायित्व सिर्जना हुन्छ। नबुझाएमा जरिवाना लाग्दछ। यो सबैभन्दा महँगो र सबैभन्दा सजिलै हुने गल्ती हो।",
-        en: "Registering for VAT you did not need creates a permanent monthly filing obligation — due even in months with no trading at all, with penalties for missing it. This is the most expensive and most common mistake we see, and it is very hard to undo.",
+        en: "Registering for VAT you did not need creates a permanent monthly filing obligation, due even in months with no trading at all, with penalties for missing it. This is the most expensive and most common mistake we see, and it is very hard to undo.",
       },
     },
     {

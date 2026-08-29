@@ -19,7 +19,7 @@ export const nda: Template = {
   },
   governingAct: CONTRACT,
   review: {
-    name: { ne: "अधिवक्ता — नियुक्ति बाँकी", en: "Advocate — pending assignment" },
+    name: { ne: "अधिवक्ता नियुक्ति बाँकी", en: "Advocate not yet assigned" },
     nbcLicence: null,
     reviewedOnBs: "2083-05-10",
     nextReviewBs: "2084-05-10",
@@ -95,7 +95,7 @@ export const nda: Template = {
               blocking: false,
               citation: CONTRACT,
               message: {
-                ne: "१० वर्षभन्दा लामो अवधि अनुचित बन्देज मानिन सक्दछ — अधिवक्तासँग परामर्श गर्नुहोस्।",
+                ne: "१० वर्षभन्दा लामो अवधि अनुचित बन्देज मानिन सक्दछ। अधिवक्तासँग परामर्श गर्नुहोस्।",
                 en: "A period beyond 10 years may be treated as an unreasonable restraint. Have an advocate review before relying on it.",
               },
             },

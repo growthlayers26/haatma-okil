@@ -21,7 +21,7 @@ export const supplyAgreement: Template = {
   title: { ne: "आपूर्ति सम्झौता", en: "Supply Agreement" },
   summary: {
     ne: "नियमित रूपमा मालसामान आपूर्ति गर्ने सम्झौता। मूल्य, गुणस्तर, सुपुर्दगी र भुक्तानी सर्त समावेश।",
-    en: "Agreement for the recurring supply of goods — price, quality, delivery and payment terms.",
+    en: "Agreement for the recurring supply of goods, covering price, quality, delivery and payment terms.",
   },
   governingAct: SALE,
   review: pendingReview(),
@@ -203,7 +203,7 @@ export const distributionAgreement: Template = {
           citation: CONTRACT,
           help: {
             ne: "एकाधिकार दिँदा उत्पादकले सोही क्षेत्रमा अरूलाई वितरण गर्न दिन पाउँदैन।",
-            en: "Granting exclusivity means the principal cannot appoint anyone else in that territory — including selling there directly.",
+            en: "Granting exclusivity means the principal cannot appoint anyone else in that territory, including selling there directly.",
           },
           options: [
             { value: "exclusive", label: { ne: "एकल वितरक", en: "Exclusive" } },
@@ -536,7 +536,7 @@ export const internshipAgreement: Template = {
   execution: [
     EXECUTION.bothSign,
     {
-      ne: "इन्टर्नले नियमित कर्मचारीसरह काम गरेको र नियन्त्रणमा रहेको देखिएमा श्रम ऐन, २०७४ लागू हुन्छ — नाम जे राखे पनि।",
+      ne: "इन्टर्नले नियमित कर्मचारीसरह काम गरेको र नियन्त्रणमा रहेको देखिएमा श्रम ऐन, २०७४ लागू हुन्छ, नाम जे राखे पनि।",
       en: "If the intern in substance does an employee's work under an employer's direction, the Labour Act 2074 applies whatever the document is called.",
     },
   ],
@@ -628,7 +628,7 @@ export const internshipAgreement: Template = {
       citation: LABOUR.writtenContract,
       body: {
         ne: `यो सम्झौता सिकाइका लागि हो र रोजगारी करार होइन। तर काम गर्ने तरिका, समय र नियन्त्रणका आधारमा वास्तविक सम्बन्ध रोजगारीको देखिएमा श्रम ऐन, २०७४ का व्यवस्था यस सम्झौताको नामले असर नपारी लागू हुनेछन्।`,
-        en: `This agreement is for learning and is not a contract of employment. If, on the substance of the arrangement — the hours, the direction and the degree of control — the relationship is in fact employment, the Labour Act 2074 applies regardless of what this document is called.`,
+        en: `This agreement is for learning and is not a contract of employment. If the relationship is in fact employment, judged by the hours, the direction and the degree of control, the Labour Act 2074 applies whatever this document is called.`,
       },
     },
     {

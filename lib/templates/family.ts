@@ -43,7 +43,7 @@ export const divorcePetition: Template = {
     },
     {
       ne: "नाबालक सन्तान वा सम्पत्ति सम्बन्धी विषय भएमा अधिवक्ताको सहयोग आवश्यक पर्दछ।",
-      en: "Where there are minor children or property to divide, an advocate should be instructed — those terms are what get contested later.",
+      en: "Where there are minor children or property to divide, an advocate should be instructed. Those terms are what get contested later.",
     },
     EXECUTION.bothSign,
   ],
@@ -201,7 +201,7 @@ export const adoptionDeed: Template = {
     EXECUTION.twoWitnesses,
     EXECUTION.notarised,
     {
-      ne: "उमेर, वैवाहिक अवस्था र सन्तानसम्बन्धी कानुनी सर्तहरू पूरा भएको हुनुपर्दछ — अधिवक्तासँग जाँच गराउनुहोस्।",
+      ne: "उमेर, वैवाहिक अवस्था र सन्तानसम्बन्धी कानुनी सर्तहरू पूरा भएको हुनुपर्दछ। अधिवक्तासँग जाँच गराउनुहोस्।",
       en: "Statutory conditions on age, marital status and existing children must be satisfied. Have an advocate check them before proceeding.",
     },
   ],
@@ -389,7 +389,7 @@ export const legalNotice: Template = {
       en: "Send by registered post or against a signed acknowledgement. Without proof of service the notice may as well not have been sent.",
     },
     {
-      ne: "पठाएको प्रति र प्रमाण सुरक्षित राख्नुहोस् — पछि अदालतमा आवश्यक पर्दछ।",
+      ne: "पठाएको प्रति र प्रमाण सुरक्षित राख्नुहोस्। पछि अदालतमा आवश्यक पर्दछ।",
       en: "Keep a copy and the proof of service; the court will want both.",
     },
   ],
@@ -415,8 +415,8 @@ export const legalNotice: Template = {
           required: true,
           label: { ne: "पृष्ठभूमि", en: "Background" },
           help: {
-            ne: "के भयो, कहिले भयो — मिति र तथ्यसहित लेख्नुहोस्।",
-            en: "What happened and when. Dates and facts, not adjectives — this may be read out in court.",
+            ne: "के भयो र कहिले भयो, मिति र तथ्यसहित लेख्नुहोस्।",
+            en: "What happened and when. Dates and facts, not adjectives. This may be read out in court.",
           },
         },
         {

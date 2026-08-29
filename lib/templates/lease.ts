@@ -18,7 +18,7 @@ export const residentialLease: Template = {
   },
   governingAct: LEASE,
   review: {
-    name: { ne: "अधिवक्ता — नियुक्ति बाँकी", en: "Advocate — pending assignment" },
+    name: { ne: "अधिवक्ता नियुक्ति बाँकी", en: "Advocate not yet assigned" },
     nbcLicence: null,
     reviewedOnBs: "2083-05-10",
     nextReviewBs: "2084-05-10",
@@ -33,7 +33,7 @@ export const residentialLease: Template = {
       en: "Registration with the local ward may be required for rental income tax purposes.",
     },
     {
-      ne: "लामो अवधिको बहाल सम्झौताका लागि मालपोत कार्यालयमा दर्ता गर्नुपर्ने हुन सक्दछ — अधिवक्तासँग परामर्श गर्नुहोस्।",
+      ne: "लामो अवधिको बहाल सम्झौताका लागि मालपोत कार्यालयमा दर्ता गर्नुपर्ने हुन सक्दछ। अधिवक्तासँग परामर्श गर्नुहोस्।",
       en: "Long-term leases may require registration at the Land Revenue Office. Confirm with an advocate before relying on this document alone.",
     },
   ],
@@ -100,7 +100,7 @@ export const residentialLease: Template = {
           required: true,
           label: { ne: "बिजुली/पानी बहालमा समावेश?", en: "Are utilities included in rent?" },
           options: [
-            { value: "no", label: { ne: "समावेश छैन — छुट्टै तिर्ने", en: "Not included — paid separately" } },
+            { value: "no", label: { ne: "समावेश छैन, छुट्टै तिर्ने", en: "Not included, paid separately" } },
             { value: "yes", label: { ne: "समावेश छ", en: "Included" } },
           ],
         },

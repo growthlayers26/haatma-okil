@@ -54,7 +54,7 @@ export const partnershipDeed: Template = {
           label: { ne: "व्यवसायको प्रकृति", en: "Nature of the business" },
           help: {
             ne: "साँघुरो लेखेमा भविष्यमा संलेख संशोधन गर्नुपर्ने हुन्छ।",
-            en: "Describe it broadly — a narrow description forces an amendment when the business grows.",
+            en: "Describe it broadly. A narrow description forces an amendment when the business grows.",
           },
         },
         bsDateField("startDateBs", { ne: "साझेदारी सुरु मिति (वि.सं.)", en: "Commencement date (BS)" }),
@@ -94,8 +94,8 @@ export const partnershipDeed: Template = {
           required: true,
           label: { ne: "प्रत्येक साझेदारको लगानी", en: "Contribution of each partner" },
           placeholder: {
-            ne: "जस्तै: सीता श्रेष्ठ — रु. ५,००,०००",
-            en: "e.g. Sita Shrestha — NPR 5,00,000",
+            ne: "जस्तै: सीता श्रेष्ठ, रु. ५,००,०००",
+            en: "e.g. Sita Shrestha, NPR 5,00,000",
           },
         },
         {
@@ -414,7 +414,7 @@ export const saleOfGoods: Template = {
           label: { ne: "मालसामानको विवरण", en: "Description of the goods" },
           help: {
             ne: "परिमाण, गुणस्तर र मोडेल स्पष्ट लेख्नुहोस्।",
-            en: "State quantity, quality and model precisely — this is what a dispute turns on.",
+            en: "State quantity, quality and model precisely. This is what a dispute turns on.",
           },
         },
         moneyField("priceNprTotal", { ne: "कुल मूल्य (रु.)", en: "Total price (NPR)" }),
@@ -603,7 +603,7 @@ export const freelanceAgreement: Template = {
       locked: true,
       body: {
         ne: `स्वतन्त्र कर्मी कार्यदाताको श्रमिक होइन र निजले आफ्नो कर दायित्व आफैँ व्यहोर्नेछ। तर काम गर्ने तरिका, समय र नियन्त्रणका आधारमा वास्तविक सम्बन्ध रोजगारीको देखिएमा श्रम ऐन, २०७४ लागू हुनेछ।`,
-        en: `The Freelancer is not an employee of the Client and is responsible for their own tax. If, on the substance of the arrangement — control, hours and direction — the relationship is in fact employment, the Labour Act 2074 applies regardless of this clause.`,
+        en: `The Freelancer is not an employee of the Client and is responsible for their own tax. If the relationship is in fact employment, judged by the control exercised, the hours worked and the direction given, the Labour Act 2074 applies regardless of this clause.`,
       },
     },
     governingLawClause(CONTRACT),

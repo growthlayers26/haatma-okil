@@ -204,7 +204,7 @@ export default function AdvocatePage() {
                 disabled={busy}
                 className="bg-accent px-5 py-2.5 font-semibold text-white transition-opacity hover:opacity-90 disabled:opacity-40"
               >
-                {busy ? "…" : `${bi({ ne: "पठाउनुहोस्", en: "Submit" })} — ${money(service.priceNpr)}`}
+                {busy ? "…" : `${bi({ ne: "पठाउनुहोस्", en: "Submit" })} ${money(service.priceNpr)}`}
               </button>
             </form>
           ) : (
@@ -220,8 +220,8 @@ export default function AdvocatePage() {
                 </h2>
                 <p className="mt-2 max-w-[58ch] leading-relaxed text-ink-2">
                   {bi({
-                    ne: "फर्मले पहिले नै विपक्षी पक्षको तर्फबाट काम गरिरहेको भए यो विषय लिन मिल्दैन। त्यसैले तपाईंले विषयको विवरण लेख्नुअघि यो जाँच गरिन्छ — विवरण नलेखिएसम्म हामी केही अभिलेख राख्दैनौं।",
-                    en: "If the firm already acts for the other side, we cannot take your matter. So this is checked before you describe anything — and until you do, nothing about the matter is recorded.",
+                    ne: "फर्मले पहिले नै विपक्षी पक्षको तर्फबाट काम गरिरहेको भए यो विषय लिन मिल्दैन। त्यसैले तपाईंले विषयको विवरण लेख्नुअघि यो जाँच गरिन्छ। विवरण नलेखिएसम्म हामी केही अभिलेख राख्दैनौं।",
+                    en: "If the firm already acts for the other side, we cannot take your matter. So this is checked before you describe anything. Until you do, nothing about the matter is recorded.",
                   })}
                 </p>
 
@@ -325,7 +325,7 @@ export default function AdvocatePage() {
               <p className="mt-3 text-sm text-ink-2">
                 {bi({
                   ne: "अधिवक्ताको विवरण लोड गर्न सकिएन। डेटाबेस कन्फिगर गरिएको छैन।",
-                  en: "Advocate records unavailable — the database isn't configured here.",
+                  en: "Advocate records unavailable. The database isn't configured here.",
                 })}
               </p>
             ) : (
@@ -386,7 +386,7 @@ export default function AdvocatePage() {
             <p className="mt-1.5 text-sm text-ink-2">
               {bi({
                 ne: "फर्मले आफ्नै अधिवक्ताको सेवा आफैँ बिल गर्दछ। कुनै दलाली वा कमिसन लिइँदैन।",
-                en: "The firm bills for its own advocates' work directly. No referral fee, no commission — the Rules of Conduct 2079 prohibit it.",
+                en: "The firm bills for its own advocates' work directly. No referral fee, no commission. The Rules of Conduct 2079 prohibit it.",
               })}
             </p>
           </div>

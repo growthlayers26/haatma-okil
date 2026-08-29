@@ -255,7 +255,7 @@ export function TeamClient({ org, queue, templates }: Props) {
     already_member: bi({ ne: "यो व्यक्ति पहिले नै टोलीमा हुनुहुन्छ।", en: "They are already on the team." }),
     self_approval: bi({
       ne: "आफ्नै मस्यौदा आफैँले स्वीकृत गर्न मिल्दैन।",
-      en: "You cannot approve your own draft — that is the point of the workflow.",
+      en: "You cannot approve your own draft. That is the point of the workflow.",
     }),
     not_permitted: bi({ ne: "तपाईंलाई यो अधिकार छैन।", en: "You do not have permission for that." }),
     not_in_plan: bi({ ne: "यो सुविधा तपाईंको योजनामा छैन।", en: "That feature is not in your plan." }),
@@ -407,8 +407,8 @@ export function TeamClient({ org, queue, templates }: Props) {
                   en: "Every seat on the plan is taken.",
                 })
               : bi({
-                  ne: "खाता भइसकेको व्यक्तिलाई मात्र थप्न सकिन्छ — हामी कसैको तर्फबाट खाता बनाउँदैनौं।",
-                  en: "Only people who already have an account can be added — we do not create logins on someone's behalf.",
+                  ne: "खाता भइसकेको व्यक्तिलाई मात्र थप्न सकिन्छ। हामी कसैको तर्फबाट खाता बनाउँदैनौं।",
+                  en: "Only people who already have an account can be added. We do not create logins on someone's behalf.",
                 })}
           </p>
         </section>

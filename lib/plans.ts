@@ -107,8 +107,8 @@ export const PLANS: Record<PlanId, Plan> = {
     id: "enterprise",
     name: { ne: "संस्थागत", en: "Enterprise" },
     tagline: {
-      ne: "ठूला संस्थाका लागि — आफ्नै ढाँचा, स्वीकृति प्रक्रिया र प्राथमिकता।",
-      en: "For larger organisations — your own templates, an approval chain, and priority.",
+      ne: "ठूला संस्थाका लागि। आफ्नै ढाँचा, स्वीकृति प्रक्रिया र प्राथमिकता।",
+      en: "For larger organisations. Your own templates, an approval chain, and priority.",
     },
     annualNpr: 24_999,
     monthlyNpr: 2_499,

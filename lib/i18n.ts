@@ -29,8 +29,8 @@ const STRINGS = {
     en: "Every clause is tied to the provision it comes from and reviewed by advocates registered with the Nepal Bar Council.",
   },
   searchPlaceholder: {
-    ne: "कागजात खोज्नुहोस् — जस्तै रोजगार करार",
-    en: "Search documents — try 'employment contract'",
+    ne: "कागजात खोज्नुहोस्। जस्तै: रोजगार करार",
+    en: "Search documents. Try 'employment contract'",
   },
   search: { ne: "खोज्नुहोस्", en: "Search" },
 
@@ -64,8 +64,8 @@ const STRINGS = {
   whyAsked: { ne: "यो किन सोधिएको हो", en: "Why this is asked" },
   governedBy: { ne: "आधार", en: "Governed by" },
   statutoryLocked: {
-    ne: "कानुनद्वारा निर्धारित — घटाउन मिल्दैन",
-    en: "Fixed by statute — cannot be reduced",
+    ne: "कानुनद्वारा निर्धारित, घटाउन मिल्दैन",
+    en: "Fixed by statute and cannot be reduced",
   },
   blockedTitle: {
     ne: "यो कागजात सिर्जना गर्न सकिँदैन",

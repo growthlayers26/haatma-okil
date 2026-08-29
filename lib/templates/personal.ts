@@ -89,8 +89,8 @@ export const powerOfAttorney: Template = {
             en: "A general power grants broad authority. A special power is limited to one defined task and is materially safer.",
           },
           options: [
-            { value: "special", label: { ne: "विशेष — एउटा निश्चित कामका लागि", en: "Special — one defined task" } },
-            { value: "general", label: { ne: "सामान्य — व्यापक अधिकार", en: "General — broad authority" } },
+            { value: "special", label: { ne: "विशेष, एउटा निश्चित कामका लागि", en: "Special, for one defined task" } },
+            { value: "general", label: { ne: "सामान्य, व्यापक अधिकार", en: "General, broad authority" } },
           ],
         },
         {
@@ -212,7 +212,7 @@ export const will: Template = {
       en: "Registering the will with the ward office or Land Revenue Office materially reduces the risk of a later challenge.",
     },
     {
-      ne: "अंशियारको हक हनन हुने गरी लेखिएको इच्छापत्र अदालतबाट बदर हुन सक्दछ — अधिवक्तासँग परामर्श गर्नुहोस्।",
+      ne: "अंशियारको हक हनन हुने गरी लेखिएको इच्छापत्र अदालतबाट बदर हुन सक्दछ। अधिवक्तासँग परामर्श गर्नुहोस्।",
       en: "A will that defeats a coparcener's partition right can be set aside by a court. Take advice from an advocate before relying on this.",
     },
   ],

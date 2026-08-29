@@ -27,8 +27,8 @@ export const rentTerminationNotice: Template = {
   review: pendingReview(),
   execution: [
     {
-      ne: "सूचना लिखित रूपमा दिनुपर्नेछ र बुझेको प्रमाण राख्नुपर्नेछ — बुझेको भरपाई, दर्ता गरिएको हुलाक रसिद वा साक्षीको हस्ताक्षर।",
-      en: "The notice must be in writing and you must keep proof of service — a signed acknowledgement, a registered post receipt, or a witness signature.",
+      ne: "सूचना लिखित रूपमा दिनुपर्नेछ र बुझेको प्रमाण राख्नुपर्नेछ। बुझेको भरपाई, दर्ता गरिएको हुलाक रसिद वा साक्षीको हस्ताक्षर।",
+      en: "The notice must be in writing and you must keep proof of service: a signed acknowledgement, a registered post receipt, or a witness signature.",
     },
     {
       ne: "प्रमाण नभएको सूचना विवादमा 'पाएकै छैन' भनी अस्वीकार गर्न सकिन्छ।",
