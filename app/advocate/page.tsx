@@ -81,12 +81,45 @@ export default function AdvocatePage() {
       <h1 className="font-serif text-4xl font-semibold tracking-[-0.02em] sm:text-5xl">
         {bi({ ne: "अधिवक्ता डेस्क", en: "Advocate desk" })}
       </h1>
-      <p className="mt-2 max-w-[62ch] text-ink-2">
+      <p className="mt-4 max-w-[62ch] text-lg leading-relaxed text-ink-2">
         {bi({
           ne: "फर्ममा दुई जना इजाजतप्राप्त अधिवक्ता हुनुहुन्छ। तपाईंको विषय एक जनालाई जिम्मा दिइनेछ।",
           en: "The firm has two licensed advocates. Your matter is assigned to one of them.",
         })}
       </p>
+
+      {/*
+        Two steps, named. The conflict check is a gate rather than a field, and a
+        reader who can see there is a second step understands why this one asks so
+        little — the matter is deliberately not described until the firm knows it can
+        act.
+      */}
+      {(stage === "intake" || stage === "detail") && (
+        <nav
+          aria-label={bi({ ne: "चरण", en: "Steps" })}
+          className="mt-6 flex flex-wrap items-center gap-x-6 gap-y-2 border-t border-rule pt-4"
+        >
+          {[
+            { n: 1, label: bi({ ne: "स्वार्थ जाँच", en: "Conflict check" }) },
+            { n: 2, label: bi({ ne: "तपाईंको विषय", en: "Your matter" }) },
+          ].map((s2) => {
+            const current = (stage === "intake" && s2.n === 1) || (stage === "detail" && s2.n === 2);
+            const done = stage === "detail" && s2.n === 1;
+            return (
+              <span
+                key={s2.n}
+                aria-current={current ? "step" : undefined}
+                className={`flex items-baseline gap-2 font-mono text-[0.72rem] uppercase tracking-[0.08em] ${
+                  current ? "text-accent" : done ? "text-malachite" : "text-ink-3/60"
+                }`}
+              >
+                <span className="tabular-nums">{done ? "✓" : s2.n}</span>
+                {s2.label}
+              </span>
+            );
+          })}
+        </nav>
+      )}
 
       <div className="mt-8 grid gap-8 lg:grid-cols-[1fr_20rem]">
         {/* ---------------- intake ---------------- */}
@@ -172,8 +205,40 @@ export default function AdvocatePage() {
               </button>
             </form>
           ) : (
-            <form onSubmit={onScreen} className="space-y-5">
+            <form onSubmit={onScreen} className="space-y-8">
+              {/*
+                The conflict check leads. It was set below the service picker, inside
+                a bordered aside — which reads as a caveat when it is in fact the
+                thing that decides whether the firm may act at all.
+              */}
               <div>
+                <h2 className="font-serif text-2xl font-semibold tracking-tight">
+                  {bi({ ne: "पहिले स्वार्थ जाँच", en: "First, a conflict check" })}
+                </h2>
+                <p className="mt-2 max-w-[58ch] leading-relaxed text-ink-2">
+                  {bi({
+                    ne: "फर्मले पहिले नै विपक्षी पक्षको तर्फबाट काम गरिरहेको भए यो विषय लिन मिल्दैन। त्यसैले तपाईंले विषयको विवरण लेख्नुअघि यो जाँच गरिन्छ — विवरण नलेखिएसम्म हामी केही अभिलेख राख्दैनौं।",
+                    en: "If the firm already acts for the other side, we cannot take your matter. So this is checked before you describe anything — and until you do, nothing about the matter is recorded.",
+                  })}
+                </p>
+
+                <label htmlFor="opposing" className="mt-6 block text-sm font-semibold">
+                  {bi({ ne: "विपक्षी पक्षको नाम", en: "Name of the other party" })}
+                </label>
+                <input
+                  id="opposing"
+                  required
+                  value={opposingParty}
+                  onChange={(e) => setOpposingParty(e.target.value)}
+                  placeholder={bi({
+                    ne: "व्यक्ति वा संस्थाको नाम",
+                    en: "The person or company on the other side",
+                  })}
+                  className="mt-2 w-full border-b-2 border-rule-strong bg-transparent py-2.5 text-lg outline-none transition-colors placeholder:text-ink-3 focus:border-accent"
+                />
+              </div>
+
+              <div className="border-t border-rule pt-8">
                 <span className="block text-sm font-semibold">
                   {bi({ ne: "कस्तो सेवा चाहिन्छ?", en: "What do you need?" })}
                 </span>
@@ -199,7 +264,6 @@ export default function AdvocatePage() {
                     </label>
                   ))}
                 </div>
-              </div>
 
               <div>
                 <label htmlFor="area" className="block text-sm font-semibold">
@@ -219,30 +283,6 @@ export default function AdvocatePage() {
                 </select>
               </div>
 
-              {/*
-                Conflict screening comes first and alone. The matter is not described
-                on this screen — that is the whole point of the two-step flow.
-              */}
-              <div className="border-l-2 border-orpiment bg-surface p-4">
-                <p className="font-mono text-[0.7rem] font-semibold uppercase tracking-wider text-orpiment">
-                  {bi({ ne: "पहिलो चरण — स्वार्थ जाँच", en: "Step one — conflict check" })}
-                </p>
-                <label htmlFor="opposing" className="mt-2 block text-sm font-semibold">
-                  {bi({ ne: "विपक्षी पक्षको नाम", en: "Name of the other party" })}
-                </label>
-                <input
-                  id="opposing"
-                  required
-                  value={opposingParty}
-                  onChange={(e) => setOpposingParty(e.target.value)}
-                  className="mt-1.5 w-full border border-rule-strong bg-surface px-3 py-2.5 text-base outline-none focus:border-accent"
-                />
-                <p className="mt-2 text-sm text-ink-2">
-                  {bi({
-                    ne: "फर्मले पहिले नै विपक्षी पक्षको तर्फबाट काम गरिरहेको भए यो विषय लिन मिल्दैन। त्यसैले विवरण लेख्नुअघि यो जाँच गरिन्छ।",
-                    en: "If the firm already acts for the other side we cannot take your matter. That is why this is checked before you describe anything.",
-                  })}
-                </p>
               </div>
 
               {!loading && !user && (
