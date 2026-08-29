@@ -183,7 +183,7 @@ export function Checkout({
         <aside className="no-print space-y-4 lg:sticky lg:top-20 lg:self-start">
           {blocked && (
             <div className="border-l-2 border-cinnabar bg-surface p-4">
-              <p className="font-mono text-xs font-semibold uppercase tracking-wider text-cinnabar">
+              <p className="font-mono text-[0.7rem] font-semibold uppercase tracking-wider text-cinnabar">
                 {t("blockedTitle")}
               </p>
               <p className="mt-1.5 text-sm text-ink-2">{t("blockedBody")}</p>
@@ -191,7 +191,7 @@ export function Checkout({
           )}
 
           <div className="border border-rule bg-surface p-4">
-            <p className="font-mono text-xs font-semibold uppercase tracking-wider text-ink-3">
+            <p className="font-mono text-[0.7rem] font-semibold uppercase tracking-wider text-ink-3">
               {t("orderSummary")}
             </p>
             <div className="mt-3 space-y-2 text-sm">
@@ -215,7 +215,7 @@ export function Checkout({
           </div>
 
           <div className="border border-rule bg-surface p-4">
-            <p className="font-mono text-xs font-semibold uppercase tracking-wider text-ink-3">
+            <p className="font-mono text-[0.7rem] font-semibold uppercase tracking-wider text-ink-3">
               {t("paymentMethod")}
             </p>
             <div className="mt-3 space-y-2">

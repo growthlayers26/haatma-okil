@@ -86,7 +86,7 @@ export function FilingServicePage({ service }: { service: FilingService }) {
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-10 sm:px-6">
-      <h1 className="max-w-[22ch] text-balance font-serif text-3xl font-semibold tracking-tight sm:text-4xl">
+      <h1 className="max-w-[22ch] text-balance font-serif text-4xl font-semibold tracking-[-0.02em] sm:text-5xl">
         {bi(service.title)}
       </h1>
       <p className="mt-3 max-w-[64ch] text-lg text-ink-2">{bi(service.blurb)}</p>
@@ -144,7 +144,7 @@ export function FilingServicePage({ service }: { service: FilingService }) {
 
         <aside className="space-y-4 lg:sticky lg:top-20 lg:self-start">
           <div className="border border-rule bg-surface p-5">
-            <p className="font-mono text-xs font-semibold uppercase tracking-wider text-ink-3">
+            <p className="font-mono text-[0.7rem] font-semibold uppercase tracking-wider text-ink-3">
               {bi({ ne: "हाम्रो शुल्क", en: "Our fee" })}
             </p>
             <p className="mt-2 font-serif text-2xl font-semibold tabular-nums">
@@ -174,7 +174,7 @@ export function FilingServicePage({ service }: { service: FilingService }) {
             confidently wrong number is worse than an admitted unknown.
           */}
           <div className="border border-rule bg-surface p-5">
-            <p className="font-mono text-xs font-semibold uppercase tracking-wider text-ink-3">
+            <p className="font-mono text-[0.7rem] font-semibold uppercase tracking-wider text-ink-3">
               {bi({ ne: "सरकारी दस्तुर", en: "Government fees" })}
             </p>
             <ul className="mt-3 space-y-3">
@@ -202,7 +202,7 @@ export function FilingServicePage({ service }: { service: FilingService }) {
           </div>
 
           <div className="border-l-2 border-rule-strong bg-surface p-5">
-            <p className="font-mono text-xs font-semibold uppercase tracking-wider text-ink-3">
+            <p className="font-mono text-[0.7rem] font-semibold uppercase tracking-wider text-ink-3">
               {bi({ ne: "आफैँ गर्न चाहनुहुन्छ?", en: "Doing it yourself?" })}
             </p>
             <p className="mt-1.5 text-sm text-ink-2">

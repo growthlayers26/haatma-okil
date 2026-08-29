@@ -35,7 +35,7 @@ export function DeskClient({ desk }: { desk: DeskState }) {
   if (!desk.linked) {
     return (
       <div className="mx-auto max-w-2xl px-4 py-16 sm:px-6">
-        <h1 className="font-serif text-3xl font-semibold tracking-tight">
+        <h1 className="font-serif text-4xl font-semibold tracking-[-0.02em] sm:text-5xl">
           {bi({ ne: "अधिवक्ता डेस्क", en: "Advocate desk" })}
         </h1>
         {desk.reason === "unauthenticated" ? (
@@ -47,7 +47,7 @@ export function DeskClient({ desk }: { desk: DeskState }) {
           </p>
         ) : (
           <div className="mt-4 border-l-2 border-orpiment bg-surface p-5">
-            <p className="font-mono text-xs font-semibold uppercase tracking-wider text-orpiment">
+            <p className="font-mono text-[0.7rem] font-semibold uppercase tracking-wider text-orpiment">
               {bi({ ne: "खाता जोडिएको छैन", en: "Account not linked" })}
             </p>
             <p className="mt-1.5 max-w-[60ch] text-sm text-ink-2">
@@ -169,7 +169,7 @@ export function DeskClient({ desk }: { desk: DeskState }) {
 
   return (
     <div className="mx-auto max-w-4xl px-4 py-10 sm:px-6">
-      <h1 className="font-serif text-3xl font-semibold tracking-tight">
+      <h1 className="font-serif text-4xl font-semibold tracking-[-0.02em] sm:text-5xl">
         {bi({ ne: "अधिवक्ता डेस्क", en: "Advocate desk" })}
       </h1>
       <p className="mt-2 font-mono text-xs uppercase tracking-wider text-ink-3">
@@ -183,7 +183,7 @@ export function DeskClient({ desk }: { desk: DeskState }) {
       )}
 
       <section className="mt-8">
-        <h2 className="font-mono text-xs font-semibold uppercase tracking-[0.1em] text-ink-3">
+        <h2 className="font-mono text-[0.72rem] font-semibold uppercase tracking-[0.12em] text-ink-3">
           {bi({ ne: "जवाफ पर्खिरहेका", en: "Waiting for you" })}
         </h2>
         {waiting.length === 0 ? (
@@ -201,7 +201,7 @@ export function DeskClient({ desk }: { desk: DeskState }) {
 
       {done.length > 0 && (
         <section className="mt-10">
-          <h2 className="font-mono text-xs font-semibold uppercase tracking-[0.1em] text-ink-3">
+          <h2 className="font-mono text-[0.72rem] font-semibold uppercase tracking-[0.12em] text-ink-3">
             {bi({ ne: "सकिएका", en: "Closed" })}
           </h2>
           <div className="mt-3 space-y-4">

@@ -30,7 +30,7 @@ export default function ServicesPage() {
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-10 sm:px-6">
-      <h1 className="font-serif text-3xl font-semibold tracking-tight sm:text-4xl">
+      <h1 className="font-serif text-4xl font-semibold tracking-[-0.02em] sm:text-5xl">
         {bi({ ne: "सेवाहरू", en: "Services" })}
       </h1>
       <p className="mt-3 max-w-[64ch] text-lg text-ink-2">
@@ -41,7 +41,7 @@ export default function ServicesPage() {
       </p>
 
       <section className="mt-10">
-        <h2 className="font-mono text-xs font-semibold uppercase tracking-[0.1em] text-ink-3">
+        <h2 className="font-mono text-[0.72rem] font-semibold uppercase tracking-[0.12em] text-ink-3">
           {bi({ ne: "अधिवक्ताको सेवा", en: "An advocate's work" })}
         </h2>
         <div className="mt-3 grid gap-px border border-rule bg-rule sm:grid-cols-3">
@@ -60,7 +60,7 @@ export default function ServicesPage() {
       </section>
 
       <section className="mt-10">
-        <h2 className="font-mono text-xs font-semibold uppercase tracking-[0.1em] text-ink-3">
+        <h2 className="font-mono text-[0.72rem] font-semibold uppercase tracking-[0.12em] text-ink-3">
           {bi({ ne: "सरकारी दर्ता", en: "Government filings" })}
         </h2>
         <div className="mt-3 grid gap-px border border-rule bg-rule sm:grid-cols-3">
@@ -80,7 +80,7 @@ export default function ServicesPage() {
       </section>
 
       <div className="mt-10 border-l-2 border-orpiment bg-surface p-5">
-        <p className="font-mono text-xs font-semibold uppercase tracking-wider text-orpiment">
+        <p className="font-mono text-[0.7rem] font-semibold uppercase tracking-wider text-orpiment">
           {bi({ ne: "हामी के बेच्दैनौं", en: "What we do not sell" })}
         </p>
         <p className="mt-1.5 max-w-[62ch] text-sm text-ink-2">

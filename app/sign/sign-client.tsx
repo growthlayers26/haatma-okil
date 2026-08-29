@@ -110,7 +110,7 @@ export function SignClient({ envelopes, documents }: Props) {
 
   return (
     <div className="mx-auto max-w-5xl px-4 py-10 sm:px-6">
-      <h1 className="font-serif text-3xl font-semibold tracking-tight sm:text-4xl">
+      <h1 className="font-serif text-4xl font-semibold tracking-[-0.02em] sm:text-5xl">
         {bi({ ne: "हस्ताक्षर", en: "Signing" })}
       </h1>
       <p className="mt-3 max-w-[64ch] text-lg text-ink-2">
@@ -125,7 +125,7 @@ export function SignClient({ envelopes, documents }: Props) {
         products will assume click-wrap is missing by accident unless told otherwise.
       */}
       <div className="mt-6 border-l-2 border-cinnabar bg-surface p-5">
-        <p className="font-mono text-xs font-semibold uppercase tracking-wider text-cinnabar">
+        <p className="font-mono text-[0.7rem] font-semibold uppercase tracking-wider text-cinnabar">
           {bi({ ne: "किन 'क्लिक गरेर हस्ताक्षर' छैन", en: "Why there is no click-to-sign here" })}
         </p>
         <p className="mt-1.5 max-w-[62ch] text-sm text-ink-2">{bi(NO_CLICKWRAP_NOTE)}</p>

@@ -78,7 +78,7 @@ export default function AdvocatePage() {
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-10 sm:px-6">
-      <h1 className="font-serif text-3xl font-semibold tracking-tight">
+      <h1 className="font-serif text-4xl font-semibold tracking-[-0.02em] sm:text-5xl">
         {bi({ ne: "अधिवक्ता डेस्क", en: "Advocate desk" })}
       </h1>
       <p className="mt-2 max-w-[62ch] text-ink-2">
@@ -125,7 +125,7 @@ export default function AdvocatePage() {
           ) : stage === "detail" ? (
             <form onSubmit={onSubmitDetail} className="space-y-5">
               <div className="border-l-2 border-malachite bg-surface p-4">
-                <p className="font-mono text-xs font-semibold uppercase tracking-wider text-malachite">
+                <p className="font-mono text-[0.7rem] font-semibold uppercase tracking-wider text-malachite">
                   ✓ {bi({ ne: "स्वार्थ बाझिने अवस्था छैन", en: "Conflict check cleared" })}
                 </p>
                 {assigned && (
@@ -224,7 +224,7 @@ export default function AdvocatePage() {
                 on this screen — that is the whole point of the two-step flow.
               */}
               <div className="border-l-2 border-orpiment bg-surface p-4">
-                <p className="font-mono text-xs font-semibold uppercase tracking-wider text-orpiment">
+                <p className="font-mono text-[0.7rem] font-semibold uppercase tracking-wider text-orpiment">
                   {bi({ ne: "पहिलो चरण — स्वार्थ जाँच", en: "Step one — conflict check" })}
                 </p>
                 <label htmlFor="opposing" className="mt-2 block text-sm font-semibold">
@@ -274,7 +274,7 @@ export default function AdvocatePage() {
         {/* ---------------- the two advocates ---------------- */}
         <aside className="space-y-4">
           <div className="border border-rule bg-surface p-4">
-            <p className="font-mono text-xs font-semibold uppercase tracking-wider text-ink-3">
+            <p className="font-mono text-[0.7rem] font-semibold uppercase tracking-wider text-ink-3">
               {bi({ ne: "फर्मका अधिवक्ता", en: "The firm's advocates" })}
             </p>
 
@@ -337,7 +337,7 @@ export default function AdvocatePage() {
           </div>
 
           <div className="border-l-2 border-orpiment bg-surface p-4">
-            <p className="font-mono text-xs font-semibold uppercase tracking-wider text-orpiment">
+            <p className="font-mono text-[0.7rem] font-semibold uppercase tracking-wider text-orpiment">
               {bi({ ne: "कमिसन छैन", en: "No commission" })}
             </p>
             <p className="mt-1.5 text-sm text-ink-2">

@@ -105,7 +105,7 @@ export default function DashboardPage() {
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-10 sm:px-6">
-      <h1 className="font-serif text-3xl font-semibold tracking-tight">{t("navDashboard")}</h1>
+      <h1 className="font-serif text-4xl font-semibold tracking-[-0.02em] sm:text-5xl">{t("navDashboard")}</h1>
 
       {!loading && !user && (
         <p className="mt-3 max-w-[62ch] border-l-2 border-orpiment bg-surface p-4 text-sm text-ink-2">
@@ -122,7 +122,7 @@ export default function DashboardPage() {
       <div className="mt-8 grid gap-8 lg:grid-cols-[1fr_20rem]">
         <section>
           <div className="flex items-baseline justify-between gap-3">
-            <h2 className="font-mono text-xs font-semibold uppercase tracking-[0.1em] text-ink-3">
+            <h2 className="font-mono text-[0.72rem] font-semibold uppercase tracking-[0.12em] text-ink-3">
               {bi({ ne: "मेरा कागजात", en: "My documents" })}
             </h2>
             <Link
@@ -182,7 +182,7 @@ export default function DashboardPage() {
           {/* Matters with the firm's advocates. */}
           {enquiries.length > 0 && (
             <>
-              <h2 className="mt-8 font-mono text-xs font-semibold uppercase tracking-[0.1em] text-ink-3">
+              <h2 className="mt-8 font-mono text-[0.72rem] font-semibold uppercase tracking-[0.12em] text-ink-3">
                 {bi({ ne: "अधिवक्तासँगका विषय", en: "Matters with an advocate" })}
               </h2>
               <div className="mt-3 grid gap-px border border-rule bg-rule">
@@ -219,7 +219,7 @@ export default function DashboardPage() {
             actually maintained.
           */}
           <div className="mt-8 border-l-2 border-orpiment bg-surface p-4">
-            <p className="font-mono text-xs font-semibold uppercase tracking-wider text-orpiment">
+            <p className="font-mono text-[0.7rem] font-semibold uppercase tracking-wider text-orpiment">
               {bi({ ne: "कानुन परिवर्तन सूचना", en: "Amendment alerts" })}
             </p>
             <p className="mt-1.5 max-w-[58ch] text-sm text-ink-2">
@@ -233,7 +233,7 @@ export default function DashboardPage() {
 
         <aside className="space-y-4">
           <div className="border border-rule bg-surface p-4">
-            <p className="font-mono text-xs font-semibold uppercase tracking-wider text-ink-3">
+            <p className="font-mono text-[0.7rem] font-semibold uppercase tracking-wider text-ink-3">
               {bi({ ne: "अनुपालन क्यालेन्डर", en: "Compliance calendar" })}
             </p>
             <ul className="mt-3 space-y-2">
@@ -257,7 +257,7 @@ export default function DashboardPage() {
 
           {/* The escalation to real counsel is the firm's actual product — always one click. */}
           <div className="border border-rule bg-surface p-4">
-            <p className="font-mono text-xs font-semibold uppercase tracking-wider text-ink-3">
+            <p className="font-mono text-[0.7rem] font-semibold uppercase tracking-wider text-ink-3">
               {bi({ ne: "अधिवक्ता डेस्क", en: "Advocate desk" })}
             </p>
             <p className="mt-1.5 text-sm text-ink-2">

@@ -107,7 +107,7 @@ export function TeamClient({ org, queue, templates }: Props) {
   if (!org) {
     return (
       <div className="mx-auto max-w-3xl px-4 py-10 sm:px-6">
-        <h1 className="font-serif text-3xl font-semibold tracking-tight">
+        <h1 className="font-serif text-4xl font-semibold tracking-[-0.02em] sm:text-5xl">
           {bi({ ne: "टोली बनाउनुहोस्", en: "Create a team" })}
         </h1>
         <p className="mt-3 max-w-[60ch] text-ink-2">
@@ -155,7 +155,7 @@ export function TeamClient({ org, queue, templates }: Props) {
 
   return (
     <div className="mx-auto max-w-5xl px-4 py-10 sm:px-6">
-      <h1 className="font-serif text-3xl font-semibold tracking-tight">{org.name}</h1>
+      <h1 className="font-serif text-4xl font-semibold tracking-[-0.02em] sm:text-5xl">{org.name}</h1>
       <p className="mt-2 font-mono text-xs uppercase tracking-wider text-ink-3">
         {org.role} · {num(org.seatsUsed)}/{num(org.seatsTotal)}{" "}
         {bi({ ne: "सिट प्रयोगमा", en: "seats used" })}
@@ -170,7 +170,7 @@ export function TeamClient({ org, queue, templates }: Props) {
 
       {isAdmin && (
         <section className="mt-8">
-          <h2 className="font-mono text-xs font-semibold uppercase tracking-[0.1em] text-ink-3">
+          <h2 className="font-mono text-[0.72rem] font-semibold uppercase tracking-[0.12em] text-ink-3">
             {bi({ ne: "सदस्य थप्नुहोस्", en: "Add a member" })}
           </h2>
           <form onSubmit={onInvite} className="mt-3 flex flex-wrap gap-2">
@@ -251,7 +251,7 @@ export function TeamClient({ org, queue, templates }: Props) {
 
       {isAdmin && (
         <section className="mt-8">
-          <h2 className="font-mono text-xs font-semibold uppercase tracking-[0.1em] text-ink-3">
+          <h2 className="font-mono text-[0.72rem] font-semibold uppercase tracking-[0.12em] text-ink-3">
             {bi({ ne: "स्वीकृतिको प्रतीक्षामा", en: "Waiting for approval" })}
           </h2>
           {queue.length === 0 ? (
@@ -293,7 +293,7 @@ export function TeamClient({ org, queue, templates }: Props) {
 
       {isAdmin && (
         <section className="mt-8">
-          <h2 className="font-mono text-xs font-semibold uppercase tracking-[0.1em] text-ink-3">
+          <h2 className="font-mono text-[0.72rem] font-semibold uppercase tracking-[0.12em] text-ink-3">
             {bi({ ne: "संस्थाका ढाँचा", en: "Your organisation's templates" })}
           </h2>
           <p className="mt-2 max-w-[62ch] text-sm text-ink-2">

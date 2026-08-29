@@ -21,7 +21,7 @@ export default function RegisterCompanyPage() {
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-10 sm:px-6">
-      <h1 className="max-w-[20ch] text-balance font-serif text-3xl font-semibold tracking-tight sm:text-4xl">
+      <h1 className="max-w-[20ch] text-balance font-serif text-4xl font-semibold tracking-[-0.02em] sm:text-5xl">
         {bi({ ne: "नेपालमा कम्पनी दर्ता", en: "Register a company in Nepal" })}
       </h1>
       <p className="mt-3 max-w-[62ch] text-lg text-ink-2">
@@ -93,7 +93,7 @@ export default function RegisterCompanyPage() {
           </ol>
 
           <div className="mt-8 border-l-2 border-orpiment bg-surface p-5">
-            <p className="font-mono text-xs font-semibold uppercase tracking-wider text-orpiment">
+            <p className="font-mono text-[0.7rem] font-semibold uppercase tracking-wider text-orpiment">
               {bi({ ne: "नाम अस्वीकृत भएमा", en: "If the name is rejected" })}
             </p>
             <p className="mt-1.5 max-w-[60ch] text-sm text-ink-2">
@@ -107,7 +107,7 @@ export default function RegisterCompanyPage() {
 
         <aside className="space-y-4 lg:sticky lg:top-20 lg:self-start">
           <div className="border border-rule bg-surface p-5">
-            <p className="font-mono text-xs font-semibold uppercase tracking-wider text-ink-3">
+            <p className="font-mono text-[0.7rem] font-semibold uppercase tracking-wider text-ink-3">
               {bi(SERVICES.company_registration.title)}
             </p>
             <p className="mt-2 font-serif text-2xl font-semibold tabular-nums">
@@ -131,7 +131,7 @@ export default function RegisterCompanyPage() {
           </div>
 
           <div className="border border-rule bg-surface p-5">
-            <p className="font-mono text-xs font-semibold uppercase tracking-wider text-ink-3">
+            <p className="font-mono text-[0.7rem] font-semibold uppercase tracking-wider text-ink-3">
               {bi({ ne: "आफैँ गर्न चाहनुहुन्छ?", en: "Doing it yourself?" })}
             </p>
             <p className="mt-1.5 text-sm text-ink-2">

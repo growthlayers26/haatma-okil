@@ -54,7 +54,7 @@ function LoginForm() {
 
   return (
     <div className="mx-auto max-w-md px-4 py-16 sm:px-6">
-      <h1 className="font-serif text-3xl font-semibold tracking-tight">
+      <h1 className="font-serif text-4xl font-semibold tracking-[-0.02em] sm:text-5xl">
         {bi({ ne: "लगइन गर्नुहोस्", en: "Sign in" })}
       </h1>
       <p className="mt-2 text-ink-2">
@@ -66,7 +66,7 @@ function LoginForm() {
 
       {state === "sent" ? (
         <div className="mt-8 border-l-2 border-malachite bg-surface p-5">
-          <p className="font-mono text-xs font-semibold uppercase tracking-wider text-malachite">
+          <p className="font-mono text-[0.7rem] font-semibold uppercase tracking-wider text-malachite">
             {bi({ ne: "इमेल पठाइयो", en: "Link sent" })}
           </p>
           <p className="mt-2 text-sm text-ink-2">

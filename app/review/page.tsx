@@ -94,7 +94,7 @@ export default function ReviewPage() {
 
   return (
     <div className="mx-auto max-w-4xl px-4 py-10 sm:px-6">
-      <h1 className="max-w-[24ch] text-balance font-serif text-3xl font-semibold tracking-tight sm:text-4xl">
+      <h1 className="max-w-[24ch] text-balance font-serif text-4xl font-semibold tracking-[-0.02em] sm:text-5xl">
         {bi({ ne: "करार जाँच", en: "Check a contract" })}
       </h1>
       <p className="mt-3 max-w-[64ch] text-lg text-ink-2">
@@ -110,7 +110,7 @@ export default function ReviewPage() {
         the honest framing and the lawful one.
       */}
       <div className="mt-6 border-l-2 border-orpiment bg-surface p-5">
-        <p className="font-mono text-xs font-semibold uppercase tracking-wider text-orpiment">
+        <p className="font-mono text-[0.7rem] font-semibold uppercase tracking-wider text-orpiment">
           {bi({ ne: "यो कानुनी राय होइन", en: "This is not legal advice" })}
         </p>
         <p className="mt-1.5 max-w-[62ch] text-sm text-ink-2">
@@ -168,7 +168,7 @@ export default function ReviewPage() {
       {/* ---------------- results ---------------- */}
       {result && !result.ok && result.reason === "payment_required" && (
         <div className="mt-6 border-l-2 border-accent bg-surface p-5">
-          <p className="font-mono text-xs font-semibold uppercase tracking-wider text-accent">
+          <p className="font-mono text-[0.7rem] font-semibold uppercase tracking-wider text-accent">
             {bi({ ne: "भुक्तानी आवश्यक", en: "Payment needed" })}
           </p>
           <p className="mt-1.5 max-w-[60ch] text-sm text-ink-2">
@@ -259,7 +259,7 @@ export default function ReviewPage() {
             <ul className="mt-6 space-y-4">
               {result.findings.map((f) => (
                 <li key={f.id} className={`border-l-2 bg-surface p-5 ${SEVERITY_STYLE[f.severity].border}`}>
-                  <p className={`font-mono text-xs font-semibold uppercase tracking-wider ${SEVERITY_STYLE[f.severity].text}`}>
+                  <p className={`font-mono text-[0.7rem] font-semibold uppercase tracking-wider ${SEVERITY_STYLE[f.severity].text}`}>
                     {SEVERITY_LABEL[f.severity]}
                   </p>
                   <h3 className="mt-1.5 font-serif text-lg font-semibold tracking-tight">{bi(f.title)}</h3>
