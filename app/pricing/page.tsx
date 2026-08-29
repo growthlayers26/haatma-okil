@@ -221,7 +221,16 @@ export default function PricingPage() {
         the differences. Cards can only list what a tier includes; a row per
         entitlement shows what the cheaper one gives up.
       */}
-      <div className="mt-10 overflow-x-auto">
+      {/*
+        The table is wider than a phone and scrolls inside its own container, which
+        is correct but invisible. Without a hint a mobile reader sees the Free column
+        and assumes that is the whole comparison.
+      */}
+      <p className="mt-10 font-mono text-[0.7rem] uppercase tracking-wider text-ink-3 sm:hidden">
+        {bi({ ne: "तुलना हेर्न छेउतिर सार्नुहोस् →", en: "Swipe to compare plans →" })}
+      </p>
+
+      <div className="mt-3 overflow-x-auto sm:mt-10">
         <table className="w-full min-w-[42rem] border-collapse text-left">
           <caption className="sr-only">
             {bi({ ne: "योजनाहरूको तुलना", en: "Comparison of plans" })}

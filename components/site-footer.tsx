@@ -22,7 +22,7 @@ export function SiteFooter() {
           law firm's own site would be a false representation.
         */}
         <div className="mt-4 flex flex-wrap gap-x-6 gap-y-1 font-mono text-xs">
-          <a href={`mailto:${FIRM.email}`} className="text-accent transition-opacity hover:opacity-70">
+          <a href={`mailto:${FIRM.email}`} className="inline-block py-3 text-accent transition-opacity hover:opacity-70">
             {FIRM.email}
           </a>
           {FIRM.phone && <span className="text-ink-2">{FIRM.phone}</span>}

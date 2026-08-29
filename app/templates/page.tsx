@@ -116,7 +116,7 @@ function TemplateLibrary() {
               type="button"
               onClick={() => setCategory(null)}
               aria-current={category === null}
-              className={`text-left font-mono text-[0.72rem] uppercase tracking-[0.08em] transition-colors ${
+              className={`py-2 text-left font-mono text-[0.72rem] uppercase tracking-[0.08em] transition-colors ${
                 category === null ? "text-accent" : "text-ink-3 hover:text-accent"
               }`}
             >
@@ -130,7 +130,7 @@ function TemplateLibrary() {
                   type="button"
                   onClick={() => setCategory(cat.id)}
                   aria-current={category === cat.id}
-                  className={`text-left font-mono text-[0.72rem] uppercase tracking-[0.08em] transition-colors ${
+                  className={`py-2 text-left font-mono text-[0.72rem] uppercase tracking-[0.08em] transition-colors ${
                     category === cat.id ? "text-accent" : "text-ink-3 hover:text-accent"
                   }`}
                 >

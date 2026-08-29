@@ -92,20 +92,30 @@ export default function HomePage() {
                 slab — the loudest thing on the page was a utility control competing
                 with the headline for the eye.
               */}
-              <form
-                onSubmit={onSearch}
-                className="mt-10 flex max-w-xl items-center gap-3 border-b-2 border-rule-strong pb-2 transition-colors focus-within:border-accent"
-              >
-                <input
-                  value={query}
-                  onChange={(e) => setQuery(e.target.value)}
-                  placeholder={t("searchPlaceholder")}
-                  aria-label={t("search")}
-                  className="min-w-0 flex-1 bg-transparent py-2 text-base outline-none placeholder:text-ink-3"
-                />
+              {/*
+                The submit sat beside the field on one row, which clipped the
+                placeholder mid-word on a phone and left a 16px tap target. It now
+                drops below the rule on small screens with a thumb-sized hit area.
+              */}
+              <form onSubmit={onSearch} className="mt-10 max-w-xl">
+                <div className="flex items-center gap-3 border-b-2 border-rule-strong pb-2 transition-colors focus-within:border-accent">
+                  <input
+                    value={query}
+                    onChange={(e) => setQuery(e.target.value)}
+                    placeholder={t("searchPlaceholder")}
+                    aria-label={t("search")}
+                    className="min-w-0 flex-1 bg-transparent py-2 text-base outline-none placeholder:text-ink-3"
+                  />
+                  <button
+                    type="submit"
+                    className="hidden flex-none py-2 font-mono text-xs font-semibold uppercase tracking-wider text-accent transition-opacity hover:opacity-70 sm:block"
+                  >
+                    {t("search")} →
+                  </button>
+                </div>
                 <button
                   type="submit"
-                  className="flex-none font-mono text-xs font-semibold uppercase tracking-wider text-accent transition-opacity hover:opacity-70"
+                  className="mt-3 w-full bg-accent py-3 font-mono text-xs font-semibold uppercase tracking-wider text-white transition-opacity hover:opacity-90 sm:hidden"
                 >
                   {t("search")} →
                 </button>
@@ -186,7 +196,7 @@ export default function HomePage() {
           </h2>
           <Link
             href="/templates"
-            className="font-mono text-xs font-semibold uppercase tracking-wider text-accent transition-opacity hover:opacity-70"
+            className="py-3 font-mono text-xs font-semibold uppercase tracking-wider text-accent transition-opacity hover:opacity-70"
           >
             {bi({ ne: "सबै", en: "All" })} {num(TEMPLATES.length)} →
           </Link>
