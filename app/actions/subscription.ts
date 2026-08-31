@@ -1,21 +1,34 @@
 "use server";
 
-import { createClient, createServiceClient } from "@/lib/supabase/server";
-import { PLANS, FREE_ENTITLEMENTS, isPlanId, type Entitlements, type PlanId, type BillingPeriod } from "@/lib/plans";
+import { getCustomerId } from "@/lib/auth/session";
+import { one } from "@/lib/db/mysql";
+import { quotaRemaining } from "@/lib/quota";
+import {
+  PLANS,
+  FREE_ENTITLEMENTS,
+  isPlanId,
+  type Entitlements,
+  type PlanId,
+  type BillingPeriod,
+} from "@/lib/plans";
 
 /**
- * Subscription state for the signed-in user.
+ * Subscription state for the signed-in customer.
  *
- * Everything here is read-only. A subscription is created solely by the payment
- * verification path running as the service role — there is deliberately no action a
- * client can call that grants itself entitlements.
+ * Read-only, and the only thing in this file. A subscription is created solely by the
+ * order-paid path — there is deliberately no action a client can call that grants
+ * itself entitlements.
+ *
+ * Spending an allowance lives in lib/quota.ts rather than here, because anything
+ * exported from a `"use server"` file is an endpoint the browser can post to, and
+ * those functions take a customer id.
  */
 
 export type SubscriptionState = {
   planId: PlanId;
   billingPeriod: BillingPeriod | null;
   entitlements: Entitlements;
-  /** Null when the user is on free — nothing expires. */
+  /** Null when the customer is on free — nothing expires. */
   currentPeriodEnd: string | null;
   questionsRemaining: number;
   reviewsRemaining: number;
@@ -30,113 +43,43 @@ const FREE_STATE: SubscriptionState = {
   reviewsRemaining: 0,
 };
 
+type SubscriptionRow = {
+  plan_id: string;
+  billing_period: BillingPeriod | null;
+  current_period_end: string | null;
+};
+
 export async function getSubscription(): Promise<SubscriptionState> {
-  const supabase = await createClient();
-  if (!supabase) return FREE_STATE;
+  const customerId = await getCustomerId();
+  if (!customerId) return FREE_STATE;
 
-  const { data: auth } = await supabase.auth.getUser();
-  if (!auth.user) return FREE_STATE;
+  const row = await one<SubscriptionRow>(
+    `SELECT plan_id, billing_period, current_period_end
+       FROM legal_subscriptions
+      WHERE customer_id = ? AND status = 'active'`,
+    [customerId],
+  );
 
-  const { data, error } = await supabase
-    .from("subscriptions")
-    .select("plan_id, billing_period, current_period_end, status")
-    .eq("user_id", auth.user.id)
-    .eq("status", "active")
-    .maybeSingle();
-
-  if (error || !data) return FREE_STATE;
+  if (!row) return FREE_STATE;
 
   // An expired row is still 'active' until something reconciles it, so the date is
   // what actually decides entitlement.
-  const end = data.current_period_end as string | null;
+  const end = row.current_period_end;
   if (end && new Date(end).getTime() <= Date.now()) return FREE_STATE;
 
-  const planId = isPlanId(data.plan_id as string) ? (data.plan_id as PlanId) : "free";
+  const planId = isPlanId(row.plan_id) ? (row.plan_id as PlanId) : "free";
 
-  const [questions, reviews] = await Promise.all([
-    supabase.rpc("quota_remaining", { p_user: auth.user.id, p_kind: "question" }),
-    supabase.rpc("quota_remaining", { p_user: auth.user.id, p_kind: "review" }),
+  const [questionsRemaining, reviewsRemaining] = await Promise.all([
+    quotaRemaining(customerId, "question"),
+    quotaRemaining(customerId, "review"),
   ]);
 
   return {
     planId,
-    billingPeriod: (data.billing_period as BillingPeriod | null) ?? null,
+    billingPeriod: row.billing_period ?? null,
     entitlements: PLANS[planId].entitlements,
     currentPeriodEnd: end,
-    questionsRemaining: Number(questions.data ?? 0),
-    reviewsRemaining: Number(reviews.data ?? 0),
+    questionsRemaining,
+    reviewsRemaining,
   };
-}
-
-/**
- * Try to cover one advocate matter from the subscriber's monthly allowance.
- *
- * Returns the id of the consumed unit, or null to mean bill it per matter — the
- * normal path for free users and for subscribers who have used the month's
- * allowance, not an error.
- *
- * The id matters: the caller must hand the unit back with releaseQuota if opening
- * the matter then fails, otherwise a subscriber pays an allowance unit for nothing.
- *
- * Runs through the service role because consuming quota writes a usage row, and no
- * client-facing policy should be able to.
- */
-export async function consumeQuota(
-  userId: string,
-  kind: "question" | "review",
-): Promise<string | null> {
-  const service = createServiceClient();
-  if (!service) return null;
-
-  const { data, error } = await service.rpc("consume_quota", {
-    p_user: userId,
-    p_kind: kind,
-  });
-
-  if (error || !data) return null;
-  return data as string;
-}
-
-/** Returns a consumed unit to the subscriber's allowance. */
-export async function releaseQuota(usageId: string): Promise<void> {
-  const service = createServiceClient();
-  if (!service) return;
-  await service.rpc("release_quota", { p_usage_id: usageId });
-}
-
-/** Links a consumed unit to the matter it paid for, for the usage audit trail. */
-export async function linkQuotaToEnquiry(usageId: string, enquiryId: string): Promise<void> {
-  const service = createServiceClient();
-  if (!service) return;
-  await service.from("quota_usage").update({ enquiry_id: enquiryId }).eq("id", usageId);
-}
-
-/**
- * Claim one paid, unspent order for a service.
- *
- * Same shape as consumeQuota and for the same reason: claim before the work, hand
- * back if the work fails. Returns null when the user has nothing paid to spend,
- * which means the caller must ask for payment rather than proceed.
- */
-export async function claimServiceOrder(
-  userId: string,
-  serviceId: string,
-): Promise<string | null> {
-  const service = createServiceClient();
-  if (!service) return null;
-
-  const { data, error } = await service.rpc("claim_service_order", {
-    p_user: userId,
-    p_service: serviceId,
-  });
-
-  if (error || !data) return null;
-  return data as string;
-}
-
-/** Return a claimed order to the unspent pool. */
-export async function releaseServiceOrder(orderId: string): Promise<void> {
-  const service = createServiceClient();
-  if (!service) return;
-  await service.rpc("release_service_order", { p_order: orderId });
 }

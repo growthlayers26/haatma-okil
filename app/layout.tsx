@@ -6,6 +6,8 @@ import { AuthProvider } from "@/components/auth-provider";
 import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
 import { LANG_COOKIE, toLang } from "@/lib/lang-cookie";
+import { getCustomer } from "@/lib/auth/session";
+import { isDatabaseConfigured } from "@/lib/db/mysql";
 import "./globals.css";
 
 const fraunces = Fraunces({
@@ -43,13 +45,16 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   // reader's language rather than being corrected after hydration.
   const lang = toLang((await cookies()).get(LANG_COOKIE)?.value);
 
+  // Resolved on the server so the first paint already knows who is signed in.
+  const user = await getCustomer();
+
   return (
     <html lang={lang} suppressHydrationWarning>
       <body
         className={`${fraunces.variable} ${sourceSans.variable} ${notoDevanagari.variable} ${jetbrains.variable} antialiased`}
       >
         <LanguageProvider initialLang={lang}>
-          <AuthProvider>
+          <AuthProvider initialUser={user} configured={isDatabaseConfigured()}>
             <div className="flex min-h-screen flex-col">
               <SiteHeader />
               <main className="flex-1">{children}</main>

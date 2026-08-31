@@ -4,17 +4,28 @@ import {
   createContext,
   useCallback,
   useContext,
-  useEffect,
   useMemo,
   useState,
+  useTransition,
   type ReactNode,
 } from "react";
-import type { User } from "@supabase/supabase-js";
-import { createClient } from "@/lib/supabase/client";
+import { useRouter } from "next/navigation";
+import { signOutAction } from "@/app/actions/auth";
+import type { Customer } from "@/lib/auth/session";
+
+/**
+ * Who is signed in, for the parts of the UI that need to know.
+ *
+ * The session is an httpOnly cookie that the browser cannot read, so unlike the
+ * Supabase version this provider does not fetch anything. The server has already
+ * resolved the customer by the time the page renders and passes it in — which is also
+ * why `loading` is now always false. There is no session check to wait for and so no
+ * flash of signed-out UI on a signed-in page.
+ */
 
 type AuthContextValue = {
-  user: User | null;
-  /** True until the first session check resolves, so the UI can avoid flashing. */
+  user: Customer | null;
+  /** Kept for the components that read it; nothing is ever pending now. */
   loading: boolean;
   configured: boolean;
   signOut: () => Promise<void>;
@@ -22,44 +33,28 @@ type AuthContextValue = {
 
 const AuthContext = createContext<AuthContextValue | null>(null);
 
-export function AuthProvider({ children }: { children: ReactNode }) {
-  // One client for the provider's lifetime; a new one per render would re-subscribe.
-  const [supabase] = useState(() => createClient());
-  const [user, setUser] = useState<User | null>(null);
-  // With no Supabase configured there is no session to wait for, so this is settled
-  // at first render rather than in an effect.
-  const [loading, setLoading] = useState(supabase !== null);
-
-  useEffect(() => {
-    if (!supabase) return;
-
-    let active = true;
-
-    supabase.auth.getUser().then(({ data }) => {
-      if (!active) return;
-      setUser(data.user ?? null);
-      setLoading(false);
-    });
-
-    const { data: sub } = supabase.auth.onAuthStateChange((_event, session) => {
-      setUser(session?.user ?? null);
-      setLoading(false);
-    });
-
-    return () => {
-      active = false;
-      sub.subscription.unsubscribe();
-    };
-  }, [supabase]);
+export function AuthProvider({
+  children,
+  initialUser,
+  configured,
+}: {
+  children: ReactNode;
+  initialUser: Customer | null;
+  configured: boolean;
+}) {
+  const router = useRouter();
+  const [user, setUser] = useState<Customer | null>(initialUser);
+  const [isPending, startTransition] = useTransition();
 
   const signOut = useCallback(async () => {
-    await supabase?.auth.signOut();
+    await signOutAction();
     setUser(null);
-  }, [supabase]);
+    startTransition(() => router.refresh());
+  }, [router]);
 
   const value = useMemo<AuthContextValue>(
-    () => ({ user, loading, configured: supabase !== null, signOut }),
-    [user, loading, supabase, signOut],
+    () => ({ user, loading: isPending, configured, signOut }),
+    [user, isPending, configured, signOut],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

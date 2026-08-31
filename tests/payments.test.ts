@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest";
 import { toPaisa, toNpr } from "@/lib/payments/types";
-import { priceNprOf } from "@/lib/payments/orders";
+import { priceNprOf } from "@/lib/payments/catalogue";
 import { planPriceNpr, annualSavingPercent, PLANS } from "@/lib/plans";
 
 describe("currency units", () => {

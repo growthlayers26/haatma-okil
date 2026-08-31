@@ -1,8 +1,10 @@
 "use server";
 
+import { randomUUID } from "node:crypto";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
-import { createClient } from "@/lib/supabase/server";
+import { getCustomerId } from "@/lib/auth/session";
+import { execute, one, query } from "@/lib/db/mysql";
 import { getTemplate } from "@/lib/templates";
 import type { Answers } from "@/lib/types";
 
@@ -13,6 +15,12 @@ import type { Answers } from "@/lib/types";
  * before sign-in, and it survives the app switch that Khalti and eSewa force during
  * payment. These actions add the durable copy — the one that survives a cleared
  * browser or a different device.
+ *
+ * Every statement here carries `customer_id = ?`, without exception. Under Postgres
+ * that clause was belt and braces; row-level security would have refused the row
+ * anyway. On MySQL there is no such second line of defence, so a forgotten predicate
+ * is a customer reading another customer's contract. It is spelled out on every
+ * query for that reason, including the ones where it looks redundant.
  */
 
 export type SavedDocument = {
@@ -23,6 +31,14 @@ export type SavedDocument = {
   updatedAt: string;
 };
 
+type DocumentRow = {
+  id: string;
+  template_slug: string;
+  answers: Answers | string | null;
+  status: "draft" | "purchased";
+  updated_at: string;
+};
+
 const AnswersSchema = z.record(z.string(), z.union([z.string(), z.number()]).optional());
 
 const SaveSchema = z.object({
@@ -30,6 +46,29 @@ const SaveSchema = z.object({
   templateSlug: z.string().min(1),
   answers: AnswersSchema,
 });
+
+/** MySQL returns JSON columns already parsed; older drivers hand back a string. */
+function readAnswers(value: DocumentRow["answers"]): Answers {
+  if (!value) return {};
+  if (typeof value === "string") {
+    try {
+      return JSON.parse(value) as Answers;
+    } catch {
+      return {};
+    }
+  }
+  return value;
+}
+
+function toSaved(row: DocumentRow): SavedDocument {
+  return {
+    id: row.id,
+    templateSlug: row.template_slug,
+    answers: readAnswers(row.answers),
+    status: row.status,
+    updatedAt: row.updated_at,
+  };
+}
 
 export async function saveDocument(input: {
   id?: string;
@@ -42,48 +81,38 @@ export async function saveDocument(input: {
   // Reject unknown slugs so a caller can't create rows for templates that don't exist.
   if (!getTemplate(parsed.data.templateSlug)) return { ok: false, reason: "unknown_template" };
 
-  const supabase = await createClient();
-  if (!supabase) return { ok: false, reason: "not_configured" };
+  const customerId = await getCustomerId();
+  if (!customerId) return { ok: false, reason: "unauthenticated" };
 
-  const { data: auth } = await supabase.auth.getUser();
-  if (!auth.user) return { ok: false, reason: "unauthenticated" };
-
-  const row = {
-    user_id: auth.user.id,
-    template_slug: parsed.data.templateSlug,
-    answers: parsed.data.answers,
-  };
+  const answers = JSON.stringify(parsed.data.answers);
 
   // A purchased document is immutable — editing it after payment would let a buyer
   // alter an instrument the firm has already put its name to.
   if (parsed.data.id) {
-    const { data, error } = await supabase
-      .from("documents")
-      .update(row)
-      .eq("id", parsed.data.id)
-      .eq("user_id", auth.user.id)
-      .eq("status", "draft")
-      .select("id")
-      .maybeSingle();
+    const updated = await execute(
+      `UPDATE legal_documents
+          SET template_slug = ?, answers = ?, updated_at = NOW()
+        WHERE id = ? AND customer_id = ? AND status = 'draft'`,
+      [parsed.data.templateSlug, answers, parsed.data.id, customerId],
+    );
 
-    if (error) return { ok: false, reason: error.message };
-    if (data) {
+    if (updated > 0) {
       revalidatePath("/dashboard");
-      return { ok: true, id: data.id };
+      return { ok: true, id: parsed.data.id };
     }
     // Fall through and insert if the update matched nothing.
   }
 
-  const { data, error } = await supabase
-    .from("documents")
-    .insert(row)
-    .select("id")
-    .single();
+  const id = randomUUID();
 
-  if (error) return { ok: false, reason: error.message };
+  await execute(
+    `INSERT INTO legal_documents (id, customer_id, template_slug, answers, created_at, updated_at)
+     VALUES (?, ?, ?, ?, NOW(), NOW())`,
+    [id, customerId, parsed.data.templateSlug, answers],
+  );
 
   revalidatePath("/dashboard");
-  return { ok: true, id: data.id };
+  return { ok: true, id };
 }
 
 /**
@@ -94,52 +123,32 @@ export async function saveDocument(input: {
  * a stranger that a given id exists.
  */
 export async function getDocument(id: string): Promise<SavedDocument | null> {
-  const supabase = await createClient();
-  if (!supabase) return null;
+  const customerId = await getCustomerId();
+  if (!customerId) return null;
 
-  const { data: auth } = await supabase.auth.getUser();
-  if (!auth.user) return null;
+  const row = await one<DocumentRow>(
+    `SELECT id, template_slug, answers, status, updated_at
+       FROM legal_documents
+      WHERE id = ? AND customer_id = ?`,
+    [id, customerId],
+  );
 
-  const { data, error } = await supabase
-    .from("documents")
-    .select("id, template_slug, answers, status, updated_at")
-    .eq("id", id)
-    .eq("user_id", auth.user.id)
-    .maybeSingle();
-
-  if (error || !data) return null;
-
-  return {
-    id: data.id as string,
-    templateSlug: data.template_slug as string,
-    answers: (data.answers ?? {}) as Answers,
-    status: data.status as "draft" | "purchased",
-    updatedAt: data.updated_at as string,
-  };
+  return row ? toSaved(row) : null;
 }
 
 export async function listDocuments(): Promise<SavedDocument[]> {
-  const supabase = await createClient();
-  if (!supabase) return [];
+  const customerId = await getCustomerId();
+  if (!customerId) return [];
 
-  const { data: auth } = await supabase.auth.getUser();
-  if (!auth.user) return [];
+  const rows = await query<DocumentRow>(
+    `SELECT id, template_slug, answers, status, updated_at
+       FROM legal_documents
+      WHERE customer_id = ?
+      ORDER BY updated_at DESC`,
+    [customerId],
+  );
 
-  const { data, error } = await supabase
-    .from("documents")
-    .select("id, template_slug, answers, status, updated_at")
-    .eq("user_id", auth.user.id)
-    .order("updated_at", { ascending: false });
-
-  if (error || !data) return [];
-
-  return data.map((d) => ({
-    id: d.id as string,
-    templateSlug: d.template_slug as string,
-    answers: (d.answers ?? {}) as Answers,
-    status: d.status as "draft" | "purchased",
-    updatedAt: d.updated_at as string,
-  }));
+  return rows.map(toSaved);
 }
 
 /**
@@ -151,11 +160,8 @@ export async function listDocuments(): Promise<SavedDocument[]> {
 export async function claimLocalDrafts(
   drafts: { templateSlug: string; answers: Answers }[],
 ): Promise<{ claimed: number }> {
-  const supabase = await createClient();
-  if (!supabase) return { claimed: 0 };
-
-  const { data: auth } = await supabase.auth.getUser();
-  if (!auth.user) return { claimed: 0 };
+  const customerId = await getCustomerId();
+  if (!customerId) return { claimed: 0 };
 
   const existing = await listDocuments();
   const alreadyHeld = new Set(existing.map((d) => d.templateSlug));
@@ -163,36 +169,38 @@ export async function claimLocalDrafts(
   const toInsert = drafts
     .filter((d) => getTemplate(d.templateSlug))
     .filter((d) => Object.keys(d.answers).length > 0)
-    .filter((d) => !alreadyHeld.has(d.templateSlug))
-    .map((d) => ({
-      user_id: auth.user!.id,
-      template_slug: d.templateSlug,
-      answers: d.answers,
-    }));
+    .filter((d) => !alreadyHeld.has(d.templateSlug));
 
   if (toInsert.length === 0) return { claimed: 0 };
 
-  const { error } = await supabase.from("documents").insert(toInsert);
-  if (error) return { claimed: 0 };
+  const values = toInsert.map(() => "(?, ?, ?, ?, NOW(), NOW())").join(", ");
+  const params = toInsert.flatMap((d) => [
+    randomUUID(),
+    customerId,
+    d.templateSlug,
+    JSON.stringify(d.answers),
+  ]);
+
+  await execute(
+    `INSERT INTO legal_documents (id, customer_id, template_slug, answers, created_at, updated_at)
+     VALUES ${values}`,
+    params,
+  );
 
   revalidatePath("/dashboard");
   return { claimed: toInsert.length };
 }
 
 export async function deleteDocument(id: string): Promise<{ ok: boolean }> {
-  const supabase = await createClient();
-  if (!supabase) return { ok: false };
+  const customerId = await getCustomerId();
+  if (!customerId) return { ok: false };
 
-  const { data: auth } = await supabase.auth.getUser();
-  if (!auth.user) return { ok: false };
-
-  const { error } = await supabase
-    .from("documents")
-    .delete()
-    .eq("id", id)
-    .eq("user_id", auth.user.id)
-    .eq("status", "draft");
+  const deleted = await execute(
+    `DELETE FROM legal_documents
+      WHERE id = ? AND customer_id = ? AND status = 'draft'`,
+    [id, customerId],
+  );
 
   revalidatePath("/dashboard");
-  return { ok: !error };
+  return { ok: deleted > 0 };
 }
