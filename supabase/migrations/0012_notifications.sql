@@ -1,4 +1,4 @@
--- Mandala Law — notifications
+-- Haatma Okil — notifications
 --
 -- An enquiry landed silently in a table. Even with the advocate desk built, both
 -- advocates would have to think to open it to discover that paid work had arrived,

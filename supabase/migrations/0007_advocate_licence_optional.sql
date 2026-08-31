@@ -1,4 +1,4 @@
--- Mandala Law — the Bar Council licence becomes optional to store
+-- Haatma Okil — the Bar Council licence becomes optional to store
 --
 -- Every practising advocate in Nepal holds a licence from the Bar Council, so this
 -- is not a claim that the number does not exist. It is a recognition that the firm

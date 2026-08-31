@@ -1,4 +1,4 @@
--- Mandala Law — let a signatory see what they are signing
+-- Haatma Okil — let a signatory see what they are signing
 --
 -- Every policy on signature_envelopes scoped to created_by, so only the person who
 -- opened the envelope could see it. The people actually named on it — the ones being

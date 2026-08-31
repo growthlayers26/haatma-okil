@@ -1,4 +1,4 @@
--- Mandala Law — contract review
+-- Haatma Okil — contract review
 --
 -- Stores what the review concluded, deliberately NOT the document it read.
 --

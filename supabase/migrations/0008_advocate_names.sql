@@ -1,4 +1,4 @@
--- Mandala Law — the firm's actual advocates
+-- Haatma Okil — the firm's actual advocates
 --
 -- Replaces the placeholder rows seeded in 0002. Matched on the placeholder practice
 -- areas rather than deleted and re-inserted, so that if any enquiry has already been

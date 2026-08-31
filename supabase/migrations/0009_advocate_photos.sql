@@ -1,4 +1,4 @@
--- Mandala Law — advocate portraits
+-- Haatma Okil — advocate portraits
 --
 -- Stored as a path rather than a blob. Two portraits that change rarely do not
 -- justify a storage bucket and its access policies; they are static assets served

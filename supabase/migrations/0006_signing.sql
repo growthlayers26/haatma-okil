@@ -1,4 +1,4 @@
--- Mandala Law — signature envelopes
+-- Haatma Okil — signature envelopes
 --
 -- Under the Electronic Transactions Act, 2063 a digital signature is recognised only
 -- when it is backed by a certificate issued by a certifying authority licensed by the

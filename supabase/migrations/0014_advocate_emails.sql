@@ -1,4 +1,4 @@
--- Mandala Law — advocate desk logins
+-- Haatma Okil — advocate desk logins
 --
 -- Sign-in is by emailed one-time link, so the address IS the credential: whoever
 -- controls the mailbox reaches that advocate's queue and the client matters in it.

@@ -1,4 +1,4 @@
--- Mandala Law — the advocate desk
+-- Haatma Okil — the advocate desk
 --
 -- The firm has two practising advocates. This is not a tiered support desk: both
 -- layers are licensed counsel, and an enquiry is assigned to one of them rather than

@@ -1,4 +1,4 @@
--- Mandala Law — linking an advocate to their login, and answering
+-- Haatma Okil — linking an advocate to their login, and answering
 --
 -- 0002 gave advocates a user_id and RLS policies letting them read and update the
 -- matters assigned to them. Nothing ever set user_id, so those policies matched

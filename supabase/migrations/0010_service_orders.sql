@@ -1,4 +1,4 @@
--- Mandala Law — orders record which service they bought
+-- Haatma Okil — orders record which service they bought
 --
 -- orders could say it was for a document (document_id) or a plan (plan_id), but a
 -- service order recorded only an amount. Nothing could tell a paid review apart from

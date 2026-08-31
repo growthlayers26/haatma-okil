@@ -1,4 +1,4 @@
--- Mandala Law — subscriptions and metered entitlements
+-- Haatma Okil — subscriptions and metered entitlements
 --
 -- The plan catalogue itself lives in lib/plans.ts, not here. What this schema stores
 -- is which plan a user holds and what they have consumed — the same split as the

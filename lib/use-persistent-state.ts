@@ -11,7 +11,7 @@ import { useCallback, useMemo, useSyncExternalStore } from "react";
  * cross-tab updates for free — a user with the wizard open in two tabs sees one draft.
  */
 
-const CHANGE_EVENT = "mandala:storage";
+const CHANGE_EVENT = "haatmaokil:storage";
 
 function subscribe(onChange: () => void) {
   window.addEventListener(CHANGE_EVENT, onChange);

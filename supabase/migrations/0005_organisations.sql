@@ -1,4 +1,4 @@
--- Mandala Law — organisations, seats and approval
+-- Haatma Okil — organisations, seats and approval
 --
 -- The subscription stays where migration 0003 put it: on a user. An organisation
 -- draws on its owner's subscription rather than holding one of its own. That avoids

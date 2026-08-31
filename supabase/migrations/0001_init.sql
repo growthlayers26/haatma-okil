@@ -1,4 +1,4 @@
--- Mandala Law — initial schema
+-- Haatma Okil — initial schema
 --
 -- Design note: clause text lives in version-controlled code, never in this database.
 -- What is stored here is what a user answered and what they paid. That keeps legal
