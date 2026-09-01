@@ -64,11 +64,38 @@ export function skuOf(item: PurchaseItem): string {
   return `doc-${item.slug}`;
 }
 
-export type EntitlementKind = "document" | "review" | "question" | "consultation" | "subscription";
+export type EntitlementKind =
+  | "document"
+  | "review"
+  | "question"
+  | "consultation"
+  | "filing"
+  | "subscription";
 
 type SkuMeaning =
-  | { kind: EntitlementKind; planId?: PlanId; period?: BillingPeriod }
+  | { kind: EntitlementKind; serviceId?: ServiceId; planId?: PlanId; period?: BillingPeriod }
   | null;
+
+/**
+ * Which kind of entitlement each service grants.
+ *
+ * Written out per service rather than derived, because the derivation is what went
+ * wrong: a fallthrough mapped every unlisted service to `question`, so the three
+ * filing services — company registration at NPR 9,999, trademark at NPR 12,999, tax
+ * registration — each granted the NPR 1,500 written-question entitlement, which
+ * anything asking for a question would then spend.
+ *
+ * An exhaustive record means adding a service to lib/services.ts without deciding
+ * what it grants is a type error rather than a silent downgrade.
+ */
+const SERVICE_ENTITLEMENT: Record<ServiceId, EntitlementKind> = {
+  question: "question",
+  consultation: "consultation",
+  document_review: "review",
+  company_registration: "filing",
+  trademark: "filing",
+  tax_registration: "filing",
+};
 
 /** What a SKU entitles its buyer to, or null if it is not one of ours. */
 export function meaningOfSku(sku: string): SkuMeaning {
@@ -79,11 +106,13 @@ export function meaningOfSku(sku: string): SkuMeaning {
   if (sku.startsWith("svc-")) {
     const id = sku.slice(4) as ServiceId;
     if (!SERVICES[id]) return null;
-    // A paid consultation and a paid written question are not interchangeable, so
-    // the service id maps straight through rather than collapsing to one kind.
-    const kind: EntitlementKind =
-      id === "document_review" ? "review" : id === "consultation" ? "consultation" : "question";
-    return { kind };
+
+    /*
+     * The service id is carried alongside the kind, not collapsed into it. The three
+     * filing services share a kind and are not interchangeable with one another, so
+     * claiming one has to match the exact service.
+     */
+    return { kind: SERVICE_ENTITLEMENT[id], serviceId: id };
   }
 
   if (sku.startsWith("plan-")) {

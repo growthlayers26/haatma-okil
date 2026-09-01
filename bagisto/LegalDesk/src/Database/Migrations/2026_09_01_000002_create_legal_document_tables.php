@@ -67,9 +67,23 @@ return new class extends Migration
              */
             $table->unsignedInteger('order_item_id')->nullable();
             $table->unsignedInteger('seq')->default(0);
-            // What was bought. 'document' unlocks one draft; 'review' and 'question'
-            // are single spends; 'subscription' is redeemed into legal_subscriptions.
-            $table->enum('kind', ['document', 'review', 'question', 'consultation', 'subscription']);
+            /*
+             * What was bought. 'document' unlocks one draft; 'review', 'question',
+             * 'consultation' and 'filing' are single spends; 'subscription' is
+             * redeemed into legal_subscriptions.
+             */
+            $table->enum('kind', [
+                'document', 'review', 'question', 'consultation', 'filing', 'subscription',
+            ]);
+            /*
+             * The exact service, where `kind` alone is too coarse.
+             *
+             * Company registration, trademark and tax registration are all 'filing'
+             * and cost between NPR 9,999 and 12,999 — they are emphatically not
+             * interchangeable with each other, so claiming one has to match on this
+             * rather than on the kind.
+             */
+            $table->string('service_id')->nullable();
             $table->char('document_id', 36)->nullable();
             // Set when spent. Claimed before the work and handed back if the work
             // fails, so nobody pays for an analysis that errored.

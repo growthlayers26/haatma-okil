@@ -118,9 +118,18 @@ export async function redeemPaidOrders(limit = 100): Promise<RedeemReport> {
       try {
         await execute(
           `INSERT INTO legal_entitlements
-             (id, customer_id, bagisto_order_id, order_item_id, seq, kind, created_at, updated_at)
-           VALUES (?, ?, ?, ?, ?, ?, NOW(), NOW())`,
-          [randomUUID(), line.customer_id, line.order_id, line.item_id, seq, meaning.kind],
+             (id, customer_id, bagisto_order_id, order_item_id, seq, kind, service_id,
+              created_at, updated_at)
+           VALUES (?, ?, ?, ?, ?, ?, ?, NOW(), NOW())`,
+          [
+            randomUUID(),
+            line.customer_id,
+            line.order_id,
+            line.item_id,
+            seq,
+            meaning.kind,
+            meaning.serviceId ?? null,
+          ],
         );
         report.granted += 1;
       } catch {
@@ -186,7 +195,7 @@ export async function unlockDocument(
 
   if (await approvalBlocks(documentId)) return { ok: false, reason: "awaiting_approval" };
 
-  const entitlementId = await call<string>("legal_claim_entitlement", [customerId, "document"]);
+  const entitlementId = await call<string>("legal_claim_entitlement", [customerId, "document", null]);
   if (!entitlementId) return { ok: false, reason: "payment_required" };
 
   const updated = await execute(

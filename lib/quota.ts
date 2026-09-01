@@ -52,12 +52,18 @@ export async function linkQuotaToEnquiry(usageId: string, enquiryId: string): Pr
  *
  * Returns null when the customer has nothing paid to spend, which means the caller
  * must ask for payment rather than proceed.
+ *
+ * `serviceId` narrows to an exact service. It matters for the filing services, which
+ * share the `filing` kind but cost between NPR 9,999 and 12,999 and buy completely
+ * different work — claiming without it would let a trademark registration be spent as
+ * a company registration.
  */
 export async function claimEntitlement(
   customerId: number,
-  kind: "document" | "review" | "question" | "consultation",
+  kind: "document" | "review" | "question" | "consultation" | "filing",
+  serviceId: string | null = null,
 ): Promise<string | null> {
-  return call<string>("legal_claim_entitlement", [customerId, kind]);
+  return call<string>("legal_claim_entitlement", [customerId, kind, serviceId]);
 }
 
 /** Return a claimed entitlement to the unspent pool. */

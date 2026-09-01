@@ -246,7 +246,11 @@ SQL,
              * before doing the work.
              */
             'legal_claim_entitlement' => <<<'SQL'
-CREATE PROCEDURE `legal_claim_entitlement`(IN p_customer INT UNSIGNED, IN p_kind VARCHAR(16))
+CREATE PROCEDURE `legal_claim_entitlement`(
+  IN p_customer INT UNSIGNED,
+  IN p_kind     VARCHAR(16),
+  IN p_service  VARCHAR(255)
+)
 BEGIN
   DECLARE v_id CHAR(36) DEFAULT NULL;
   DECLARE CONTINUE HANDLER FOR NOT FOUND BEGIN END;
@@ -257,6 +261,10 @@ BEGIN
     FROM legal_entitlements
    WHERE customer_id = p_customer
      AND kind = p_kind
+     -- A null p_service means "any of this kind". Passing one narrows to the exact
+     -- service, which is what keeps a NPR 12,999 trademark filing from being spent
+     -- as though it were a NPR 9,999 company registration.
+     AND (p_service IS NULL OR service_id = p_service)
      AND consumed_at IS NULL
    ORDER BY created_at
    LIMIT 1

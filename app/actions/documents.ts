@@ -5,6 +5,7 @@ import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { getCustomerId } from "@/lib/auth/session";
 import { execute, one, query } from "@/lib/db/mysql";
+import { unlockDocument } from "@/lib/payments/orders";
 import { getTemplate } from "@/lib/templates";
 import type { Answers } from "@/lib/types";
 
@@ -189,6 +190,53 @@ export async function claimLocalDrafts(
 
   revalidatePath("/dashboard");
   return { claimed: toInsert.length };
+}
+
+/**
+ * How many paid, unspent document credits the customer holds.
+ *
+ * A paid order grants "one document" rather than releasing a particular draft,
+ * because the cart cannot carry a draft id through Bagisto's checkout and guessing
+ * which draft was meant would be wrong on the one occasion it mattered. So the
+ * customer is shown what they have and picks.
+ */
+export async function documentCreditsAvailable(): Promise<number> {
+  const customerId = await getCustomerId();
+  if (!customerId) return 0;
+
+  const row = await one<{ n: number }>(
+    `SELECT COUNT(*) AS n
+       FROM legal_entitlements
+      WHERE customer_id = ? AND kind = 'document' AND consumed_at IS NULL`,
+    [customerId],
+  );
+
+  return Number(row?.n ?? 0);
+}
+
+/**
+ * Spend one credit to release a draft.
+ *
+ * This is the step that was missing: payment granted a credit and nothing ever spent
+ * it, so a document stayed a draft after being paid for — no unwatermarked copy, and
+ * no signature envelope, since an envelope refuses anything unpurchased.
+ */
+export async function releaseDocument(
+  documentId: string,
+): Promise<{ ok: true } | { ok: false; reason: string }> {
+  if (!z.string().uuid().safeParse(documentId).success) {
+    return { ok: false, reason: "invalid" };
+  }
+
+  const customerId = await getCustomerId();
+  if (!customerId) return { ok: false, reason: "unauthenticated" };
+
+  const outcome = await unlockDocument(customerId, documentId);
+
+  revalidatePath("/dashboard");
+  revalidatePath(`/documents/${documentId}`);
+
+  return outcome.ok ? { ok: true } : { ok: false, reason: outcome.reason };
 }
 
 export async function deleteDocument(id: string): Promise<{ ok: boolean }> {
