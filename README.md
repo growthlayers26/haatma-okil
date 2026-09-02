@@ -19,7 +19,12 @@ Full reasoning: the build plan and wireframes published alongside this repo.
 
 ## Stack
 
-Next.js 16 (App Router) · React 19 · TypeScript · Tailwind v4 · Supabase (Postgres + RLS) · Vitest
+Next.js 16 (App Router) · React 19 · TypeScript · Tailwind v4 · Bagisto 2 (Laravel 12, MySQL 8) · Vitest
+
+Bagisto runs in Docker and owns commerce and identity: customers, cart, checkout,
+orders, invoices, payment methods, the admin panel and mail. The legal domain lives
+alongside it in the same MySQL database, in `legal_`-prefixed tables owned by a
+Bagisto package. The legal reasoning stays here in TypeScript — see below.
 
 ## Architecture
 
@@ -62,24 +67,132 @@ hand-written table — a wrong date on an executed contract is a legal defect.
 
 ## Running it
 
+Two processes: Bagisto in Docker, and this app. Bagisto lives in its own checkout
+(`bagisto-docker/`), not in this repo.
+
+```bash
+docker compose -f docker-compose.nginx-php.yml up -d
+```
+
 ```bash
 npm install && npm run dev
 ```
 
-Copy `.env.example` to `.env.local` for Supabase and gateway credentials. **The app
-runs without any of them** — drafting, preview and bilingual rendering all work
-anonymously against localStorage, and payment returns a clear "not configured" message
-rather than failing. Credentials add accounts, durable documents, the advocate desk,
-and live payment.
+Copy `.env.example` to `.env.local`. It needs the MySQL connection Bagisto uses,
+`BAGISTO_URL`, and `LEGAL_API_SECRET` — which must match the same key in Bagisto's
+`.env`, because it is what stops the mail endpoint being an open relay.
 
-Apply the migrations in `supabase/migrations/` in order.
+Apply the schema and build the shop catalogue:
+
+```bash
+docker exec nginx-php sh -lc 'cd /var/www/html/bagisto && php artisan migrate'
+```
+
+```bash
+curl -s http://localhost:3000/api/catalogue > /path/to/bagisto/storage/app/catalogue.json
+```
+
+```bash
+docker exec nginx-php sh -lc 'cd /var/www/html/bagisto && php artisan legal:seed-catalogue'
+```
+
+`migrate` also switches the shop's base currency to NPR. Bagisto installs with USD as
+its only currency, and the catalogue seeder writes the firm's price list in as plain
+numbers — so before this, a Rs 599 contract was offered at $599, about a hundred and
+thirty times its price, and nothing failed loudly because the checkout rendered a
+perfectly ordinary dollar figure.
+
+Then give each advocate desk access:
+
+```bash
+docker exec nginx-php sh -lc 'cd /var/www/html/bagisto && php artisan legal:link-advocates'
+```
+
+It reports who can open the desk and who cannot. Advocates sign in with a Bagisto
+**staff** account, created in the admin panel at the same address held on their
+advocate record — the command deliberately does not create those accounts, because
+choosing a password on a named advocate's behalf is not something a script should do.
+A mismatched address does not error; it simply never matches, and the advocate opens
+an empty desk that looks exactly like having no matters.
+
+The catalogue step exists so the price list has one home. Templates, services and plans
+are priced in `lib/` and copied into Bagisto's catalogue from there; maintaining the
+prices by hand in the admin panel would create a second price list, and the day the two
+disagree is the day a client is charged something the site did not quote. Re-run it
+after any price change — it matches on SKU and updates in place.
+
+**The app still runs without any of it.** Drafting, preview and bilingual rendering
+work anonymously against localStorage. What the database adds is accounts, durable
+documents, the advocate desk and purchase.
+
+Mail goes to Mailpit at http://localhost:8025. The shop is at http://localhost, its
+admin at http://localhost/admin.
+
+### Where the Bagisto package lives
+
+`bagisto/LegalDesk/` — in this repo, bind-mounted into the Bagisto container at
+`packages/HaatmaOkil/LegalDesk`. It is the firm's own code and belongs with the firm's
+code; kept inside the Bagisto checkout it would sit untracked among vendor files, one
+`git clean` or upstream pull away from being lost.
+
+**Three edits inside the Bagisto checkout make it load, and they are not in this
+repo.** They live in a checkout that tracks upstream Bagisto, so a `git checkout .`, a
+stash, or an upstream merge there silently unloads the entire package — every file
+still present, and Laravel no longer aware of any of it. Written down here because
+that failure is silent, and because recreating them from memory at that point is
+exactly when nobody will remember there were three.
+
+In `docker-compose.nginx-php.yml`, under the `nginx-php` service volumes — note the
+absolute path, which has to be corrected if this repo moves or another machine runs it:
+
+```
+- /ABSOLUTE/PATH/TO/lawyer/bagisto/LegalDesk:/var/www/html/bagisto/packages/HaatmaOkil/LegalDesk
+```
+
+In `bagisto/composer.json`, under `autoload.psr-4`:
+
+```
+"HaatmaOkil\\LegalDesk\\": "packages/HaatmaOkil/LegalDesk/src"
+```
+
+In `bagisto/bootstrap/providers.php`, the import plus `LegalDeskServiceProvider::class`
+in the returned array.
+
+To check the package is actually loaded — this 401s when it is, and 404s when it is
+not, which is the difference between "wrong password" and "the package is gone":
+
+```bash
+curl -s -o /dev/null -w '%{http_code}\n' http://localhost/api/legal/auth/me
+```
+
+It owns the schema and nothing else. The legal reasoning — which clauses a template
+carries, what the statute requires, whether a draft breaches it — stays in TypeScript,
+written once and shared by server and browser. Reimplementing any of it in PHP would
+put the same rule in two languages and let them drift, which is the one failure mode a
+legal product cannot tolerate.
+
+The fifteen Postgres migrations this replaced were never applied anywhere and are gone
+from the tree; they remain in git history at 5291adb if the reasoning in their comments
+is ever wanted.
 
 ### Accounts
 
-Sign-in is an emailed one-time link — no passwords, because password handling is the
-largest security liability a small firm can take on and buys nothing over a link.
-Phone OTP suits the Nepali market better and Supabase supports it; it needs an SMS
-provider wired up.
+An account is a **Bagisto customer**, and sign-in goes through Bagisto — it owns the
+password hashing and the three states that should stop someone getting in: unverified,
+suspended, deactivated. The app holds the returned token in an httpOnly cookie and
+verifies it against `personal_access_tokens` on its own connection, so reading a
+session costs one indexed lookup rather than a round trip to PHP.
+
+This replaced an emailed one-time link, and the trade is worth stating. The original
+reasoning was that password handling is the largest liability a small firm can take on;
+that argument is much weaker when the hashing belongs to Laravel rather than to this
+codebase. What is genuinely lost is that a one-time link suits the Nepali market better
+than another password. A magic-link guard belongs in Bagisto, next to the other
+credentials — not as a second identity system here.
+
+Advocates sign in separately, as Bagisto **admins**, under their own cookie. That is
+what finally closes a real gap: `advocates.user_id` used to exist with nothing able to
+set it, so no advocate could open an enquiry the firm had already been paid for.
 
 Nothing is gated behind an account except payment and the advocate desk. A visitor
 drafts anonymously, and their drafts are claimed onto the account at first sign-in —
@@ -102,22 +215,39 @@ paying commission for cases, so the firm bills its own clients for its own advoc
 
 ## Payment safety
 
-Payment is wired end to end for **Khalti ePay v2** and **eSewa ePay v2** and activates
-on credentials alone. Four rules hold it together:
+Bagisto owns the money: the order, the invoice, the payment method and the gateway
+call. Checkout is a browser redirect to `/legal/buy/<sku>`, which puts the item in the
+customer's own Bagisto cart and hands them to Bagisto's checkout.
 
-1. **The redirect never marks an order paid.** It carries only an order id; the server
-   then asks the gateway what actually happened. Trusting redirect parameters is the
-   standard Nepali checkout bug and is exploitable by typing the success URL.
-2. **The client never sends a price.** It names what it's buying; the amount is
-   recomputed from the registry. A posted `amount: 1` buys nothing.
-3. **Amounts are reconciled.** If the gateway reports taking a different amount than
-   the order says, the order fails rather than releasing the document.
-4. **Verification is idempotent.** Gateways retry and users refresh; the paid
-   transition is conditioned on the row still being `pending`.
+Two rules survive the move, and they are the ones that matter:
 
-Two unit mismatches worth knowing, both handled inside the gateway modules: Khalti
-quotes **paisa**, eSewa quotes **rupees**, and eSewa's HMAC-SHA256 signature covers
-exactly the fields in `signed_field_names`, *in that order*.
+1. **The client never sends a price.** It names what it's buying; the amount comes from
+   the registry via the SKU. A posted `amount: 1` buys nothing.
+2. **Nothing is released on a redirect.** Entitlements are granted from a paid invoice
+   row written by Bagisto's own checkout, never from a return URL. Trusting redirect
+   parameters is the standard Nepali checkout bug and is exploitable by typing the
+   success URL.
+
+What a payment buys is recorded as a row in `legal_entitlements` — one per unit of an
+order line, spent once. A paid document order grants "one document", and the customer
+chooses which draft it releases; guessing from the order which draft they meant would
+be wrong on the one occasion it mattered.
+
+**No Nepali gateway is connected yet.** Bagisto has eSewa and Khalti extensions
+available and none is installed, so today's usable methods are the ones Bagisto ships.
+The verification logic for Khalti ePay v2 and eSewa ePay v2 is kept in
+`lib/payments/{khalti,esewa}.ts` — it is no longer in the app's own order path, but it
+encodes two unit mismatches worth keeping: Khalti quotes **paisa**, eSewa quotes
+**rupees**, and eSewa's HMAC-SHA256 signature covers exactly the fields in
+`signed_field_names`, *in that order*. That is the starting point for a Bagisto payment
+extension.
+
+### The seam
+
+A customer signs in twice — once here, once on the shop — because these are two
+applications sharing one account rather than one application. It is left visible rather
+than papered over with a shared session cookie, which is a decision about cookie scope
+the firm should make deliberately.
 
 ## Contract review
 
@@ -164,12 +294,24 @@ There is deliberately no click-wrap. Under ETA 2063 a typed name is not a recogn
 signature, and the impossibility is enforced in `complete_envelope` rather than in the
 UI, so the guarantee does not depend on this application being correct.
 
-## Reconciliation
+## Redemption
 
-`POST /api/payment/reconcile`, guarded by a shared secret and meant for a cron. Without
-it a payment only settled if the buyer returned to the return page — a closed tab or a
-dropped mobile connection left money taken and nothing released. It also drains the
-notification queue in the same pass.
+A paid invoice becomes an entitlement in two ways, and the first is the one that
+matters to a customer: the dashboard redeems that customer's own paid orders when they
+look, so a purchase appears immediately. Scheduling lives in infrastructure and is the
+piece most likely to be missing on a fresh deployment, and a customer who has just paid
+and sees nothing concludes the payment failed.
+
+`POST /api/payment/reconcile` is the second: guarded by a shared secret, meant for a
+cron, it sweeps every customer and drains the notification queue in the same pass.
+Nothing breaks without it — it catches subscriptions and filings, which nobody looks at
+a dashboard to collect.
+
+It used to chase payments whose buyer never came back from a wallet. It no longer has
+to — Bagisto settles its own abandoned checkouts — so what remains is the half Bagisto
+cannot do: reading a paid invoice and working out what it entitles someone to in legal
+terms. Safe to run repeatedly; a unique index on the order line makes granting
+idempotent.
 
 ## Status
 

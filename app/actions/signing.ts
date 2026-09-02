@@ -1,8 +1,10 @@
 "use server";
 
+import { randomUUID } from "node:crypto";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
-import { createClient, createServiceClient } from "@/lib/supabase/server";
+import { getCustomer } from "@/lib/auth/session";
+import { call, execute, one, query } from "@/lib/db/mysql";
 import { isDigitalSigningAvailable } from "@/lib/signing/ca";
 
 /**
@@ -10,8 +12,15 @@ import { isDigitalSigningAvailable } from "@/lib/signing/ca";
  *
  * Two routes exist in the schema; only the wet-ink one can complete, because no
  * certifying authority adapter is implemented. That is enforced in the database
- * (complete_envelope) as well as here, so the guarantee does not rest on this file
- * being correct.
+ * (legal_complete_envelope) as well as here, so the guarantee does not rest on this
+ * file being correct.
+ *
+ * READ THIS BEFORE CHANGING ANY QUERY HERE. Under Postgres, `listEnvelopes` ran with
+ * no WHERE clause at all, and that was correct: a row-level security policy decided
+ * that you see an envelope if you sent it or are named on it. There is no policy any
+ * more. Every rule that policy expressed is now written out below, and a query that
+ * loses its predicate does not fail — it quietly shows one client another client's
+ * contract and the people signing it.
  */
 
 export type SigningMethod = "wet_ink" | "digital_certificate";
@@ -63,112 +72,173 @@ export async function createEnvelope(
     return { ok: false, reason: "digital_unavailable" };
   }
 
-  const supabase = await createClient();
-  if (!supabase) return { ok: false, reason: "not_configured" };
+  const customer = await getCustomer();
+  if (!customer) return { ok: false, reason: "unauthenticated" };
 
-  const { data: auth } = await supabase.auth.getUser();
-  if (!auth.user) return { ok: false, reason: "unauthenticated" };
-
-  // Only a document the user owns, and only one they have actually bought — an
+  // Only a document the customer owns, and only one they have actually bought — an
   // envelope over a watermarked draft would circulate a specimen for signature.
-  const { data: doc } = await supabase
-    .from("documents")
-    .select("id, status, org_id")
-    .eq("id", parsed.data.documentId)
-    .eq("user_id", auth.user.id)
-    .maybeSingle();
+  const doc = await one<{ id: string; status: string; org_id: string | null }>(
+    `SELECT id, status, org_id
+       FROM legal_documents
+      WHERE id = ? AND customer_id = ?`,
+    [parsed.data.documentId, customer.id],
+  );
 
   if (!doc) return { ok: false, reason: "not_found" };
   if (doc.status !== "purchased") return { ok: false, reason: "not_purchased" };
 
-  const { data: envelope, error } = await supabase
-    .from("signature_envelopes")
-    .insert({
-      document_id: parsed.data.documentId,
-      created_by: auth.user.id,
-      org_id: doc.org_id ?? null,
-      method: parsed.data.method,
-      subject: parsed.data.subject,
-      status: "sent",
-    })
-    .select("id")
-    .single();
+  const envelopeId = randomUUID();
 
-  if (error || !envelope) return { ok: false, reason: "error" };
+  try {
+    await execute(
+      `INSERT INTO legal_signature_envelopes
+         (id, document_id, created_by, org_id, method, subject, status, created_at, updated_at)
+       VALUES (?, ?, ?, ?, ?, ?, 'sent', NOW(), NOW())`,
+      [
+        envelopeId,
+        parsed.data.documentId,
+        customer.id,
+        doc.org_id,
+        parsed.data.method,
+        parsed.data.subject,
+      ],
+    );
 
-  const rows = parsed.data.signatories.map((s, i) => ({
-    envelope_id: envelope.id as string,
-    full_name: s.fullName,
-    email: s.email || null,
-    capacity: s.capacity || null,
-    order_index: i,
-  }));
+    const values = parsed.data.signatories.map(() => "(?, ?, ?, ?, ?, ?, NOW(), NOW())").join(", ");
+    const params = parsed.data.signatories.flatMap((s, i) => [
+      randomUUID(),
+      envelopeId,
+      s.fullName,
+      s.email || null,
+      s.capacity || null,
+      i,
+    ]);
 
-  const { error: sigError } = await supabase.from("signatories").insert(rows);
-  if (sigError) return { ok: false, reason: "error" };
+    await execute(
+      `INSERT INTO legal_signatories
+         (id, envelope_id, full_name, email, capacity, order_index, created_at, updated_at)
+       VALUES ${values}`,
+      params,
+    );
 
-  const service = createServiceClient();
-  await service?.from("signature_events").insert({
-    envelope_id: envelope.id as string,
-    actor_id: auth.user.id,
-    kind: "envelope_created",
-    detail: { method: parsed.data.method, signatories: rows.length },
-  });
+    await execute(
+      `INSERT INTO legal_signature_events
+         (id, envelope_id, actor_kind, actor_id, kind, detail, created_at)
+       VALUES (?, ?, 'customer', ?, 'envelope_created', ?, NOW())`,
+      [
+        randomUUID(),
+        envelopeId,
+        customer.id,
+        JSON.stringify({
+          method: parsed.data.method,
+          signatories: parsed.data.signatories.length,
+        }),
+      ],
+    );
+  } catch {
+    return { ok: false, reason: "error" };
+  }
 
   revalidatePath("/sign");
-  return { ok: true, envelopeId: envelope.id as string };
+  return { ok: true, envelopeId };
 }
 
 /**
- * Envelopes the caller can see: the ones they opened, and the ones they are named
- * on. The filter is deliberately absent — RLS decides, so a signatory sees exactly
- * what migration 0013 grants and nothing depends on this query getting it right.
+ * Envelopes the caller can see: the ones they opened, and the ones they are named on.
+ *
+ * The email match is what lets a signatory who is not the sender open the envelope
+ * they were invited to. It compares against the address on their Bagisto account,
+ * which is the only address they have proved control of — matching on a
+ * self-declared one would let anyone claim any envelope by typing the right address.
  */
 export async function listEnvelopes(): Promise<EnvelopeSummary[]> {
-  const supabase = await createClient();
-  if (!supabase) return [];
+  const customer = await getCustomer();
+  if (!customer) return [];
 
-  const { data: auth } = await supabase.auth.getUser();
-  if (!auth.user) return [];
+  const envelopes = await query<{
+    id: string;
+    document_id: string;
+    subject: string;
+    method: SigningMethod;
+    status: EnvelopeSummary["status"];
+    created_at: string;
+    created_by: number;
+    template_slug: string | null;
+  }>(
+    `SELECT e.id, e.document_id, e.subject, e.method, e.status, e.created_at, e.created_by,
+            d.template_slug
+       FROM legal_signature_envelopes e
+       LEFT JOIN legal_documents d ON d.id = e.document_id
+      WHERE e.created_by = ?
+         OR EXISTS (
+              SELECT 1 FROM legal_signatories s
+               WHERE s.envelope_id = e.id AND LOWER(s.email) = LOWER(?)
+            )
+      ORDER BY e.created_at DESC`,
+    [customer.id, customer.email],
+  );
 
-  const { data } = await supabase
-    .from("signature_envelopes")
-    .select(
-      "id, document_id, subject, method, status, created_at, created_by, documents(template_slug), signatories(id, full_name, capacity, status, signed_at, order_index)",
-    )
-    .order("created_at", { ascending: false });
+  if (envelopes.length === 0) return [];
 
-  return (data ?? []).map((e) => {
-    const doc = e.documents as unknown as { template_slug: string } | null;
-    const sigs = (e.signatories ?? []) as unknown as {
-      id: string;
-      full_name: string;
-      capacity: string | null;
-      status: "pending" | "signed" | "declined";
-      signed_at: string | null;
-      order_index: number;
-    }[];
+  const placeholders = envelopes.map(() => "?").join(", ");
+  const signatories = await query<{
+    id: string;
+    envelope_id: string;
+    full_name: string;
+    capacity: string | null;
+    status: "pending" | "signed" | "declined";
+    signed_at: string | null;
+    order_index: number;
+  }>(
+    `SELECT id, envelope_id, full_name, capacity, status, signed_at, order_index
+       FROM legal_signatories
+      WHERE envelope_id IN (${placeholders})
+      ORDER BY order_index`,
+    envelopes.map((e) => e.id),
+  );
 
-    return {
-      id: e.id as string,
-      documentId: e.document_id as string,
-      templateSlug: doc?.template_slug ?? null,
-      subject: e.subject as string,
-      method: e.method as SigningMethod,
-      status: e.status as EnvelopeSummary["status"],
-      isOwner: e.created_by === auth.user!.id,
-      signatories: [...sigs]
-        .sort((a, b) => a.order_index - b.order_index)
-        .map((s) => ({
-          id: s.id,
-          fullName: s.full_name,
-          capacity: s.capacity,
-          status: s.status,
-          signedAt: s.signed_at,
-        })),
-      createdAt: e.created_at as string,
-    };
-  });
+  return envelopes.map((e) => ({
+    id: e.id,
+    documentId: e.document_id,
+    templateSlug: e.template_slug,
+    subject: e.subject,
+    method: e.method,
+    status: e.status,
+    isOwner: e.created_by === customer.id,
+    signatories: signatories
+      .filter((s) => s.envelope_id === e.id)
+      .map((s) => ({
+        id: s.id,
+        fullName: s.full_name,
+        capacity: s.capacity,
+        status: s.status,
+        signedAt: s.signed_at,
+      })),
+    createdAt: e.created_at,
+  }));
+}
+
+/**
+ * Whether the caller may act on this envelope: they sent it, or they are named on it
+ * at the address their account proves they control.
+ *
+ * Its own function because three actions need the same answer, and because the old
+ * code did not check at all — it called through the service role, so anyone holding a
+ * signatory id could record a signature against it. Unguessable ids are not access
+ * control.
+ */
+async function mayActOnEnvelope(envelopeId: string, customerId: number, email: string) {
+  return one<{ id: string }>(
+    `SELECT e.id
+       FROM legal_signature_envelopes e
+      WHERE e.id = ?
+        AND (e.created_by = ?
+             OR EXISTS (
+                  SELECT 1 FROM legal_signatories s
+                   WHERE s.envelope_id = e.id AND LOWER(s.email) = LOWER(?)
+                ))`,
+    [envelopeId, customerId, email],
+  );
 }
 
 /**
@@ -187,40 +257,43 @@ export async function recordWetInkSignature(
     .safeParse({ signatoryId, whereHeld });
   if (!parsed.success) return { ok: false, reason: "invalid" };
 
-  const supabase = await createClient();
-  const service = createServiceClient();
-  if (!supabase || !service) return { ok: false, reason: "not_configured" };
+  const customer = await getCustomer();
+  if (!customer) return { ok: false, reason: "unauthenticated" };
 
-  const { data: auth } = await supabase.auth.getUser();
-  if (!auth.user) return { ok: false, reason: "unauthenticated" };
+  const signatory = await one<{ envelope_id: string }>(
+    `SELECT envelope_id FROM legal_signatories WHERE id = ?`,
+    [parsed.data.signatoryId],
+  );
+  if (!signatory) return { ok: false, reason: "not_found" };
 
-  const { data, error } = await service.rpc("record_wet_ink_signature", {
-    p_signatory: parsed.data.signatoryId,
-    p_actor: auth.user.id,
-    p_path: parsed.data.whereHeld,
-  });
-  if (error) return { ok: false, reason: "error" };
+  const permitted = await mayActOnEnvelope(signatory.envelope_id, customer.id, customer.email);
+  if (!permitted) return { ok: false, reason: "not_permitted" };
+
+  const result = await call<string>("legal_record_wet_ink_signature", [
+    parsed.data.signatoryId,
+    customer.id,
+    parsed.data.whereHeld,
+  ]);
 
   revalidatePath("/sign");
-  return { ok: data === "ok", reason: (data as string) ?? "error" };
+  return { ok: result === "ok", reason: result ?? "error" };
 }
 
 export async function completeEnvelope(
   envelopeId: string,
 ): Promise<{ ok: boolean; reason: string }> {
-  const supabase = await createClient();
-  const service = createServiceClient();
-  if (!supabase || !service) return { ok: false, reason: "not_configured" };
+  if (!z.string().uuid().safeParse(envelopeId).success) {
+    return { ok: false, reason: "invalid" };
+  }
 
-  const { data: auth } = await supabase.auth.getUser();
-  if (!auth.user) return { ok: false, reason: "unauthenticated" };
+  const customer = await getCustomer();
+  if (!customer) return { ok: false, reason: "unauthenticated" };
 
-  const { data, error } = await service.rpc("complete_envelope", {
-    p_envelope: envelopeId,
-    p_actor: auth.user.id,
-  });
-  if (error) return { ok: false, reason: "error" };
+  const permitted = await mayActOnEnvelope(envelopeId, customer.id, customer.email);
+  if (!permitted) return { ok: false, reason: "not_permitted" };
+
+  const result = await call<string>("legal_complete_envelope", [envelopeId, customer.id]);
 
   revalidatePath("/sign");
-  return { ok: data === "ok", reason: (data as string) ?? "error" };
+  return { ok: result === "ok", reason: result ?? "error" };
 }

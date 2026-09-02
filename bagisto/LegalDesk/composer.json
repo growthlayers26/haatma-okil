@@ -1,0 +1,19 @@
+{
+    "name": "haatmaokil/legal-desk",
+    "description": "The legal domain for Haatma Okil: documents, advocates, enquiries, signing and quota.",
+    "type": "library",
+    "license": "proprietary",
+    "autoload": {
+        "psr-4": {
+            "HaatmaOkil\\LegalDesk\\": "src/"
+        }
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "HaatmaOkil\\LegalDesk\\Providers\\LegalDeskServiceProvider"
+            ]
+        }
+    },
+    "minimum-stability": "dev"
+}

@@ -20,6 +20,9 @@ export default function AdvocatePage() {
   const [stage, setStage] = useState<Stage>("intake");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
+  // Set when the matter was refused for want of payment, so the form can offer the
+  // way to pay rather than just reporting a wall.
+  const [needsPayment, setNeedsPayment] = useState(false);
 
   const [kind, setKind] = useState<ServiceId>("question");
   const [areaOfLaw, setAreaOfLaw] = useState("employment");
@@ -40,6 +43,7 @@ export default function AdvocatePage() {
     e.preventDefault();
     setBusy(true);
     setError("");
+    setNeedsPayment(false);
 
     const result = await screenConflict({ areaOfLaw, opposingParty, kind });
     setBusy(false);
@@ -55,6 +59,25 @@ export default function AdvocatePage() {
       setStage("conflict");
       return;
     }
+
+    /*
+     * Nothing paid for this matter — neither a monthly allowance nor a purchase.
+     *
+     * Said plainly, with the price, rather than as a generic failure. The matter has
+     * not been opened and no advocate has seen it, and a vague error here would leave
+     * someone waiting for an answer that was never going to come.
+     */
+    if (result.reason === "payment_required") {
+      setNeedsPayment(true);
+      setError(
+        bi({
+          ne: `यो विषय खोल्न ${money(result.priceNpr ?? service.priceNpr)} भुक्तानी आवश्यक छ, वा योजनाको मासिक कोटा चाहिन्छ।`,
+          en: `Opening this matter costs ${money(result.priceNpr ?? service.priceNpr)}, or one of your plan's monthly allowance. Nothing has been sent to an advocate yet.`,
+        }),
+      );
+      return;
+    }
+
     setError(
       result.reason === "unauthenticated"
         ? bi({ ne: "कृपया पहिले लगइन गर्नुहोस्।", en: "Please sign in first." })
@@ -63,6 +86,38 @@ export default function AdvocatePage() {
             en: "The advocate desk is not available in this environment.",
           }),
     );
+  }
+
+  /**
+   * Send the buyer to the shop for this service.
+   *
+   * Goes through /api/payment/initiate like every other purchase rather than linking
+   * straight at the shop: that endpoint prices the item server-side from the registry
+   * and checks the session, so the browser never names an amount.
+   */
+  async function startPayment() {
+    setBusy(true);
+    try {
+      const response = await fetch("/api/payment/initiate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ item: { type: "service", id: kind } }),
+      });
+
+      const data = (await response.json().catch(() => null)) as {
+        handoff?: { mode: string; url: string };
+        message?: string;
+      } | null;
+
+      if (data?.handoff?.mode === "redirect") {
+        window.location.href = data.handoff.url;
+        return;
+      }
+
+      setError(data?.message ?? bi({ ne: "भुक्तानी सुरु गर्न सकिएन।", en: "Could not start payment." }));
+    } finally {
+      setBusy(false);
+    }
   }
 
   async function onSubmitDetail(e: React.FormEvent) {
@@ -306,9 +361,23 @@ export default function AdvocatePage() {
               </button>
 
               {error && (
-                <p className="border-l-2 border-cinnabar bg-surface p-3 text-sm text-cinnabar" role="alert">
-                  {error}
-                </p>
+                <div
+                  className={`border-l-2 bg-surface p-3 ${needsPayment ? "border-orpiment" : "border-cinnabar"}`}
+                  role="alert"
+                >
+                  <p className={`text-sm ${needsPayment ? "text-ink-2" : "text-cinnabar"}`}>{error}</p>
+
+                  {needsPayment && (
+                    <button
+                      type="button"
+                      onClick={() => void startPayment()}
+                      disabled={busy}
+                      className="mt-3 inline-block bg-accent px-4 py-2 text-sm font-semibold text-white transition-opacity hover:opacity-90 disabled:opacity-40"
+                    >
+                      {busy ? "…" : bi({ ne: "भुक्तानी गर्नुहोस्", en: `Pay ${money(service.priceNpr)}` })}
+                    </button>
+                  )}
+                </div>
               )}
             </form>
           )}

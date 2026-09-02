@@ -6,6 +6,8 @@ import { AuthProvider } from "@/components/auth-provider";
 import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
 import { LANG_COOKIE, toLang } from "@/lib/lang-cookie";
+import { getCustomer } from "@/lib/auth/session";
+import { isDatabaseConfigured } from "@/lib/db/mysql";
 import "./globals.css";
 
 const fraunces = Fraunces({
@@ -43,13 +45,33 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   // reader's language rather than being corrected after hydration.
   const lang = toLang((await cookies()).get(LANG_COOKIE)?.value);
 
+  // Resolved on the server so the first paint already knows who is signed in.
+  const user = await getCustomer();
+
+  /*
+   * The font variables belong on <html>, not <body>.
+   *
+   * next/font declares each family as a custom property on whatever element carries
+   * its class. globals.css builds --serif, --deva, --sans and --mono from those at
+   * :root — and a custom property is resolved where it is declared, so with the
+   * classes one level down on <body>, :root saw no --font-noto-devanagari and every
+   * one of those four became invalid at computed-value time. Body then inherited four
+   * invalid values.
+   *
+   * The effect was total and silent: no chosen font applied anywhere on the site, in
+   * either language, and the browser's defaults stood in for all of them. It surfaced
+   * in Nepali first only because a system serif handles Devanagari far worse than it
+   * handles Latin.
+   */
   return (
-    <html lang={lang} suppressHydrationWarning>
-      <body
-        className={`${fraunces.variable} ${sourceSans.variable} ${notoDevanagari.variable} ${jetbrains.variable} antialiased`}
-      >
+    <html
+      lang={lang}
+      suppressHydrationWarning
+      className={`${fraunces.variable} ${sourceSans.variable} ${notoDevanagari.variable} ${jetbrains.variable}`}
+    >
+      <body className="antialiased">
         <LanguageProvider initialLang={lang}>
-          <AuthProvider>
+          <AuthProvider initialUser={user} configured={isDatabaseConfigured()}>
             <div className="flex min-h-screen flex-col">
               <SiteHeader />
               <main className="flex-1">{children}</main>

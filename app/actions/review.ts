@@ -1,11 +1,13 @@
 "use server";
 
+import { randomUUID } from "node:crypto";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
-import { createClient } from "@/lib/supabase/server";
+import { getCustomerId } from "@/lib/auth/session";
+import { execute } from "@/lib/db/mysql";
 import { extractFacts, isReviewConfigured } from "@/lib/review/extract";
 import { evaluate, summarise, type Finding } from "@/lib/review/rules";
-import { consumeQuota, releaseQuota, claimServiceOrder, releaseServiceOrder } from "./subscription";
+import { claimEntitlement, consumeQuota, releaseEntitlement, releaseQuota } from "@/lib/quota";
 import { SERVICES } from "@/lib/services";
 
 /**
@@ -56,25 +58,23 @@ export async function reviewContract(input: { text: string }): Promise<ReviewOut
 
   if (!isReviewConfigured()) return { ok: false, reason: "not_configured" };
 
-  const supabase = await createClient();
-  if (!supabase) return { ok: false, reason: "not_configured" };
-
-  const { data: auth } = await supabase.auth.getUser();
-  if (!auth.user) return { ok: false, reason: "unauthenticated" };
+  const customerId = await getCustomerId();
+  if (!customerId) return { ok: false, reason: "unauthenticated" };
 
   /*
-   * A review must be paid for, by allowance or by order, before the model is called.
+   * A review must be paid for, by allowance or by entitlement, before the model is
+   * called.
    *
-   * Without this the analysis ran for anyone with an account: no order was ever
-   * created, the price was displayed and never charged, and every submission spent
+   * Without this the analysis ran for anyone with an account: nothing was ever
+   * charged, the price was displayed and never collected, and every submission spent
    * real API credit. That is a revenue hole and an unbounded cost in one function.
    *
    * Allowance first, since a subscriber should not be asked to pay twice.
    */
-  const usageId = await consumeQuota(auth.user.id, "review");
-  const orderId = usageId ? null : await claimServiceOrder(auth.user.id, "document_review");
+  const usageId = await consumeQuota(customerId, "review");
+  const entitlementId = usageId ? null : await claimEntitlement(customerId, "review");
 
-  if (!usageId && !orderId) {
+  if (!usageId && !entitlementId) {
     return {
       ok: false,
       reason: "payment_required",
@@ -87,36 +87,41 @@ export async function reviewContract(input: { text: string }): Promise<ReviewOut
   if (!extracted.ok) {
     // Hand back whatever was spent — nobody pays for an analysis that errored.
     if (usageId) await releaseQuota(usageId);
-    if (orderId) await releaseServiceOrder(orderId);
+    if (entitlementId) await releaseEntitlement(entitlementId);
     return { ok: false, reason: extracted.reason, message: extracted.message };
   }
 
   const findings = evaluate(extracted.facts);
   const summary = summarise(findings);
 
-  // Persist the conclusions only. The document itself is never written down — see
-  // the note at the top of migration 0004.
-  const { data: row } = await supabase
-    .from("reviews")
-    .insert({
-      user_id: auth.user.id,
-      document_type: extracted.facts.documentType,
-      facts: extracted.facts,
-      findings,
-      breach_count: summary.breach,
-      missing_count: summary.missing,
-      check_count: summary.check,
-      covered_by_plan: usageId !== null,
-      order_id: orderId,
-    })
-    .select("id")
-    .maybeSingle();
+  // Persist the conclusions only. The document itself is never written down.
+  const reviewId = randomUUID();
+
+  await execute(
+    `INSERT INTO legal_reviews
+       (id, customer_id, document_type, facts, findings,
+        breach_count, missing_count, check_count,
+        covered_by_plan, entitlement_id, created_at, updated_at)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), NOW())`,
+    [
+      reviewId,
+      customerId,
+      extracted.facts.documentType,
+      JSON.stringify(extracted.facts),
+      JSON.stringify(findings),
+      summary.breach,
+      summary.missing,
+      summary.check,
+      usageId !== null,
+      entitlementId,
+    ],
+  );
 
   revalidatePath("/dashboard");
 
   return {
     ok: true,
-    reviewId: (row?.id as string) ?? null,
+    reviewId,
     documentType: extracted.facts.documentType,
     findings,
     summary,
