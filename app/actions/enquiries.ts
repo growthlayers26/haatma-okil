@@ -6,7 +6,13 @@ import { z } from "zod";
 import { getCustomerId } from "@/lib/auth/session";
 import { call, execute, one, query } from "@/lib/db/mysql";
 import { SERVICES, type ServiceId } from "@/lib/services";
-import { consumeQuota, releaseQuota, linkQuotaToEnquiry } from "@/lib/quota";
+import {
+  claimEntitlement,
+  consumeQuota,
+  linkQuotaToEnquiry,
+  releaseEntitlement,
+  releaseQuota,
+} from "@/lib/quota";
 import { queue } from "@/lib/notify";
 
 /**
@@ -39,7 +45,17 @@ export type ConflictResult =
       /** True when the subscriber's monthly allowance covered this matter. */
       coveredByPlan: boolean;
     }
-  | { cleared: false; reason: "conflict" | "unauthenticated" | "not_configured" | "error" };
+  | {
+      cleared: false;
+      reason:
+        | "conflict"
+        | "unauthenticated"
+        | "not_configured"
+        | "payment_required"
+        | "error";
+      /** Set on payment_required, so the caller shows the price without guessing. */
+      priceNpr?: number;
+    };
 
 type AdvocateRow = {
   id: string;
@@ -136,15 +152,37 @@ export async function screenConflict(input: {
   const assignedId = await call<string>("legal_assign_advocate", [areaOfLaw]);
 
   /*
-   * Try to cover this from the subscriber's monthly allowance.
+   * A matter must be paid for, by allowance or by entitlement, before it reaches an
+   * advocate.
+   *
+   * Without this the intake was free. It took the allowance when there was one, and
+   * when there was not it recorded `covered_by_plan = false` and opened the matter
+   * anyway — the comment here used to say that meant "bill per matter", but nothing
+   * anywhere implemented billing per matter. So a written question at NPR 1,500 and a
+   * consultation at NPR 4,000 could be raised without limit, and each one landed on a
+   * real advocate's desk. That is the same hole contract review had, except it spends
+   * an advocate's time rather than API credit, which is the more expensive of the two.
+   *
+   * Allowance first, since a subscriber should not be asked to pay twice.
    *
    * A live consultation is deliberately never metered — it occupies an advocate's
    * diary rather than a slice of their writing time, so it is always billed.
-   *
-   * A null here is the ordinary path, not a failure: it means bill per matter.
    */
   const quotaKind = kind === "question" ? "question" : kind === "document_review" ? "review" : null;
   const usageId = quotaKind ? await consumeQuota(customerId, quotaKind) : null;
+
+  const entitlementKind =
+    kind === "document_review" ? "review" : kind === "consultation" ? "consultation" : "question";
+  const entitlementId = usageId ? null : await claimEntitlement(customerId, entitlementKind);
+
+  if (!usageId && !entitlementId) {
+    return {
+      cleared: false,
+      reason: "payment_required",
+      priceNpr: SERVICES[kind].priceNpr,
+    };
+  }
+
   const coveredByPlan = usageId !== null;
 
   const dueAt = new Date();
@@ -156,8 +194,9 @@ export async function screenConflict(input: {
     await execute(
       `INSERT INTO legal_enquiries
          (id, customer_id, document_id, advocate_id, area_of_law, opposing_party, kind,
-          status, conflict_cleared_at, due_at, covered_by_plan, created_at, updated_at)
-       VALUES (?, ?, ?, ?, ?, ?, ?, 'screening', NOW(), ?, ?, NOW(), NOW())`,
+          status, conflict_cleared_at, due_at, covered_by_plan, entitlement_id,
+          created_at, updated_at)
+       VALUES (?, ?, ?, ?, ?, ?, ?, 'screening', NOW(), ?, ?, ?, NOW(), NOW())`,
       [
         enquiryId,
         customerId,
@@ -168,12 +207,14 @@ export async function screenConflict(input: {
         kind,
         dueAt,
         coveredByPlan,
+        entitlementId,
       ],
     );
   } catch {
-    // The unit was taken before the matter existed. Since the matter could not be
-    // opened, hand it back rather than charging a subscriber for nothing.
+    // Whatever was spent was spent before the matter existed. Since the matter could
+    // not be opened, hand it back rather than charging for nothing.
     if (usageId) await releaseQuota(usageId);
+    if (entitlementId) await releaseEntitlement(entitlementId);
     return { cleared: false, reason: "error" };
   }
 

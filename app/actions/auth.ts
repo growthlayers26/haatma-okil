@@ -2,7 +2,15 @@
 
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
-import { getCustomer, register, signIn, signOut, type Customer } from "@/lib/auth/session";
+import {
+  getCustomer,
+  register,
+  signIn,
+  signInDesk,
+  signOut,
+  signOutDesk,
+  type Customer,
+} from "@/lib/auth/session";
 
 /**
  * Signing in.
@@ -63,6 +71,33 @@ export async function registerAction(input: unknown): Promise<AuthActionResult> 
 
 export async function signOutAction(): Promise<void> {
   await signOut();
+  revalidatePath("/", "layout");
+}
+
+/**
+ * Advocate sign-in, which is a different door from the client one.
+ *
+ * It has to be. Advocates are staff — Bagisto admins, not customers — and the desk
+ * reads a separate cookie. Until this existed the desk sent them to the client login,
+ * which set the wrong cookie, so an advocate signed in successfully and arrived back
+ * at a page still telling them to sign in. There was no way into the firm's own half
+ * of the product.
+ */
+export async function signInDeskAction(input: unknown): Promise<AuthActionResult> {
+  const parsed = Credentials.safeParse(input);
+  if (!parsed.success) return { ok: false, error: "invalid" };
+
+  const result = await signInDesk(parsed.data.email, parsed.data.password);
+  if (!result.ok) return { ok: false, error: result.error };
+
+  revalidatePath("/desk");
+  revalidatePath("/", "layout");
+  return { ok: true };
+}
+
+export async function signOutDeskAction(): Promise<void> {
+  await signOutDesk();
+  revalidatePath("/desk");
   revalidatePath("/", "layout");
 }
 

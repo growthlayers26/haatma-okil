@@ -2,7 +2,7 @@ import "server-only";
 
 import { createHash } from "node:crypto";
 import { cookies } from "next/headers";
-import { one } from "@/lib/db/mysql";
+import { one, type Param } from "@/lib/db/mysql";
 
 /**
  * Who is signed in.
@@ -68,7 +68,7 @@ export async function getCustomer(): Promise<Customer | null> {
   const parsed = parseToken((await cookies()).get(SESSION_COOKIE)?.value);
   if (!parsed) return null;
 
-  const row = await one<CustomerRow>(
+  const row = await readOrNull<CustomerRow>(
     `SELECT c.id, c.first_name, c.last_name, c.email, c.phone,
             c.is_verified, c.status, c.is_suspended
        FROM personal_access_tokens t
@@ -102,6 +102,31 @@ export type DeskUser = {
   advocateId: string | null;
 };
 
+/**
+ * Read one row, treating an unreachable database as "not signed in".
+ *
+ * This is called from the root layout, so an exception here does not fail one page —
+ * it fails every page, including the anonymous drafting flow that is supposed to work
+ * with no database at all. A signed-in visitor was getting a 500 on the whole site the
+ * moment MySQL blinked, which is precisely backwards: the person with an account got a
+ * worse outage than the person without one.
+ *
+ * Degrading to signed-out is also the safe direction. It shows less rather than more,
+ * and no access decision is made on the strength of a failed lookup.
+ *
+ * Deliberately narrow: only session resolution swallows the error. Server actions
+ * still throw, because there "the database is down" is something the caller needs to
+ * hear rather than quietly treat as an empty result.
+ */
+async function readOrNull<T>(sql: string, params: Param[]): Promise<T | null> {
+  try {
+    return await one<T>(sql, params);
+  } catch (error) {
+    console.error("[session] could not reach the database:", error);
+    return null;
+  }
+}
+
 /** Splits a Sanctum token into its row id and the secret to hash against. */
 function parseToken(token: string | undefined): { id: number; hash: string } | null {
   if (!token) return null;
@@ -121,7 +146,7 @@ export async function getDeskUser(): Promise<DeskUser | null> {
   const parsed = parseToken((await cookies()).get(DESK_COOKIE)?.value);
   if (!parsed) return null;
 
-  const row = await one<{
+  const row = await readOrNull<{
     id: number;
     name: string;
     email: string;

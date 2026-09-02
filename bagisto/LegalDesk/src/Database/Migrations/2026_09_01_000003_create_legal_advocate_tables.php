@@ -79,12 +79,20 @@ return new class extends Migration
              * change retroactively when a subscription lapses or renews.
              */
             $table->boolean('covered_by_plan')->default(false);
+            /*
+             * The paid entitlement spent on this matter, when the allowance did not
+             * cover it. A practice has to be able to show what was charged for what,
+             * and "covered_by_plan = false" only says the allowance did not pay —
+             * not that anything else did.
+             */
+            $table->char('entitlement_id', 36)->nullable();
 
             $table->timestamps();
 
             $table->foreign('customer_id')->references('id')->on('customers')->onDelete('cascade');
             $table->foreign('document_id')->references('id')->on('legal_documents')->onDelete('set null');
             $table->foreign('advocate_id')->references('id')->on('legal_advocates')->onDelete('set null');
+            $table->foreign('entitlement_id')->references('id')->on('legal_entitlements')->onDelete('set null');
 
             $table->index(['customer_id', 'created_at']);
             $table->index(['advocate_id', 'status', 'due_at']);
