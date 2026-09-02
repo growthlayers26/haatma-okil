@@ -73,8 +73,23 @@ class RemoveDemoCatalogue extends Command
         }
 
         $removed = 0;
+        $cascaded = 0;
 
         foreach ($doomed as $product) {
+            /*
+             * Deleting a configurable product takes its variants with it, so by the
+             * time the loop reaches those variants they are already gone. Skipping
+             * them quietly is the honest report: they were removed, just not by this
+             * iteration. Without this the run ends in a wall of "could not remove"
+             * errors describing a deletion that in fact succeeded.
+             */
+            if (! DB::table('products')->where('id', $product->id)->exists()) {
+                $cascaded++;
+                $removed++;
+
+                continue;
+            }
+
             try {
                 // Through the repository so Bagisto tears down the attribute values,
                 // flat rows, indices and media that belong to each product.
@@ -86,6 +101,10 @@ class RemoveDemoCatalogue extends Command
         }
 
         $this->info("Removed {$removed} product(s).");
+
+        if ($cascaded > 0) {
+            $this->line("  ({$cascaded} of those were variants removed with their parent.)");
+        }
 
         $remaining = DB::table('products')->count();
         $this->line("The catalogue now holds {$remaining} product(s).");
