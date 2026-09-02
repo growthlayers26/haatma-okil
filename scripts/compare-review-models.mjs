@@ -53,6 +53,8 @@ const env = loadEnv();
 const BASE_URL = (env.REVIEW_API_BASE_URL || "").replace(/\/+$/, "");
 const API_KEY = env.REVIEW_API_KEY || "";
 
+const TAGS = (env.REVIEW_API_TAGS || "").split(",").map((t) => t.trim()).filter(Boolean);
+
 const CANDIDATES = process.argv.slice(2).length
   ? process.argv.slice(2)
   : ["upstage/solar-pro4:free", "stepfun/step-3.7-flash:free", env.REVIEW_MODEL].filter(Boolean);
@@ -154,6 +156,9 @@ async function run(model) {
         model,
         temperature: 0,
         max_tokens: 4000,
+        // Nous Portal rejects a request without these. Format is "key=value", and a
+        // user= tag is mandatory; other OpenAI-compatible providers ignore the field.
+        ...(TAGS.length ? { tags: TAGS } : {}),
         messages: [
           { role: "system", content: SYSTEM_PROMPT },
           { role: "user", content: `Extract the facts.\n\n<document>\n${CONTRACT}\n</document>` },

@@ -55,7 +55,23 @@ function openAiCompatibleConfig() {
 
   if (!baseUrl || !apiKey || !model) return null;
 
-  return { baseUrl: baseUrl.replace(/\/+$/, ""), apiKey, model };
+  /*
+   * Provider-specific request tags, as "key=value" strings.
+   *
+   * Nous Portal refuses any request without them and requires a `user=` tag among
+   * them; the error it gives for a missing one ("missing tags") does not say so, and
+   * an array of plain strings is rejected just as firmly as none at all.
+   *
+   * Sent only when configured, because a provider that does not expect the field
+   * rejects the request outright rather than ignoring it — so an empty setting has to
+   * mean "omit" rather than "send nothing".
+   */
+  const tags = (process.env.REVIEW_API_TAGS ?? "")
+    .split(",")
+    .map((tag) => tag.trim())
+    .filter(Boolean);
+
+  return { baseUrl: baseUrl.replace(/\/+$/, ""), apiKey, model, tags };
 }
 
 export function isReviewConfigured(): boolean {
@@ -118,7 +134,7 @@ export async function extractFacts(contractText: string): Promise<ExtractOutcome
 
 /* ------------------------------------------------------- OpenAI-compatible */
 
-type OpenAiConfig = { baseUrl: string; apiKey: string; model: string };
+type OpenAiConfig = { baseUrl: string; apiKey: string; model: string; tags: string[] };
 
 type ChatCompletion = {
   choices?: { message?: { content?: string | null }; finish_reason?: string }[];
@@ -152,6 +168,7 @@ async function extractViaOpenAiCompatible(
   const attempt = async (useSchema: boolean) => {
     const body: Record<string, unknown> = {
       model: config.model,
+      ...(config.tags.length > 0 ? { tags: config.tags } : {}),
       messages: useSchema
         ? messages
         : [
