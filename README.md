@@ -135,6 +135,36 @@ admin at http://localhost/admin.
 code; kept inside the Bagisto checkout it would sit untracked among vendor files, one
 `git clean` or upstream pull away from being lost.
 
+**Three edits inside the Bagisto checkout make it load, and they are not in this
+repo.** They live in a checkout that tracks upstream Bagisto, so a `git checkout .`, a
+stash, or an upstream merge there silently unloads the entire package — every file
+still present, and Laravel no longer aware of any of it. Written down here because
+that failure is silent, and because recreating them from memory at that point is
+exactly when nobody will remember there were three.
+
+In `docker-compose.nginx-php.yml`, under the `nginx-php` service volumes — note the
+absolute path, which has to be corrected if this repo moves or another machine runs it:
+
+```
+- /ABSOLUTE/PATH/TO/lawyer/bagisto/LegalDesk:/var/www/html/bagisto/packages/HaatmaOkil/LegalDesk
+```
+
+In `bagisto/composer.json`, under `autoload.psr-4`:
+
+```
+"HaatmaOkil\\LegalDesk\\": "packages/HaatmaOkil/LegalDesk/src"
+```
+
+In `bagisto/bootstrap/providers.php`, the import plus `LegalDeskServiceProvider::class`
+in the returned array.
+
+To check the package is actually loaded — this 401s when it is, and 404s when it is
+not, which is the difference between "wrong password" and "the package is gone":
+
+```bash
+curl -s -o /dev/null -w '%{http_code}\n' http://localhost/api/legal/auth/me
+```
+
 It owns the schema and nothing else. The legal reasoning — which clauses a template
 carries, what the statute requires, whether a draft breaches it — stays in TypeScript,
 written once and shared by server and browser. Reimplementing any of it in PHP would
