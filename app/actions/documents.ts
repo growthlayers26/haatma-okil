@@ -5,7 +5,7 @@ import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { getCustomerId } from "@/lib/auth/session";
 import { execute, one, query } from "@/lib/db/mysql";
-import { unlockDocument } from "@/lib/payments/orders";
+import { redeemPaidOrders, unlockDocument } from "@/lib/payments/orders";
 import { getTemplate } from "@/lib/templates";
 import type { Answers } from "@/lib/types";
 
@@ -203,6 +203,17 @@ export async function claimLocalDrafts(
 export async function documentCreditsAvailable(): Promise<number> {
   const customerId = await getCustomerId();
   if (!customerId) return 0;
+
+  /*
+   * Redeem this customer's paid orders before counting.
+   *
+   * The scheduled sweep does the same thing for everyone, but scheduling lives in
+   * infrastructure and is the piece most likely to be missing on a fresh deployment.
+   * Doing it here means a purchase appears the moment its buyer looks, which is the
+   * only moment that matters to them — and it is cheap, because it is scoped to one
+   * customer and grants nothing it has already granted.
+   */
+  await redeemPaidOrders(20, customerId);
 
   const row = await one<{ n: number }>(
     `SELECT COUNT(*) AS n

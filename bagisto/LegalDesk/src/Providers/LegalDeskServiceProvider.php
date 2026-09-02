@@ -2,6 +2,7 @@
 
 namespace HaatmaOkil\LegalDesk\Providers;
 
+use HaatmaOkil\LegalDesk\Console\Commands\LinkAdvocates;
 use HaatmaOkil\LegalDesk\Console\Commands\SeedCatalogue;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\ServiceProvider;
@@ -34,7 +35,7 @@ class LegalDeskServiceProvider extends ServiceProvider
             ->group(__DIR__.'/../Routes/web.php');
 
         if ($this->app->runningInConsole()) {
-            $this->commands([SeedCatalogue::class]);
+            $this->commands([SeedCatalogue::class, LinkAdvocates::class]);
         }
     }
 

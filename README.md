@@ -96,6 +96,25 @@ curl -s http://localhost:3000/api/catalogue > /path/to/bagisto/storage/app/catal
 docker exec nginx-php sh -lc 'cd /var/www/html/bagisto && php artisan legal:seed-catalogue'
 ```
 
+`migrate` also switches the shop's base currency to NPR. Bagisto installs with USD as
+its only currency, and the catalogue seeder writes the firm's price list in as plain
+numbers — so before this, a Rs 599 contract was offered at $599, about a hundred and
+thirty times its price, and nothing failed loudly because the checkout rendered a
+perfectly ordinary dollar figure.
+
+Then give each advocate desk access:
+
+```bash
+docker exec nginx-php sh -lc 'cd /var/www/html/bagisto && php artisan legal:link-advocates'
+```
+
+It reports who can open the desk and who cannot. Advocates sign in with a Bagisto
+**staff** account, created in the admin panel at the same address held on their
+advocate record — the command deliberately does not create those accounts, because
+choosing a password on a named advocate's behalf is not something a script should do.
+A mismatched address does not error; it simply never matches, and the advocate opens
+an empty desk that looks exactly like having no matters.
+
 The catalogue step exists so the price list has one home. Templates, services and plans
 are priced in `lib/` and copied into Bagisto's catalogue from there; maintaining the
 prices by hand in the admin panel would create a second price list, and the day the two
@@ -247,9 +266,16 @@ UI, so the guarantee does not depend on this application being correct.
 
 ## Redemption
 
-`POST /api/payment/reconcile`, guarded by a shared secret and meant for a cron. It
-turns paid invoices into entitlements and drains the notification queue in the same
-pass.
+A paid invoice becomes an entitlement in two ways, and the first is the one that
+matters to a customer: the dashboard redeems that customer's own paid orders when they
+look, so a purchase appears immediately. Scheduling lives in infrastructure and is the
+piece most likely to be missing on a fresh deployment, and a customer who has just paid
+and sees nothing concludes the payment failed.
+
+`POST /api/payment/reconcile` is the second: guarded by a shared secret, meant for a
+cron, it sweeps every customer and drains the notification queue in the same pass.
+Nothing breaks without it — it catches subscriptions and filings, which nobody looks at
+a dashboard to collect.
 
 It used to chase payments whose buyer never came back from a wallet. It no longer has
 to — Bagisto settles its own abandoned checkouts — so what remains is the half Bagisto

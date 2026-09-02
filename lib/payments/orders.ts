@@ -78,7 +78,19 @@ export type RedeemReport = { ordersSeen: number; granted: number; subscriptions:
  * (bagisto_order_id, order_item_id, seq) makes granting idempotent, so a re-sweep
  * inserts nothing it has already inserted.
  */
-export async function redeemPaidOrders(limit = 100): Promise<RedeemReport> {
+export async function redeemPaidOrders(
+  limit = 100,
+  /**
+   * Narrow the sweep to one customer.
+   *
+   * The dashboard passes their own id so a purchase shows up the moment they look,
+   * without waiting for a schedule. That matters more than it sounds: the alternative
+   * is a customer who has just paid, sees nothing, and concludes it failed — and the
+   * cron is the piece most likely to be missing on a fresh deployment, because it
+   * lives in infrastructure rather than in this repository.
+   */
+  customerId?: number,
+): Promise<RedeemReport> {
   const report: RedeemReport = { ordersSeen: 0, granted: 0, subscriptions: 0 };
 
   const lines = await query<{
@@ -95,13 +107,14 @@ export async function redeemPaidOrders(limit = 100): Promise<RedeemReport> {
        JOIN order_items i ON i.order_id = o.id
       WHERE inv.state = 'paid'
         AND o.customer_id IS NOT NULL
+        AND (? IS NULL OR o.customer_id = ?)
         AND NOT EXISTS (
               SELECT 1 FROM legal_entitlements e
                WHERE e.bagisto_order_id = o.id AND e.order_item_id = i.id
             )
       ORDER BY o.id
       LIMIT ?`,
-    [limit],
+    [customerId ?? null, customerId ?? null, limit],
   );
 
   const orders = new Set<number>();
