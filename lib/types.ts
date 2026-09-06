@@ -77,7 +77,7 @@ export type Clause = {
   locked?: boolean;
 };
 
-export type Category = "employment" | "property" | "business" | "family";
+export type Category = "employment" | "property" | "business" | "family" | "litigation";
 
 export type AdvocateReview = {
   name: Bilingual;
