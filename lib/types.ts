@@ -75,7 +75,27 @@ export type Clause = {
   citation?: Citation;
   when?: Condition;
   locked?: boolean;
+  /**
+   * A numbered body paragraph, in layouts that number them.
+   *
+   * Court petitions number only the substantive paragraphs — the request and the
+   * declaration — while the court address, the parties and the fee line run on
+   * unnumbered above them. Contracts number every clause, so this is ignored there.
+   */
+  numbered?: boolean;
 };
+
+/**
+ * How the finished document is laid out on the page.
+ *
+ * `instrument` is a private document between parties: a titled deed with numbered,
+ * headed clauses and a signature block for each side. `petition` is a filing
+ * addressed to a court, and its shape is prescribed by the court rather than chosen
+ * — no title, no clause headings, one signatory, and the date at the foot rather
+ * than the head. Rendering a petition as an instrument produces something a registry
+ * would not accept, which is the whole reason this distinction exists.
+ */
+export type DocumentLayout = "instrument" | "petition";
 
 export type Category = "employment" | "property" | "business" | "family" | "litigation";
 
@@ -91,6 +111,8 @@ export type AdvocateReview = {
 
 export type Template = {
   slug: string;
+  /** Defaults to `instrument`. */
+  layout?: DocumentLayout;
   title: Bilingual;
   summary: Bilingual;
   category: Category;

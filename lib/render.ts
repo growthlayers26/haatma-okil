@@ -7,6 +7,7 @@ import type {
   Condition,
   ValidationIssue,
   Citation,
+  DocumentLayout,
 } from "./types";
 import { formatNpr, toNepaliDigits } from "./nepal";
 import { parseBsString, formatBsLong } from "./bs-date";
@@ -25,10 +26,12 @@ export type RenderedClause = {
   body: string;
   citation?: Citation;
   locked: boolean;
+  numbered: boolean;
 };
 
 export type RenderedDocument = {
   title: string;
+  layout: DocumentLayout;
   clauses: RenderedClause[];
 };
 
@@ -124,9 +127,10 @@ export function renderDocument(
       body: interpolate(clause.body[lang], answers, fields, lang),
       citation: clause.citation,
       locked: clause.locked ?? false,
+      numbered: clause.numbered ?? false,
     }));
 
-  return { title: template.title[lang], clauses };
+  return { layout: template.layout ?? "instrument", title: template.title[lang], clauses };
 }
 
 /**

@@ -42,6 +42,7 @@ const REVIEW = pendingReview();
 export const petitionOfficeDeadlineAcknowledged: Template = {
   slug: "court-petition-01-office-deadline-acknowledged",
   category: "litigation",
+  layout: "petition",
   priceNpr: 299,
   title: {
     ne: "अड्डाको रोहवरमा म्याद बुझिपाऊँ (फाराम नं. १)",
@@ -95,6 +96,7 @@ export const petitionOfficeDeadlineAcknowledged: Template = {
     courtFeeClause(),
     {
       id: "request",
+      numbered: true,
       heading: { ne: "निवेदन", en: "The petition" },
       body: {
         ne: "उपर्युक्त मुद्दामा मेरो/हाम्रो नाउँमा प्रतिउत्तर पेस गर्ने {{issuingBasis}} बमोजिम हाजिर हुन आउने आदेश भई म्याद जारी भएकाले सो म्याद मुलुकी देवानी कार्यविधि संहिता, २०७४ को दफा १०७ बमोजिम बुझिलिन आफैं/वारिसमार्फत {{documentsAttached}} यसै साथ राखी निवेदन गरेको छु/छौं। तसर्थ मेरो/हाम्रो नामको म्याद बुझिलिई हाजिर हुन पाऊँ।",
@@ -111,6 +113,7 @@ export const petitionOfficeDeadlineAcknowledged: Template = {
 export const petitionDateSelfTakenOver: Template = {
   slug: "court-petition-02-date-self-taken-over",
   category: "litigation",
+  layout: "petition",
   priceNpr: 299,
   title: { ne: "तारिख सकार गरिपाऊँ (फाराम नं. २)", en: "Take Over One's Own Hearing Date (Form 2)" },
   summary: {
@@ -142,6 +145,7 @@ export const petitionDateSelfTakenOver: Template = {
     courtFeeClause(),
     {
       id: "request",
+      numbered: true,
       heading: { ne: "निवेदन", en: "The petition" },
       body: {
         ne: "उक्त मुद्दामा मैले/हामीले {{attorneyName}}, जिल्ला {{attorneyDistrict}}, {{attorneyMunicipality}} वडा नं. {{attorneyWard}} बस्नेलाई वारिस राख्न अख्तियारनामा लेखिदिएको र निज वारिसलाई यस अदालतबाट मिति {{hearingDateBs}} गतेको तारिख तोकिएकोमा म/हामी आफैं तारिखमा रहने हुँदा मुलुकी देवानी कार्यविधि संहिता, २०७४ को दफा १५२ बमोजिम आफ्नो मुद्दाको तारिख आफैं सकार गरिपाऊँ।",
@@ -158,6 +162,7 @@ export const petitionDateSelfTakenOver: Template = {
 export const petitionServiceByPublication: Template = {
   slug: "court-petition-03-service-by-publication",
   category: "litigation",
+  layout: "petition",
   priceNpr: 299,
   title: {
     ne: "म्याद, सूचना प्रकाशन/प्रशारण गरी तामेल गरिपाऊँ (फाराम नं. ३)",
@@ -192,6 +197,7 @@ export const petitionServiceByPublication: Template = {
     courtFeeClause(),
     {
       id: "request",
+      numbered: true,
       heading: { ne: "निवेदन", en: "The petition" },
       body: {
         ne: "उपर्युक्त मुद्दामा तपसिलका प्रतिवादीको नामको म्याद रीतपूर्वक तामेल हुन नसकेको भनी तामेलदारले अदालतमा प्रतिवेदन दिएको हुनाले निजका नाममा यस अदालतबाट मुलुकी देवानी कार्यविधि संहिता, २०७४ को दफा १०५(२२) र मुलुकी फौजदारी कार्यविधि संहिता, २०७४ को दफा ६२(१) र सर्वोच्च अदालत नियमावली, २०७४ को नियम १४८ बमोजिम राष्ट्रिय स्तरका दैनिक पत्रिका, रेडियो, टेलिभिजन वा विद्युतीय माध्यमबाट प्रकाशित/प्रसारण गरी म्याद तामेल गरिपाऊँ। यसरी म्याद तामेल गर्दा लाग्ने दस्तुर तोकिएबमोजिम म आफैंले बुझाउनेछु।\n\nम्याद जारी गर्नुपर्ने विपक्षीको विवरण:\n{{respondentDetail}}",
@@ -208,6 +214,7 @@ export const petitionServiceByPublication: Template = {
 export const petitionAddressDisclosed: Template = {
   slug: "court-petition-04-address-disclosed",
   category: "litigation",
+  layout: "petition",
   priceNpr: 299,
   title: { ne: "वतन खुलाएको (फाराम नं. ४)", en: "New Address Disclosed (Form 4)" },
   summary: {
@@ -244,6 +251,7 @@ export const petitionAddressDisclosed: Template = {
     courtFeeClause(),
     {
       id: "request",
+      numbered: true,
       heading: { ne: "निवेदन", en: "The petition" },
       body: {
         ne: "उक्त मुद्दामा मैले पुनरावेदन पत्र/रिट निवेदनमा उल्लेख गरेको बयान कागजमा खुलाएको वतनमा विपक्षीका नाउँमा सम्मानित अदालतबाट जारी भएको म्याद रीतपूर्वक तामेल हुन नसकी मुलुकी देवानी कार्यविधि संहिता, २०७४ को दफा १७१(२), ऐ. दफा २७५ र मुलुकी फौजदारी कार्यविधि नियमावली, २०७५ को नियम ८९ बमोजिम अर्को वतन खुलाउनु भन्ने आदेशानुसार विपक्षीको तपसिलबमोजिमको वतन खुलाएको छु। सोही वतनमा म्याद जारी गरिपाऊँ।\n\nतपसिल:\n{{newAddressDetail}}",
@@ -260,6 +268,7 @@ export const petitionAddressDisclosed: Template = {
 export const petitionStatementTaken: Template = {
   slug: "court-petition-05-statement-taken",
   category: "litigation",
+  layout: "petition",
   priceNpr: 299,
   title: { ne: "बयान गराइपाऊँ (फाराम नं. ५)", en: "Statement Taken on Appearance (Form 5)" },
   summary: {
@@ -297,6 +306,7 @@ export const petitionStatementTaken: Template = {
     courtFeeClause(),
     {
       id: "request",
+      numbered: true,
       heading: { ne: "निवेदन", en: "The petition" },
       body: {
         ne: "उल्लिखित मुद्दामा यस अदालतबाट मेरा नाममा जारी भएको म्याद/पक्राउ पुर्जी मिति {{servedDateBs}} मा तामेल भएकाले म्याद भित्रै/जारी भएको म्याद/पक्राउ पुर्जी बमोजिम हाजिर हुन आएको छु। {{statementBasis}} बमोजिम बयान गराइपाऊँ।",
@@ -313,6 +323,7 @@ export const petitionStatementTaken: Template = {
 export const petitionAppearAndStatement: Template = {
   slug: "court-petition-06-appear-and-statement",
   category: "litigation",
+  layout: "petition",
   priceNpr: 299,
   title: { ne: "हाजिर गराई वयान गराइपाऊँ (फाराम नं. ६)", en: "Appear and Give a Statement (Form 6)" },
   summary: {
@@ -340,6 +351,7 @@ export const petitionAppearAndStatement: Template = {
     courtFeeClause(),
     {
       id: "request",
+      numbered: true,
       heading: { ne: "निवेदन", en: "The petition" },
       body: {
         ne: "उक्त मुद्दामा मेरा नाममा मुलुकी देवानी कार्यविधि संहिता, २०७४ को दफा १२३ बमोजिम जारी भएको म्याद मिति {{servedDateBs}} मा तामेल भएकाले तामेल भएका मितिले म्यादभित्रै बयानका लागि हाजिर हुन आएको छु। बयान गराइपाऊँ।",
@@ -356,6 +368,7 @@ export const petitionAppearAndStatement: Template = {
 export const petitionCertifiedCopy: Template = {
   slug: "court-petition-07-certified-copy",
   category: "litigation",
+  layout: "petition",
   priceNpr: 299,
   title: { ne: "नक्कल निवेदन (फाराम नं. ७)", en: "Request a Certified Copy (Form 7)" },
   summary: {
@@ -435,6 +448,7 @@ export const petitionCertifiedCopy: Template = {
     courtFeeClause(),
     {
       id: "request",
+      numbered: true,
       heading: { ne: "निवेदन", en: "The petition" },
       body: {
         ne: "म निवेदक {{requestBasis}} बमोजिम निम्नबमोजिमको लिखत/प्रमाणको नक्कल अदालतको/आफ्नै तर्फबाट सारी लिन पाउँ भनी नियम बमोजिमको दस्तुर साथै राखी निवेदन गर्दछु।\n\nनक्कल माग गरेका लिखत/प्रमाण:\n{{documentsRequested}}",
@@ -451,6 +465,7 @@ export const petitionCertifiedCopy: Template = {
 export const petitionFeeDeposited: Template = {
   slug: "court-petition-08-fee-deposited",
   category: "litigation",
+  layout: "petition",
   priceNpr: 299,
   title: { ne: "दस्तुर दाखिला गरेको (फाराम नं. ८)", en: "Fee Deposited (Form 8)" },
   summary: {
@@ -486,6 +501,7 @@ export const petitionFeeDeposited: Template = {
     courtFeeClause(),
     {
       id: "request",
+      numbered: true,
       heading: { ne: "निवेदन", en: "The petition" },
       body: {
         ne: "उल्लिखित मुद्दामा मलाई/हामीलाई सम्मानित अदालतबाट दस्तुर लिई हाजिर हुन आउनु भनी तारिख तोकी पाएकोमा देहायबमोजिमको दस्तुर लिई हाजिर हुन आएको छु/छौं।\n\nनपुग अदालती शुल्क (दफा ७७): रु. {{shortfallFeeNpr}}\nविशेषज्ञ/वैज्ञानिक परीक्षण दस्तुर: रु. {{expertFeeNpr}}\nम्याद/सूचना प्रकाशन दस्तुर (दफा १०५(२४)): रु. {{publicationFeeNpr}}\nअन्य दस्तुर: रु. {{otherFeeNpr}}\nबैंक दाखिला भौचर नं.: {{voucherNo}}",
@@ -508,6 +524,7 @@ export const petitionFeeDeposited: Template = {
 export const petitionLapsedDateCondoned37: Template = {
   slug: "court-petition-37-lapsed-date-condoned",
   category: "litigation",
+  layout: "petition",
   priceNpr: 299,
   title: {
     ne: "फौजदारी गुज्रेको तारिख थामिपाऊँ — दफा ८५ (फाराम नं. ३७)",
@@ -548,6 +565,7 @@ export const petitionLapsedDateCondoned37: Template = {
     courtFeeClause(),
     {
       id: "request",
+      numbered: true,
       heading: { ne: "निवेदन", en: "The petition" },
       body: {
         ne: "उल्लिखित मुद्दामा म/हामीले यस अदालतबाट मिति {{fixedDateBs}} गतेको तारिख तोकी पाएको थिएँ/थियौं। उक्त मितिमा अदालतमा उपस्थित भै तारिख लिनुपर्नेमा {{lapseReason}} भई तारिख गुज्रन गयो। तसर्थ मुलुकी फौजदारी कार्यविधि संहिता, २०७४ को दफा ८५(१) बमोजिम {{totalDays}} दिनमध्ये {{instanceCount}} पटक {{daysClaimed}} दिन गुज्रेको तारिख थामिपाऊँ। आवश्यक प्रमाण यसैसाथ छ।",
@@ -569,6 +587,7 @@ export const petitionLapsedDateCondoned37: Template = {
 export const petitionLapsedDeadlineMultiGround: Template = {
   slug: "court-petition-10-lapsed-deadline-multi-ground",
   category: "litigation",
+  layout: "petition",
   priceNpr: 299,
   title: { ne: "गुज्रेको म्याद थामिपाऊँ (फाराम नं. १०)", en: "Condone a Lapsed Deadline (Form 10)" },
   summary: {
@@ -620,6 +639,7 @@ export const petitionLapsedDeadlineMultiGround: Template = {
     courtFeeClause(),
     {
       id: "request",
+      numbered: true,
       heading: { ne: "निवेदन", en: "The petition" },
       body: {
         ne: "उक्त मुद्दामा सम्मानित अदालतबाट म/हामीका नाममा जारी भएको {{deadlineDays}} दिने म्याद मिति {{servedDateBs}} मा तामेल भई मिति {{dueDateBs}} सम्ममा हाजिर हुनुपर्नेमा {{lapseReason}} भई अदालतमा हाजिर हुन नसकी सो म्याद गुज्रिन गएकोले {{ground}} बमोजिम {{groundDetail}} {{daysClaimed}} दिनको म्याद थामिपाऊँ। प्रमाण यसैसाथ संलग्न गरेको छु।",
@@ -636,6 +656,7 @@ export const petitionLapsedDeadlineMultiGround: Template = {
 export const petitionStatusQuo: Template = {
   slug: "court-petition-11-status-quo",
   category: "litigation",
+  layout: "petition",
   priceNpr: 299,
   title: { ne: "यथास्थितिमा राखिपाऊँ (फाराम नं. ११)", en: "Preserve the Status Quo (Form 11)" },
   summary: {
@@ -673,6 +694,7 @@ export const petitionStatusQuo: Template = {
     courtFeeClause(),
     {
       id: "request",
+      numbered: true,
       heading: { ne: "निवेदन", en: "The petition" },
       body: {
         ne: "उल्लिखित मुद्दामा मेरो/हाम्रो दाबी भएको सम्पत्तिमा विपक्षीले भौतिक स्वरूप बिगार्न लागेको हुँदा — {{riskDescription}} — मुलुकी देवानी कार्यविधि संहिता, २०७४ को दफा १५६ बमोजिम मुद्दा किनारा नभएसम्म यथास्थितिमा राखिपाऊँ। आवश्यक प्रमाण कागज यसैसाथ छ।\n\nयथास्थितिमा राख्नुपर्ने सम्पत्तिको विवरण:\n{{propertyDetail}}",
@@ -689,6 +711,7 @@ export const petitionStatusQuo: Template = {
 export const petitionIrregularServiceVoided: Template = {
   slug: "court-petition-12-irregular-service-voided",
   category: "litigation",
+  layout: "petition",
   priceNpr: 299,
   title: { ne: "बेरीतको म्याद बदर गरिपाऊँ (फाराम नं. १२)", en: "Void an Irregularly Served Deadline (Form 12)" },
   summary: {
@@ -717,6 +740,7 @@ export const petitionIrregularServiceVoided: Template = {
     courtFeeClause(),
     {
       id: "request",
+      numbered: true,
       heading: { ne: "निवेदन", en: "The petition" },
       body: {
         ne: "उल्लिखित मुद्दामा मेरो/हाम्रो नाममा यस अदालतबाट मिति {{issuedDateBs}} मा जारी भएको म्याद/सूचना तामेल गर्दा मुलुकी देवानी कार्यविधि संहिता, २०७४ को दफा १०५ बमोजिमको रीत नपुर्‍याई तामेल भएको हुँदा — {{irregularityDetail}} — सो म्याद ऐ. संहिताको दफा ११७ बमोजिम बदर गरी पुनः म्याद तामेल गरिपाऊँ।",
@@ -733,6 +757,7 @@ export const petitionIrregularServiceVoided: Template = {
 export const petitionFreeLegalAid: Template = {
   slug: "court-petition-13-free-legal-aid",
   category: "litigation",
+  layout: "petition",
   priceNpr: 299,
   title: { ne: "निःशुल्क कानुनी सहायता उपलब्ध गराइपाऊँ (फाराम नं. १३)", en: "Request Free Legal Aid (Form 13)" },
   summary: {
@@ -776,6 +801,7 @@ export const petitionFreeLegalAid: Template = {
     partiesClause(),
     {
       id: "request",
+      numbered: true,
       heading: { ne: "निवेदन", en: "The petition" },
       body: {
         ne: "म/हामी {{aidGround}} भई कानून व्यवसायी राख्न असमर्थ भएकाले वैतनिक कानून व्यवसायी/अन्य कानून व्यवसायीमार्फत कानूनी सहायता ({{aidType}}) उपलब्ध गराई पाउन यो निवेदन गरेको छु/छौं। सर्वोच्च अदालत नियमावली, २०७४ को नियम १४३ बमोजिम वैतनिक कानून व्यवसायीमार्फत निःशुल्क कानुनी सहायता उपलब्ध गराइपाऊँ।",
@@ -792,6 +818,7 @@ export const petitionFreeLegalAid: Template = {
 export const petitionProBono: Template = {
   slug: "court-petition-14-pro-bono",
   category: "litigation",
+  layout: "petition",
   priceNpr: 299,
   title: { ne: "प्रो बोनो सेवा उपलब्ध गराइपाऊँ (फाराम नं. १४)", en: "Request Pro Bono Service (Form 14)" },
   summary: {
@@ -830,6 +857,7 @@ export const petitionProBono: Template = {
     partiesClause(),
     {
       id: "request",
+      numbered: true,
       heading: { ne: "निवेदन", en: "The petition" },
       body: {
         ne: "म/हामी {{aidGround}} भएकोले स्वेच्छिक कानूनी सहायता (प्रो बोनो सेवा) उपलब्ध गराई पाउन यो निवेदन गरेको छु/छौं। सर्वोच्च अदालत नियमावली, २०७४ को नियम १४६ बमोजिम स्वेच्छिक कानूनी सेवा (प्रो बोनो सेवा) उपलब्ध गराइपाऊँ।",
@@ -846,6 +874,7 @@ export const petitionProBono: Template = {
 export const petitionOriginalDocumentFiled: Template = {
   slug: "court-petition-15-original-document-filed",
   category: "litigation",
+  layout: "petition",
   priceNpr: 299,
   title: { ne: "सक्कल लिखत पेस गरेको (फाराम नं. १५)", en: "Original Document Filed (Form 15)" },
   summary: {
@@ -890,6 +919,7 @@ export const petitionOriginalDocumentFiled: Template = {
     courtFeeClause(),
     {
       id: "request",
+      numbered: true,
       heading: { ne: "निवेदन", en: "The petition" },
       body: {
         ne: "उक्त मुद्दामा {{requestBasis}} बमोजिम सम्मानित अदालतको मिति {{orderDateBs}} को आदेशबमोजिम तपसिलबमोजिमको सक्कल लिखत/फोटो/अन्य प्रमाण दाखिला गर्न ल्याएको छु। मिसिल सामेल गराइपाऊँ।\n\nतपसिल:\n{{documentDetail}}",
@@ -906,6 +936,7 @@ export const petitionOriginalDocumentFiled: Template = {
 export const petitionWitnessTestimony: Template = {
   slug: "court-petition-16-witness-testimony",
   category: "litigation",
+  layout: "petition",
   priceNpr: 299,
   title: { ne: "साक्षी हाजिर गराई बकपत्र गराइपाऊँ (फाराम नं. १६)", en: "Produce and Swear a Witness (Form 16)" },
   summary: {
@@ -961,6 +992,7 @@ export const petitionWitnessTestimony: Template = {
     courtFeeClause(),
     {
       id: "request",
+      numbered: true,
       heading: { ne: "निवेदन", en: "The petition" },
       body: {
         ne: "{{requestBasis}} बमोजिम उल्लिखित मुद्दामा सम्मानित अदालतको आदेशबमोजिम फिरादपत्र र प्रतिउत्तरपत्र/बयानको प्रमाण खण्डमा उल्लिखित साक्षी लिई हाजिर हुन आउनु भनी मलाई/हामीलाई मिति {{hearingDateBs}} को तारिख तोकी पाएकोमा तपसिलमा उल्लिखित साक्षी लिई उपस्थित भएको छु/छौं। हाजिर गराई {{swearingParty}} बकपत्र गराइपाऊँ।\n\nसाक्षीको विवरण:\n{{witnessDetail}}",
@@ -978,6 +1010,7 @@ export const petitionWitnessTestimony: Template = {
 export const petitionLapsedDeadlineMultiGround9: Template = {
   slug: "court-petition-09-lapsed-date-multi-ground",
   category: "litigation",
+  layout: "petition",
   priceNpr: 299,
   title: { ne: "गुज्रेको तारिख थामिपाऊँ (फाराम नं. ९)", en: "Condone a Lapsed Hearing Date (Form 9)" },
   summary: {
@@ -1037,6 +1070,7 @@ export const petitionLapsedDeadlineMultiGround9: Template = {
     courtFeeClause(),
     {
       id: "request",
+      numbered: true,
       heading: { ne: "निवेदन", en: "The petition" },
       body: {
         ne: "उक्त मुद्दामा सम्मानित अदालतबाट मलाई/हामीलाई मिति {{fixedDateBs}} गतेको तारिख तोकि पाएकोमा काबु बाहिरको परिस्थिति परी अदालतमा उपस्थित भै तारिख लिन नसकी सो तारिख गुज्रिन गएकोले — {{lapseReason}} — {{ground}} बमोजिम {{instance}} {{groundDetail}} {{daysClaimed}} दिनको तारिख थामिपाऊँ। प्रमाण यसैसाथ संलग्न गरेको छु।",
@@ -1054,6 +1088,7 @@ export const petitionLapsedDeadlineMultiGround9: Template = {
 export const petitionLapsedDateCaseRevival: Template = {
   slug: "court-petition-30-lapsed-date-case-revival",
   category: "litigation",
+  layout: "petition",
   priceNpr: 299,
   title: { ne: "गुज्रेको तारिख थामी मुद्दा सकार गर्न अनुमति पाऊँ (फाराम नं. ३०)", en: "Condone a Lapsed Date and Revive the Case (Form 30)" },
   summary: {
@@ -1093,6 +1128,7 @@ export const petitionLapsedDateCaseRevival: Template = {
     courtFeeClause(),
     {
       id: "request",
+      numbered: true,
       heading: { ne: "निवेदन", en: "The petition" },
       body: {
         ne: "वादी/प्रतिवादी भएको प्रस्तुत मुद्दा कैद वा जरिवानाको सजाय नहुने प्रकृतिको मुद्दा भएको र सम्मानित अदालतमा दर्ता भई कारबाहीयुक्त अवस्थामा रहेको छ। उजुरवाला {{complainantName}} {{revivalGround}}, मिति {{groundDateBs}} देखि, तोकिएको म्याद/तारिख गुज्रन गएको हुनाले गुज्रेको म्याद/तारिख थामी मुलुकी फौजदारी कार्यविधि संहिता, २०७४ को दफा १९० बमोजिम मृत्यु/होस ठेगाना नरहेको/बेपत्ता भएको मितिले बाटोको म्याद बाहेक पैंतिस दिनभित्र मुद्दा सकार गर्न अनुमति पाऊँ।",
@@ -1109,6 +1145,7 @@ export const petitionLapsedDateCaseRevival: Template = {
 export const petitionLapsedDateCondoned32: Template = {
   slug: "court-petition-32-lapsed-date-condoned",
   category: "litigation",
+  layout: "petition",
   priceNpr: 299,
   title: { ne: "गुज्रेको तारिख थामिपाऊँ — दफा १६८ (फाराम नं. ३२)", en: "Condone a Lapsed Hearing Date — §168 (Form 32)" },
   summary: {
@@ -1143,6 +1180,7 @@ export const petitionLapsedDateCondoned32: Template = {
     courtFeeClause(),
     {
       id: "request",
+      numbered: true,
       heading: { ne: "निवेदन", en: "The petition" },
       body: {
         ne: "उल्लिखित मुद्दामा यस अदालतबाट मिति {{fixedDateBs}} गतेको तारिख तोकी पाएको थिएँ/थियौं। उक्त मितिमा अदालतमा उपस्थित भै तारिख लिनुपर्नेमा {{lapseReason}} भई तारिख गुज्रन गयो। तसर्थ मुलुकी फौजदारी कार्यविधि संहिता, २०७४ को दफा १६८(३) बमोजिम गुज्रेको तारिख थामिपाऊँ। आवश्यक प्रमाण यसैसाथ संलग्न छ।",
@@ -1159,6 +1197,7 @@ export const petitionLapsedDateCondoned32: Template = {
 export const petitionLapsedDeadlineThreeGround: Template = {
   slug: "court-petition-36-lapsed-deadline-three-ground",
   category: "litigation",
+  layout: "petition",
   priceNpr: 299,
   title: { ne: "गुज्रेको म्याद थामिपाऊँ (फाराम नं. ३६)", en: "Condone a Lapsed Deadline (Form 36)" },
   summary: {
@@ -1207,6 +1246,7 @@ export const petitionLapsedDeadlineThreeGround: Template = {
     courtFeeClause(),
     {
       id: "request",
+      numbered: true,
       heading: { ne: "निवेदन", en: "The petition" },
       body: {
         ne: "उक्त मुद्दामा सम्मानित अदालतबाट म/हामीका नाममा जारी भएको {{deadlineDays}} दिने म्याद मिति {{servedDateBs}} मा तामेल भई मिति {{dueDateBs}} सम्ममा हाजिर हुनुपर्नेमा काबु बाहिरको परिस्थिति परी अदालतमा हाजिर हुन नसकी सो म्याद गुज्रिन गएकोले {{ground}} बमोजिम {{groundDetail}} {{daysClaimed}} दिनको म्याद थामिपाऊँ। प्रमाण यसैसाथ संलग्न गरेको छु।",
@@ -1223,6 +1263,7 @@ export const petitionLapsedDeadlineThreeGround: Template = {
 export const petitionAmendPleading: Template = {
   slug: "court-petition-17-amend-pleading",
   category: "litigation",
+  layout: "petition",
   priceNpr: 299,
   title: { ne: "संशोधन गरिपाऊँ (फाराम नं. १७)", en: "Correct a Clerical Error in a Pleading (Form 17)" },
   summary: {
@@ -1269,6 +1310,7 @@ export const petitionAmendPleading: Template = {
     courtFeeClause(),
     {
       id: "request",
+      numbered: true,
       heading: { ne: "निवेदन", en: "The petition" },
       body: {
         ne: "उल्लिखित मुद्दामा मैले/हामीले पेस गरेको {{documentType}}मा तपसिलमा उल्लेख भए अनुसारको टाइप/लेखाइको भुलबाट त्रुटि हुन गएको हुँदा सोको सट्टा तपसिलमा उल्लेख भए बमोजिमको बेहोरा कायम हुने गरी मुलुकी देवानी कार्यविधि नियमावली, २०७५ को नियम १४ र सर्वोच्च अदालत नियमावली, २०७४ को नियम १९ बमोजिम लिखत संशोधन गरिपाऊँ।\n\nपाना नं. {{pageNo}}, हरफ {{lineNo}}:\n{{errorDetail}}",
@@ -1285,6 +1327,7 @@ export const petitionAmendPleading: Template = {
 export const petitionCaseWithdrawal: Template = {
   slug: "court-petition-18-case-withdrawal",
   category: "litigation",
+  layout: "petition",
   priceNpr: 299,
   title: { ne: "मुद्दा फिर्ता गरिपाऊँ (फाराम नं. १८)", en: "Withdraw the Case (Form 18)" },
   summary: {
@@ -1328,6 +1371,7 @@ export const petitionCaseWithdrawal: Template = {
     courtFeeClause(),
     {
       id: "request",
+      numbered: true,
       heading: { ne: "निवेदन", en: "The petition" },
       body: {
         ne: "मैले/हामीले दायर गरेको रिट/निवेदन/पुनरावेदनपत्र बमोजिमको दाबी त्यागी सो दाबी फिर्ता लिनको लागि — {{withdrawalGround}} — प्रस्तुत मुद्दा मुलुकी देवानी कार्यविधि संहिता, २०७४ को दफा १९६ बमोजिम फिर्ता गरिपाउन यो निवेदन गरेको छु/छौं। माग बमोजिम मुद्दा फिर्ता गरिपाऊँ।",
@@ -1344,6 +1388,7 @@ export const petitionCaseWithdrawal: Template = {
 export const petitionCaseStayed19: Template = {
   slug: "court-petition-19-case-stayed",
   category: "litigation",
+  layout: "petition",
   priceNpr: 299,
   title: { ne: "मुद्दा मुलतबीमा राखिपाऊँ (फाराम नं. १९)", en: "Stay the Case (Form 19)" },
   summary: {
@@ -1375,6 +1420,7 @@ export const petitionCaseStayed19: Template = {
     courtFeeClause(),
     {
       id: "request",
+      numbered: true,
       heading: { ne: "निवेदन", en: "The petition" },
       body: {
         ne: "प्रस्तुत मुद्दा सम्मानित अदालतमा दायर भई कारबाहीयुक्त अवस्थामा रहेको छ। {{relatedCourt}} मा कारबाहीयुक्त अवस्थामा रहेको वादी {{relatedParties}} भएको मु.नं. {{relatedCaseNo}} को {{relatedCaseName}} मुद्दा प्रस्तुत मुद्दासँग अन्तरप्रभावी रहेकाले सो मुद्दा फैसला नहुन्जेलसम्मका लागि, {{otherReasons}}, उल्लिखित मुद्दा मुलुकी देवानी कार्यविधि संहिता, २०७४ को दफा २०१ बमोजिम मुलतबीमा राखिपाऊँ।",
@@ -1391,6 +1437,7 @@ export const petitionCaseStayed19: Template = {
 export const petitionCaseRevivedFromStay: Template = {
   slug: "court-petition-20-case-revived-from-stay",
   category: "litigation",
+  layout: "petition",
   priceNpr: 299,
   title: { ne: "मुद्दा मुलतबीबाट जगाइपाऊँ (फाराम नं. २०)", en: "Revive a Stayed Case (Form 20)" },
   summary: {
@@ -1419,6 +1466,7 @@ export const petitionCaseRevivedFromStay: Template = {
     courtFeeClause(),
     {
       id: "request",
+      numbered: true,
       heading: { ne: "निवेदन", en: "The petition" },
       body: {
         ne: "प्रस्तुत मुद्दा {{stayReason}} कारणबाट सम्मानित अदालतको मिति {{stayOrderDateBs}} को आदेशानुसार मुलतबीमा रहेकोमा उक्त प्रयोजन समाप्त भइसकेकोले मुलुकी देवानी कार्यविधि संहिता, २०७४ को दफा २०२ बमोजिम मुलतबीबाट जगाई कारबाही गरिपाउन सम्बन्धित कागजात संलग्न राखी निवेदन गर्दछु/गर्दछौं। निवेदन मागबमोजिम मुद्दा मुलतबीबाट जगाइ पाऊँ।",
@@ -1435,6 +1483,7 @@ export const petitionCaseRevivedFromStay: Template = {
 export const petitionDeferredFeeFacility: Template = {
   slug: "court-petition-21-deferred-fee-facility",
   category: "litigation",
+  layout: "petition",
   priceNpr: 299,
   title: { ne: "अदालती शुल्क पछि बुझाउने गरी सुविधा पाऊँ (फाराम नं. २१)", en: "Defer Payment of the Court Fee (Form 21)" },
   summary: {
@@ -1472,6 +1521,7 @@ export const petitionDeferredFeeFacility: Template = {
     partiesClause(),
     {
       id: "request",
+      numbered: true,
       heading: { ne: "निवेदन", en: "The petition" },
       body: {
         ne: "उपरोक्त विषयमा विपक्षी उपर प्रस्तुत मुद्दा दायर गर्न यस अदालतको आदेशानुसार म/हामीसँगबाट माग भएअनुसारको अदालती शुल्क रु. {{feeDueNpr}} दाखिला गर्नुपर्ने भएकोमा {{hardshipGround}} उक्त अदालती शुल्क हाल दाखिल गर्न नसक्ने हुँदा मुलुकी देवानी कार्यविधि संहिता, २०७४ को दफा ६५ बमोजिम अदालती शुल्क पछि बुझाउने गरी सुविधा पाऊँ।\n\nसंलग्न कागजात: {{recommendationOffice}}को सिफारिसपत्र।",
@@ -1488,6 +1538,7 @@ export const petitionDeferredFeeFacility: Template = {
 export const petitionBelatedEvidence: Template = {
   slug: "court-petition-22-belated-evidence",
   category: "litigation",
+  layout: "petition",
   priceNpr: 299,
   title: { ne: "छुट प्रमाण पेस गरेको बारे (फाराम नं. २२)", en: "Belated Evidence Filed (Form 22)" },
   summary: {
@@ -1516,6 +1567,7 @@ export const petitionBelatedEvidence: Template = {
     courtFeeClause(),
     {
       id: "request",
+      numbered: true,
       heading: { ne: "निवेदन", en: "The petition" },
       body: {
         ne: "उल्लिखित मुद्दामा प्रमाण लाग्ने निम्न कागज {{omissionReason}} कारणले पेस गर्न छुट भएको हुनाले पेसी तारिख अघि नै सर्वोच्च अदालत नियमावली, २०७४ को नियम ६९ बमोजिम छुट प्रमाण पेस गरेको छु। मिसिल सामेल राखिपाऊँ।\n\n{{evidenceList}}",
@@ -1532,6 +1584,7 @@ export const petitionBelatedEvidence: Template = {
 export const petitionJudgmentCorrection: Template = {
   slug: "court-petition-23-judgment-correction",
   category: "litigation",
+  layout: "petition",
   priceNpr: 299,
   title: { ne: "फैसला/आदेश संशोधन गरिपाऊँ (फाराम नं. २३)", en: "Correct a Clerical Error in a Judgment or Order (Form 23)" },
   summary: {
@@ -1568,6 +1621,7 @@ export const petitionJudgmentCorrection: Template = {
     courtFeeClause(),
     {
       id: "request",
+      numbered: true,
       heading: { ne: "निवेदन", en: "The petition" },
       body: {
         ne: "उल्लिखित मुद्दा सम्मानित अदालतमा दायर भई मिति {{judgmentDateBs}} मा फैसला/आदेश भएको छ। सो फैसला/आदेशमा तपसिलमा उल्लेख भए अनुसारको टाइप/लेखाइको भुलबाट त्रुटि हुन गएको हुँदा सोको सट्टा तपसिलबमोजिमको बेहोरा कायम गर्ने गरी न्याय प्रशासन ऐन, २०७३ को दफा १८ र सर्वोच्च अदालत नियमावली, २०७४ को नियम ९४ बमोजिम संशोधन गरिपाऊँ।\n\nपाना नं. {{pageNo}}, हरफ {{lineNo}}:\n{{errorDetail}}",
@@ -1584,6 +1638,7 @@ export const petitionJudgmentCorrection: Template = {
 export const petitionBondHearingDate: Template = {
   slug: "court-petition-24-bond-hearing-date",
   category: "litigation",
+  layout: "petition",
   priceNpr: 299,
   title: { ne: "धरौट तारेख पाऊँ (फाराम नं. २४)", en: "Remain on the Bond Hearing Roll (Form 24)" },
   summary: {
@@ -1622,6 +1677,7 @@ export const petitionBondHearingDate: Template = {
     courtFeeClause(),
     {
       id: "request",
+      numbered: true,
       heading: { ne: "निवेदन", en: "The petition" },
       body: {
         ne: "उल्लिखित मुद्दा {{originatingCourt}} अदालतमार्फत {{petitionType}} निवेदन दर्ता भई आज मिति {{dateFixedBs}} को तारिख तोकी हाजिर हुन जानु भनी पठाएकोमा उक्त मुद्दाको सक्कल मिसिल प्राप्त हुन नआएकाले सर्वोच्च अदालत नियमावली, २०७४ को नियम ६०(४) बमोजिम हाललाई धरौट तारेखमा रहन पाऊँ। तारिख पर्चाको प्रतिलिपि यसैसाथ छ।",
@@ -1638,6 +1694,7 @@ export const petitionBondHearingDate: Template = {
 export const petitionJudgmentInformation: Template = {
   slug: "court-petition-25-judgment-information",
   category: "litigation",
+  layout: "petition",
   priceNpr: 299,
   title: {
     ne: "फैसला/आदेशको जानकारी पाऊँ (फाराम नं. २५)",
@@ -1675,6 +1732,7 @@ export const petitionJudgmentInformation: Template = {
     courtFeeClause(),
     {
       id: "request",
+      numbered: true,
       heading: { ne: "निवेदन", en: "The petition" },
       body: {
         ne: "उल्लिखित मुद्दामा सम्मानित अदालतबाट मिति {{judgmentDateBs}} मा फैसला/आदेश भएकोमा पूर्ण पाठ तयार हुन समय लाग्ने भएकाले उक्त फैसला/आदेशको बेहोराको जानकारी पाउन म/हामी सरोकारवाला भएकाले यो निवेदन गरेको छु/छौं। सर्वोच्च अदालत नियमावली, २०७४ को नियम ९१(५)(६) बमोजिम उक्त मितिको फैसला/आदेशको जानकारी पाऊँ।",
@@ -1691,6 +1749,7 @@ export const petitionJudgmentInformation: Template = {
 export const petitionDetentionNotice: Template = {
   slug: "court-petition-26-detention-notice",
   category: "litigation",
+  layout: "petition",
   priceNpr: 299,
   title: {
     ne: "थुनामा परेको जानकारी बारे (फाराम नं. २६)",
@@ -1762,6 +1821,7 @@ export const petitionDetentionNotice: Template = {
     courtFeeClause(),
     {
       id: "request",
+      numbered: true,
       heading: { ne: "निवेदन", en: "The petition" },
       body: {
         ne: "उल्लिखित मुद्दामा म/हामीलाई मिति {{hearingDateBs}} को तारिख तोकिएकोमा म/हामी {{detentionCase}} मुद्दामा मिति {{detentionFromBs}} देखि थुनामा परेको हुनाले तारिखमा हाजिर हुन नसकेको हुँदा {{informant}} {{informantName}} बाट मुलुकी देवानी कार्यविधि संहिता, २०७४ को दफा १४० बमोजिम थुनामा परेको बेहोरा जानकारीको लागि अनुरोध छ।",
@@ -1778,6 +1838,7 @@ export const petitionDetentionNotice: Template = {
 export const petitionSettlementNotice: Template = {
   slug: "court-petition-27-settlement-notice",
   category: "litigation",
+  layout: "petition",
   priceNpr: 399,
   title: {
     ne: "मिलापत्रको जानकारी गराइपाऊँ (फाराम नं. २७)",
@@ -1829,6 +1890,7 @@ export const petitionSettlementNotice: Template = {
     courtFeeClause(),
     {
       id: "request",
+      numbered: true,
       heading: { ne: "निवेदन", en: "The petition" },
       body: {
         ne: "उपर्युक्त मुद्दा सम्मानित अदालतमा दायर भई हामीहरूबीच {{settlementTerms}} बेहोराबाट मिति {{settlementDateBs}} मा मिलापत्र भएकाले मिलापत्रबमोजिम गरिदिनु भनी सम्बन्धित अड्डा {{targetOffice}} का नाममा मुलुकी देवानी कार्यविधि संहिता, २०७४ को दफा १९३(६) बमोजिम जनाउ पुर्जी गरिपाऊँ।",
@@ -1845,6 +1907,7 @@ export const petitionSettlementNotice: Template = {
 export const petitionPropertyAttachment: Template = {
   slug: "court-petition-28-property-attachment",
   category: "litigation",
+  layout: "petition",
   priceNpr: 499,
   title: {
     ne: "सम्पत्ति रोक्का राखिपाऊँ (फाराम नं. २८)",
@@ -1915,6 +1978,7 @@ export const petitionPropertyAttachment: Template = {
     courtFeeClause(),
     {
       id: "request",
+      numbered: true,
       heading: { ne: "निवेदन", en: "The petition" },
       body: {
         ne: "उल्लिखित विपक्षी उपर मैले मिति {{caseFiledBs}} मा प्रस्तुत मुद्दा दायर गरी हाल विचाराधीन अवस्थामा रहेको छ। मैले/हामीले दाबी गरेको सम्पत्ति अन्य व्यक्तिहरूलाई हक हस्तान्तरण गर्ने सम्भावना रहेको छ। उक्त सम्पत्ति हक हस्तान्तरण भई गएमा मेरो हकमा असर पर्ने भएकोले तपसिलबमोजिमको सम्पत्ति कुनै पनि बेहोराले हक हस्तान्तरण, धितो बन्धक समेत राख्न नपाउने गरी मुलुकी देवानी संहिता, २०७४ को दफा २३० बमोजिम रोक्का राखिपाऊँ।",
@@ -1939,6 +2003,7 @@ export const petitionPropertyAttachment: Template = {
 export const petitionRemainOnHearingRoll: Template = {
   slug: "court-petition-29-remain-on-hearing-roll",
   category: "litigation",
+  layout: "petition",
   priceNpr: 299,
   title: {
     ne: "तारेखमा बस्न पाऊँ (फाराम नं. २९)",
@@ -1994,6 +2059,7 @@ export const petitionRemainOnHearingRoll: Template = {
     courtFeeClause(),
     {
       id: "request",
+      numbered: true,
       heading: { ne: "निवेदन", en: "The petition" },
       body: {
         ne: "उपर्युक्त मुद्दामा मैले/हामीले सर्वोच्च अदालत नियमावली, २०७४ को {{rollGround}} बमोजिम निवेदनसाथ उपस्थित भएको छु/छौं। तारेखमा रहन पाऊँ।",
@@ -2010,6 +2076,7 @@ export const petitionRemainOnHearingRoll: Template = {
 export const petitionStayForConflict: Template = {
   slug: "court-petition-31-stay-for-conflict",
   category: "litigation",
+  layout: "petition",
   priceNpr: 499,
   title: {
     ne: "मुद्दाको कारबाही रोकिपाऊँ (फाराम नं. ३१)",
@@ -2108,6 +2175,7 @@ export const petitionStayForConflict: Template = {
     courtFeeClause(),
     {
       id: "request",
+      numbered: true,
       heading: { ne: "निवेदन", en: "The petition" },
       body: {
         ne: "उल्लिखित मुद्दा सम्मानित अदालतमा कारबाहीयुक्त अवस्थामा रही इजलास नं. {{benchNo}} मा पेसी चढेको रहेछ। उक्त इजलासका माननीय न्यायाधीश श्री {{judgeName}} को निम्न कारणले गर्दा प्रस्तुत मुद्दासँग स्वार्थ बाझिने भएको हुँदा मुलुकी फौजदारी कार्यविधि संहिता, २०७४ को दफा १७६(३) बमोजिम मुद्दाको कारबाही र किनारा रोकिपाऊँ।\n\nस्वार्थ बाझिने कारण: {{conflictGround}}\n\n{{conflictDetail}}",
@@ -2124,6 +2192,7 @@ export const petitionStayForConflict: Template = {
 export const petitionReleaseExcessAttachment: Template = {
   slug: "court-petition-33-release-excess-attachment",
   category: "litigation",
+  layout: "petition",
   priceNpr: 499,
   title: {
     ne: "बढी रोक्का रहेको सम्पत्ति फुकुवा गरिपाऊँ (फाराम नं. ३३)",
@@ -2176,6 +2245,7 @@ export const petitionReleaseExcessAttachment: Template = {
     courtFeeClause(),
     {
       id: "request",
+      numbered: true,
       heading: { ne: "निवेदन", en: "The petition" },
       body: {
         ne: "उक्त मुद्दामा रोक्का राख्नुपर्ने सम्पत्तिभन्दा बढी सम्पत्ति रोक्का राखिएको हुनाले बढी रोक्का राखिएको देहायको सम्पत्ति मुलुकी फौजदारी कार्यविधि संहिता, २०७४ को दफा १५६(३) बमोजिम फुकुवा गरिपाऊँ।\n\n{{excessProperty}}\n\nराष्ट्रिय परिचयपत्र नं.: {{nationalIdNo}}",
@@ -2192,6 +2262,7 @@ export const petitionReleaseExcessAttachment: Template = {
 export const petitionCashInsteadOfSurety: Template = {
   slug: "court-petition-34-cash-instead-of-surety",
   category: "litigation",
+  layout: "petition",
   priceNpr: 499,
   title: {
     ne: "जेथाको सट्टा नगद धरौटी दाखिला गरिपाऊँ (फाराम नं. ३४)",
@@ -2264,6 +2335,7 @@ export const petitionCashInsteadOfSurety: Template = {
     courtFeeClause(),
     {
       id: "request",
+      numbered: true,
       heading: { ne: "निवेदन", en: "The petition" },
       body: {
         ne: "उपरोक्त मुद्दामा यस अदालतबाट {{orderStage}} को क्रममा मिति {{orderDateBs}} मा म/हामीबाट रु. {{orderedAmountNpr}} धरौटी वा सो बराबरको जेथा जमानत लिने आदेश भएकोमा नगद दाखिला गर्न नसकेको हुँदा सोबापत तपसिलमा उल्लिखित सम्पत्ति जेथा जमानी राखेकोमा, सोको सट्टा माग भएको रकम रु. {{depositedAmountNpr}} यसै निवेदनसाथ दाखिला गरेको छु/छौं। धरौट तथा जमानत निर्देशिका, २०७५ को दफा २६(१)(२) बमोजिम नगद धरौटी लिई, जेथा जमानतमा रहेको तपसिलको जग्गा ऐ. निर्देशिकाको दफा २७(ग) बमोजिम फुकुवा गरिपाऊँ।",
@@ -2288,6 +2360,7 @@ export const petitionCashInsteadOfSurety: Template = {
 export const petitionChangeSurety: Template = {
   slug: "court-petition-35-change-surety",
   category: "litigation",
+  layout: "petition",
   priceNpr: 499,
   title: {
     ne: "जेथा परिवर्तन गरिपाऊँ (फाराम नं. ३५)",
@@ -2354,6 +2427,7 @@ export const petitionChangeSurety: Template = {
     courtFeeClause(),
     {
       id: "request",
+      numbered: true,
       heading: { ne: "निवेदन", en: "The petition" },
       body: {
         ne: "उपर्युक्त मुद्दामा यस अदालतबाट {{orderStage}} को क्रममा मिति {{orderDateBs}} मा म/हामीबाट रु. {{orderedAmountNpr}} धरौटी वा सो बराबरको जेथा जमानत लिने आदेश भएकामा नगद दाखिला गर्न नसकेको हुँदा सोबापत तपसिलमा उल्लिखित सम्पत्ति जेथा जमानी राखेकोमा, {{changeReason}} कारणले गर्दा देहायबमोजिमको जेथा परिवर्तन गर्नुपर्ने भएको हुनाले धरौट तथा जमानत निर्देशिका, २०७५ को दफा २६ बमोजिम जेथा परिवर्तन गरी रोक्का जग्गा फुकुवा समेत गरिपाऊँ।",
@@ -2378,6 +2452,7 @@ export const petitionChangeSurety: Template = {
 export const petitionWitnessProtection: Template = {
   slug: "court-petition-38-witness-protection",
   category: "litigation",
+  layout: "petition",
   priceNpr: 399,
   title: {
     ne: "साक्षीको सुरक्षा प्रबन्ध गरिपाऊँ (फाराम नं. ३८)",
@@ -2433,6 +2508,7 @@ export const petitionWitnessProtection: Template = {
     courtFeeClause(),
     {
       id: "request",
+      numbered: true,
       heading: { ne: "निवेदन", en: "The petition" },
       body: {
         ne: "उल्लिखित मुद्दामा म/हामी साक्षीको रूपमा रहेको र {{riskReason}} कारणले {{riskStage}} म/हामीलाई सुरक्षामा खतरा रहेको हुनाले मुलुकी फौजदारी कार्यविधि संहिता, २०७४ को दफा ११४(१) बमोजिम सुरक्षा प्रबन्ध गरिपाऊँ।",
@@ -2449,6 +2525,7 @@ export const petitionWitnessProtection: Template = {
 export const petitionRevokeAttorney: Template = {
   slug: "court-petition-39-revoke-attorney",
   category: "litigation",
+  layout: "petition",
   priceNpr: 299,
   title: {
     ne: "वारेस बदर गरी तारिख सकार गरिपाऊँ (फाराम नं. ३९)",
@@ -2504,6 +2581,7 @@ export const petitionRevokeAttorney: Template = {
     courtFeeClause(),
     {
       id: "request",
+      numbered: true,
       heading: { ne: "निवेदन", en: "The petition" },
       body: {
         ne: "उक्त मुद्दामा मैले/हामीले जिल्ला {{attorneyDistrict}}, {{attorneyMunicipality}} बस्ने {{attorneyName}} लाई वारिस राख्न अख्तियारनामा लेखिदिएको र निज वारिसलाई यस अदालतबाट मिति {{attorneyDateBs}} गतेको तारिख तोकिएकोमा म/हामी आफैं तारिखमा रहने हुँदा मुलुकी फौजदारी कार्यविधि संहिता, २०७४ को दफा ९३ बमोजिम आफ्नो मुद्दाको तारिख आफैं सकार गरिपाऊँ।",
@@ -2520,6 +2598,7 @@ export const petitionRevokeAttorney: Template = {
 export const petitionAppointAttorney: Template = {
   slug: "court-petition-40-appoint-attorney",
   category: "litigation",
+  layout: "petition",
   priceNpr: 399,
   title: {
     ne: "वारिस नियुक्ति गर्न अनुमति पाऊँ (फाराम नं. ४०)",
@@ -2600,6 +2679,7 @@ export const petitionAppointAttorney: Template = {
     courtFeeClause(),
     {
       id: "request",
+      numbered: true,
       heading: { ne: "निवेदन", en: "The petition" },
       body: {
         ne: "उक्त मुद्दा मिति {{caseFiledBs}} मा सम्मानित अदालतमा दायर भई कारबाहीयुक्त अवस्थामा छ। म/हामी आफैं तारिखमा हाजिर भई पुर्पक्ष गर्नुपर्नेमा म/हामीलाई {{impediment}} काबुबाहिरको परिस्थिति परी अदालतमा उपस्थित हुन नसक्ने भएको र उक्त मुद्दा निम्नबमोजिमको बेहोरा भएको हुनाले मुलुकी फौजदारी कार्यविधि संहिता, २०७४ को दफा ९५(१) बमोजिम वारिस नियुक्त गर्न अनुमति पाऊँ।\n\nअनुमति पाउनुपर्ने कारण: {{permissionGround}}",
@@ -2619,6 +2699,7 @@ export const petitionAppointAttorney: Template = {
 export const petitionCriminalCaseStayed: Template = {
   slug: "court-petition-41-criminal-case-stayed",
   category: "litigation",
+  layout: "petition",
   priceNpr: 399,
   title: {
     ne: "मुद्दा मुलतबीमा राखिपाऊँ — फौजदारी (फाराम नं. ४१)",
@@ -2694,6 +2775,7 @@ export const petitionCriminalCaseStayed: Template = {
     courtFeeClause(),
     {
       id: "request",
+      numbered: true,
       heading: { ne: "निवेदन", en: "The petition" },
       body: {
         ne: "प्रस्तुत मुद्दा सम्मानित अदालतमा दायर भई कारबाहीयुक्त अवस्थामा छ। निम्न कारण परेकोले उल्लिखित मुद्दा मुलुकी फौजदारी कार्यविधि संहिता, २०७४ को दफा ९७(१) बमोजिम मुलतबीमा राखिपाऊँ।\n\nमुलतबी रहनुपर्ने कारण:\n(क) {{relatedCourt}} मा कारबाहीयुक्त अवस्थामा रहेको, वादी {{relatedPlaintiff}} प्रतिवादी {{relatedDefendant}} भएको {{relatedCaseNo}} को {{relatedCaseType}} मुद्दा प्रस्तुत मुद्दासँग अन्तरप्रभावी रहेकाले सो मुद्दा फैसला नहुन्जेलसम्मका लागि।\n(ख) {{otherGround}}\n\nसंलग्न कागजात: {{attachedDocuments}}",
@@ -2710,6 +2792,7 @@ export const petitionCriminalCaseStayed: Template = {
 export const petitionTimeToProduceEvidence: Template = {
   slug: "court-petition-42-time-to-produce-evidence",
   category: "litigation",
+  layout: "petition",
   priceNpr: 299,
   title: {
     ne: "प्रमाण पेस गर्न अनुमति पाऊँ (फाराम नं. ४२)",
@@ -2766,6 +2849,7 @@ export const petitionTimeToProduceEvidence: Template = {
     courtFeeClause(),
     {
       id: "request",
+      numbered: true,
       heading: { ne: "निवेदन", en: "The petition" },
       body: {
         ne: "प्रस्तुत मुद्दामा प्रमाण लाग्ने लिखत वा दसी प्रमाण {{filingOccasion}} पेस गर्नुपर्नेमा म/हामीले उक्त प्रमाणहरू — {{evidenceDescription}} — {{impediment}} काबुबाहिरको परिस्थिति परी पेस गर्न नसकेको हुनाले मुलुकी फौजदारी कार्यविधि संहिता, २०७४ को दफा ९९(३) बमोजिम प्रमाण पेस गर्न अर्को तारिख तोकिपाऊँ।",
@@ -2782,6 +2866,7 @@ export const petitionTimeToProduceEvidence: Template = {
 export const petitionPersonProduced: Template = {
   slug: "court-petition-43-person-produced",
   category: "litigation",
+  layout: "petition",
   priceNpr: 249,
   title: {
     ne: "कारणी उपस्थित गराएको (फाराम नं. ४३)",
@@ -2838,6 +2923,7 @@ export const petitionPersonProduced: Template = {
     courtFeeClause(),
     {
       id: "request",
+      numbered: true,
       heading: { ne: "निवेदन", en: "The petition" },
       body: {
         ne: "उल्लिखित मुद्दामा {{purpose}} आज मिति {{producedOnBs}} गते कारणीलाई उपस्थित गराउनु भनी तारेख तोकी पाएबमोजिम यसै निवेदनसाथ आफ्नो पक्ष/कारणी {{personProduced}} लाई उपस्थित गराएको छु। कानूनबमोजिम गरिपाऊँ।",
@@ -2859,6 +2945,7 @@ export const petitionPersonProduced: Template = {
 export const petitionReleaseAttachment: Template = {
   slug: "court-petition-44-release-attachment",
   category: "litigation",
+  layout: "petition",
   priceNpr: 449,
   title: {
     ne: "रोक्का रहेको सम्पत्ति फुकुवा गरिपाऊँ (फाराम नं. ४४)",
@@ -2907,6 +2994,7 @@ export const petitionReleaseAttachment: Template = {
     courtFeeClause(),
     {
       id: "request",
+      numbered: true,
       heading: { ne: "निवेदन", en: "The petition" },
       body: {
         ne: "उक्त मुद्दामा {{releaseGround}} भएकोले देहायको सम्पत्ति रोक्का राख्न नपर्ने हुँदा मुलुकी फौजदारी कार्यविधि नियमावली, २०७५ को नियम ९२(२) तथा मुलुकी देवानी कार्यविधि संहिताको दफा १५६ बमोजिम रोक्का रहेको जग्गा फुकुवा गरिपाऊँ।\n\n{{attachedProperty}}",
@@ -2923,6 +3011,7 @@ export const petitionReleaseAttachment: Template = {
 export const petitionDepositRefund: Template = {
   slug: "court-petition-45-deposit-refund",
   category: "litigation",
+  layout: "petition",
   priceNpr: 399,
   title: {
     ne: "धरौटी रकम फिर्ता पाऊँ (फाराम नं. ४५)",
@@ -2994,6 +3083,7 @@ export const petitionDepositRefund: Template = {
     courtFeeClause(),
     {
       id: "request",
+      numbered: true,
       heading: { ne: "निवेदन", en: "The petition" },
       body: {
         ne: "{{refundGround}} भएकोले उक्त मुद्दामा मैले/हामीले यस अदालतमा राखेको निम्नानुसारको धरौटी {{refundBasis}} बमोजिम फिर्ता पाऊँ।\n\n{{depositDetail}}",
@@ -3019,6 +3109,7 @@ export const petitionDepositRefund: Template = {
 export const petitionCourtFeeRefund: Template = {
   slug: "court-petition-46-court-fee-refund",
   category: "litigation",
+  layout: "petition",
   priceNpr: 349,
   title: {
     ne: "अदालती शुल्क फिर्ता पाऊँ (फाराम नं. ४६)",
@@ -3057,6 +3148,7 @@ export const petitionCourtFeeRefund: Template = {
     courtFeeClause(),
     {
       id: "request",
+      numbered: true,
       heading: { ne: "निवेदन", en: "The petition" },
       body: {
         ne: "उक्त मुद्दा मिति {{settlementDateBs}} मा मिलापत्र भएको र सो मिलापत्रअनुसार मैले/हामीले फिर्ता पाउने ठहरेको अदालती शुल्क रु. {{refundAmountNpr}} मुलुकी देवानी कार्यविधि संहिता, २०७४ को दफा ८२ बमोजिम फिर्ता पाऊँ। आवश्यक कागजात यसैसाथ छ।",
@@ -3082,6 +3174,7 @@ export const petitionCourtFeeRefund: Template = {
 export const petitionCashDepositMade: Template = {
   slug: "court-petition-47-cash-deposit-made",
   category: "litigation",
+  layout: "petition",
   priceNpr: 399,
   title: {
     ne: "नगद धरौट जम्मा गरेको (फाराम नं. ४७)",
@@ -3156,6 +3249,7 @@ export const petitionCashDepositMade: Template = {
     courtFeeClause(),
     {
       id: "request",
+      numbered: true,
       heading: { ne: "निवेदन", en: "The petition" },
       body: {
         ne: "उल्लिखित मुद्दामा मिति {{orderDateBs}} मा {{depositBasis}} माननीय न्यायाधीश श्री {{judgeName}} को इजलासबाट मलाई {{sentence}} बापत धरौट राख्ने आदेश/सुविधा प्राप्त भएकोले त्यसबापतको नगद रकम रु. {{depositAmountNpr}} यसै निवेदनसाथ दाखिला गरेको छु। उक्त धरौट रकम बुझी लिई कानूनबमोजिम तारिखमा रहन/पुनरावेदन दर्ता गर्न पाऊँ।",
@@ -3172,6 +3266,7 @@ export const petitionCashDepositMade: Template = {
 export const petitionBankGuaranteeGiven: Template = {
   slug: "court-petition-48-bank-guarantee-given",
   category: "litigation",
+  layout: "petition",
   priceNpr: 449,
   title: {
     ne: "बैंक जमानत दिइएको (फाराम नं. ४८)",
@@ -3252,6 +3347,7 @@ export const petitionBankGuaranteeGiven: Template = {
     courtFeeClause(),
     {
       id: "request",
+      numbered: true,
       heading: { ne: "निवेदन", en: "The petition" },
       body: {
         ne: "उल्लिखित मुद्दामा मिति {{orderDateBs}} मा {{depositBasis}} माननीय न्यायाधीश श्री {{judgeName}} को इजलासबाट मलाई {{sentence}} बापत रु. {{guaranteeAmountNpr}} धरौट वा जमानत माग्ने गरी आदेश भएकोले, त्यसबापत {{bankOffice}} मा कार्यालय रहेको {{bankName}} ले मिति {{guaranteeValidUntilBs}} सम्मको लागि मिति {{guaranteeIssuedBs}} मा जारी गरेको बैंक जमानत यसै निवेदनसाथ दाखिला गरेको छु। उक्त बैंक जमानत अदालतको आदेशानुसारको अवधिभर कायम रहने गरी बुझी लिई कानूनबमोजिम गरिपाऊँ।",
@@ -3268,6 +3364,7 @@ export const petitionBankGuaranteeGiven: Template = {
 export const petitionAppearInPerson: Template = {
   slug: "court-petition-49-appear-in-person",
   category: "litigation",
+  layout: "petition",
   priceNpr: 249,
   title: {
     ne: "स्वयं उपस्थित भई हाजिर हुन पाऊँ (फाराम नं. ४९)",
@@ -3317,6 +3414,7 @@ export const petitionAppearInPerson: Template = {
     courtFeeClause(),
     {
       id: "request",
+      numbered: true,
       heading: { ne: "निवेदन", en: "The petition" },
       body: {
         ne: "प्रस्तुत मुद्दामा म निवेदक {{onlineThroughCourt}} अदालतमार्फत अनलाइन तारिखमा रहँदै आएको र आज मिति {{appearanceDateBs}} गते तोकिएको {{dateType}} मा यसै अदालतमा उपस्थित भएको सन्दर्भमा सूचना प्रविधिको प्रयोग (अनलाइन) बाट तारिख लिने सम्बन्धी निर्देशिका, २०७२ को दफा १४ बमोजिम यसै अदालतमा तारिखमा हाजिर हुन पाऊँ भनी यो निवेदन पेस गरेको छु।",
@@ -3333,6 +3431,7 @@ export const petitionAppearInPerson: Template = {
 export const petitionAppearWithinFifteenDays: Template = {
   slug: "court-petition-50-appear-within-fifteen-days",
   category: "litigation",
+  layout: "petition",
   priceNpr: 249,
   title: {
     ne: "१५ दिने म्यादमा हाजिर हुन पाऊँ (फाराम नं. ५०)",
@@ -3370,6 +3469,7 @@ export const petitionAppearWithinFifteenDays: Template = {
     courtFeeClause(),
     {
       id: "request",
+      numbered: true,
       heading: { ne: "निवेदन", en: "The petition" },
       body: {
         ne: "प्रस्तुत मुद्दामा सर्वोच्च अदालत नियमावली, २०७४ को नियम ६७ बमोजिम आदेश भई मेरा नाममा जारी भएको १५ दिने म्याद मिति {{noticeServedBs}} मा तामेल भएकोले म तामेल भएको मितिले म्यादभित्रै हाजिर हुन आएको छु। हाजिर भई सर्वोच्च अदालत नियमावली, २०७४ को नियम ७१ बमोजिम तारिखमा रहन पाऊँ।",
@@ -3392,6 +3492,7 @@ export const petitionAppearWithinFifteenDays: Template = {
 export const petitionOnlineHearingEnrolment: Template = {
   slug: "court-petition-51-online-hearing-enrolment",
   category: "litigation",
+  layout: "petition",
   priceNpr: 349,
   title: {
     ne: "अनलाइन तारिखमा रहन पाऊँ (फाराम नं. ५१)",
@@ -3529,6 +3630,7 @@ export const petitionOnlineHearingEnrolment: Template = {
 export const petitionRule62Order: Template = {
   slug: "court-petition-52-rule-62-order",
   category: "litigation",
+  layout: "petition",
   priceNpr: 599,
   title: {
     ne: "नियम ६२ बमोजिम आदेश जारी पाऊँ (फाराम नं. ५२)",
@@ -3634,6 +3736,7 @@ export const petitionRule62Order: Template = {
     courtFeeClause(),
     {
       id: "request",
+      numbered: true,
       heading: { ne: "निवेदन", en: "The petition" },
       body: {
         ne: "{{decidedCaseParties}} भएको मुद्दा नं. {{decidedCaseNo}} को मुद्दामा भएको आदेश/निर्णय मेरो हकमा समेत आकर्षित हुने भएकोले सर्वोच्च अदालत नियमावली, २०७४ को नियम ६२ को उपनियम (१) बमोजिम देहायको निवेदन पेस गरेको छु।",

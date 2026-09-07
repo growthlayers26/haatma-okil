@@ -256,6 +256,8 @@ export function closingClause(variant: "standard" | "copy-petition" = "standard"
 
   return {
     id: "closing",
+    // Paragraph 2 on the forms: the truth declaration, then the signature and date.
+    numbered: true,
     heading: { ne: "घोषणा र हस्ताक्षर", en: "Declaration and signature" },
     locked: true,
     body,
