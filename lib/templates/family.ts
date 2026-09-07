@@ -25,6 +25,17 @@ export const divorcePetition: Template = {
   slug: "divorce-petition-mutual",
   category: "family",
   priceNpr: 1_299,
+  /*
+   * This is filed at a District Court, not exchanged between two contracting
+   * parties — the same shape as the 52 Supreme Court petitions, and it was
+   * getting none of that treatment: a centred title, a "Date:" stamp at the top,
+   * numbered clause HEADINGS with statutory badges and citation arrows, none of
+   * which belongs on a filing. It also never had a signing clause of its own,
+   * having relied entirely on the generic instrument footer — which for a joint
+   * petition happened to give the right COUNT of lines by accident, but attached
+   * to a document shaped like a private contract rather than a filing.
+   */
+  layout: "petition",
   title: { ne: "सहमतिमा सम्बन्ध विच्छेदको निवेदन", en: "Mutual Consent Divorce Petition" },
   summary: {
     ne: "दुवै पक्षको सहमतिमा सम्बन्ध विच्छेदका लागि अदालतमा दिइने निवेदनको ढाँचा। अदालतको फैसलाबिना सम्बन्ध विच्छेद हुँदैन।",
@@ -91,6 +102,7 @@ export const divorcePetition: Template = {
           label: { ne: "सम्पत्ति बाँडफाँट", en: "Division of property" },
         },
         moneyField("maintenanceNpr", { ne: "मासिक भरणपोषण (रु.)", en: "Monthly maintenance (NPR)" }, undefined, false),
+        bsDateField("petitionDateBs", { ne: "निवेदन दिने मिति (वि.सं.)", en: "Date of the petition (BS)" }),
       ],
     },
   ],
@@ -107,6 +119,7 @@ export const divorcePetition: Template = {
     },
     {
       id: "parties",
+      numbered: true,
       heading: { ne: "निवेदकहरू", en: "The petitioners" },
       body: {
         ne: `हामी {{husbandName}} (नागरिकता नं. {{husbandCitizenshipNo}}) र {{wifeName}} (नागरिकता नं. {{wifeCitizenshipNo}}), ठेगाना {{address}}, संयुक्त रूपमा यो निवेदन दिन्छौं।`,
@@ -115,6 +128,7 @@ export const divorcePetition: Template = {
     },
     {
       id: "marriage",
+      numbered: true,
       heading: { ne: "विवाहको विवरण", en: "The marriage" },
       body: {
         ne: `हाम्रो विवाह मिति {{marriageDateBs}} मा सम्पन्न भएको थियो।`,
@@ -123,6 +137,7 @@ export const divorcePetition: Template = {
     },
     {
       id: "separation",
+      numbered: true,
       heading: { ne: "छुट्टिएको अवस्था", en: "Separation" },
       when: { field: "separationDateBs", op: "truthy" },
       body: {
@@ -132,6 +147,7 @@ export const divorcePetition: Template = {
     },
     {
       id: "consent",
+      numbered: true,
       heading: { ne: "सहमति", en: "Consent" },
       locked: true,
       citation: DIVORCE,
@@ -142,6 +158,7 @@ export const divorcePetition: Template = {
     },
     {
       id: "children",
+      numbered: true,
       heading: { ne: "सन्तानको व्यवस्था", en: "Arrangements for the children" },
       when: { field: "hasChildren", op: "eq", value: "yes" },
       body: {
@@ -151,6 +168,7 @@ export const divorcePetition: Template = {
     },
     {
       id: "maintenance",
+      numbered: true,
       heading: { ne: "भरणपोषण", en: "Maintenance" },
       when: { field: "maintenanceNpr", op: "truthy" },
       body: {
@@ -160,6 +178,7 @@ export const divorcePetition: Template = {
     },
     {
       id: "property",
+      numbered: true,
       heading: { ne: "सम्पत्ति बाँडफाँट", en: "Division of property" },
       body: {
         ne: `सम्पत्ति सम्बन्धमा हामीबीच देहायबमोजिम सहमति भएको छ:\n\n{{propertyArrangements}}`,
@@ -168,12 +187,30 @@ export const divorcePetition: Template = {
     },
     {
       id: "prayer",
+      numbered: true,
       heading: { ne: "अनुरोध", en: "Prayer" },
       locked: true,
       citation: DIVORCE,
       body: {
         ne: `तसर्थ, माथिको व्यहोरा विचार गरी प्रचलित कानुनबमोजिम हाम्रो सम्बन्ध विच्छेद गरी फैसला गरिपाउँ भनी अनुरोध गर्दछौं। अदालतको फैसला नभएसम्म विवाह कायमै रहने कुरा हामीलाई जानकारी छ।`,
         en: `We therefore respectfully pray that the Court grant a decree dissolving our marriage in accordance with prevailing law. We understand that the marriage subsists until such a decree is granted.`,
+      },
+    },
+    /*
+     * The petition layout renders no generic signature footer — see
+     * SignatureFooter in components/document-preview.tsx, which only fires on
+     * `instrument` layout. A joint petition needs both petitioners' names on the
+     * page, so that has to live here, in the clause content itself, the same way
+     * every one of the 52 Supreme Court forms carries its own closing.
+     */
+    {
+      id: "closing",
+      numbered: true,
+      heading: { ne: "घोषणा र हस्ताक्षर", en: "Declaration and signature" },
+      locked: true,
+      body: {
+        ne: `लेखिएको बेहोरा ठिक साँचो हो, फरक ठहरे कानूनबमोजिम सहुँला बुझाउँला।\n\nनिवेदक: {{husbandName}}\n\nनिवेदक: {{wifeName}}\n\nइति संवत् {{petitionDateBs}} शुभम्।`,
+        en: `What is written herein is true and correct; if found otherwise, we shall submit to the consequences prescribed by law.\n\nPetitioner: {{husbandName}}\n\nPetitioner: {{wifeName}}\n\nDated (BS): {{petitionDateBs}}.`,
       },
     },
   ],
@@ -186,6 +223,15 @@ export const adoptionDeed: Template = {
   slug: "adoption-deed",
   category: "family",
   priceNpr: 1_299,
+  signatures: {
+    kind: "parties",
+    roles: [
+      { ne: "ग्रहण गर्ने पक्ष", en: "Adopter" },
+      { ne: "दिने पक्ष (आमाबुबा/संरक्षक)", en: "Giving party (parent or guardian)" },
+    ],
+  },
+  witnessLines: 2,
+  notarised: true,
   title: { ne: "धर्मपुत्र/धर्मपुत्री ग्रहणको लिखत", en: "Adoption Deed" },
   summary: {
     ne: "धर्मपुत्र वा धर्मपुत्री ग्रहण गर्ने लिखत। कानुनी प्रक्रिया पूरा नभई सम्बन्ध स्थापित हुँदैन।",
@@ -275,6 +321,13 @@ export const affidavit: Template = {
   slug: "affidavit",
   category: "family",
   priceNpr: 299,
+  /*
+   * One declarant signs, before a notary — not before lay witnesses, which is why
+   * this carries `notarised` and no `witnessLines`. The old footer's second box
+   * implied a co-declarant this document has no place for.
+   */
+  signatures: { kind: "single", role: { ne: "घोषणाकर्ता", en: "Declarant" } },
+  notarised: true,
   title: { ne: "स्वघोषणा (हलफनामा)", en: "Affidavit" },
   summary: {
     ne: "आफूले जानेको कुरा सत्य हो भनी गरिने लिखित घोषणा। झुट्ठा विवरण दिनु कानुनी अपराध हो।",
@@ -376,6 +429,13 @@ export const legalNotice: Template = {
   slug: "legal-notice",
   category: "family",
   priceNpr: 499,
+  /*
+   * Unilateral: the recipient does not countersign a demand letter. Its own
+   * closing "sender" clause already names and addresses the one person who does —
+   * appending a generic two-box footer beneath that would print a name and address
+   * once, then two blank boxes implying a second signatory who was never a party.
+   */
+  signatures: { kind: "embedded" },
   title: { ne: "कानुनी सूचना (ताकेता पत्र)", en: "Legal Notice / Demand Letter" },
   summary: {
     ne: "मुद्दा हाल्नुअघि विपक्षी पक्षलाई पठाइने औपचारिक सूचना। धेरै विवाद यहीँ टुंगिन्छन्।",

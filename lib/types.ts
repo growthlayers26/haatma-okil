@@ -97,6 +97,36 @@ export type Clause = {
  */
 export type DocumentLayout = "instrument" | "petition";
 
+/**
+ * How an instrument's foot is signed. Ignored on `petition` layout, whose closing
+ * is its own numbered clause rather than a generic block.
+ *
+ * The default — two named signature lines side by side — is right for an ordinary
+ * bilateral contract and wrong for almost anything else. It was, for a while, the
+ * only option every template got, which meant a will was rendered with a line for
+ * a second signatory nobody expects to exist and no line for the two witnesses the
+ * document itself requires; a salary certificate got a duplicate, contradictory
+ * signature block bolted on beneath the one already written into its own body.
+ * Each variant below exists because one real document in this catalogue needed it.
+ */
+export type SignatureSpec =
+  /** Two named lines side by side — an ordinary bilateral contract. The default. */
+  | { kind: "parties"; roles: [Bilingual, Bilingual] }
+  /** One named line — a unilateral instrument with a single signatory: a grantor,
+   * a testator, a declarant. */
+  | { kind: "single"; role: Bilingual }
+  /** One line per non-empty row of a multi-line answer, for however many people a
+   * document actually names — a board's directors, a company's founders — rather
+   * than a count fixed at two. */
+  | { kind: "list"; fieldId: string; role: Bilingual }
+  /** An instruction plus blank ruled space, for a signatory count no field
+   * captures — "every founding shareholder must sign" said once, not guessed at. */
+  | { kind: "note"; text: Bilingual }
+  /** No footer at all: the clause content already ends with the sign-off — a
+   * letter's letterhead-and-signature block, a notice's "From:" line. Appending
+   * the generic footer on top would read as a second, contradictory signatory. */
+  | { kind: "embedded" };
+
 export type Category = "employment" | "property" | "business" | "family" | "litigation";
 
 export type AdvocateReview = {
@@ -113,6 +143,16 @@ export type Template = {
   slug: string;
   /** Defaults to `instrument`. */
   layout?: DocumentLayout;
+  /** Defaults to two generic party lines. See {@link SignatureSpec}. */
+  signatures?: SignatureSpec;
+  /**
+   * Blank witness signature lines below the signature block — 2 is the number
+   * every witnessed instrument in this catalogue actually asks for. Rendered only
+   * when set; a document with no statutory witness requirement gets none.
+   */
+  witnessLines?: number;
+  /** A notary attestation line below the signatures and any witnesses. */
+  notarised?: boolean;
   title: Bilingual;
   summary: Bilingual;
   category: Category;

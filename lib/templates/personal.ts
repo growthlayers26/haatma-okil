@@ -23,6 +23,15 @@ export const powerOfAttorney: Template = {
   slug: "power-of-attorney",
   category: "family",
   priceNpr: 499,
+  /*
+   * Only the grantor signs a power of attorney — the attorney accepts by acting on
+   * it, not by countersigning the instrument. The generic two-box footer used to
+   * imply a second contracting party that has no role here, and gave no line at
+   * all to the two witnesses the execution notes below require.
+   */
+  signatures: { kind: "single", role: { ne: "अख्तियार दिने व्यक्ति", en: "Grantor" } },
+  witnessLines: 2,
+  notarised: true,
   title: { ne: "अख्तियारनामा", en: "Power of Attorney" },
   summary: {
     ne: "अर्को व्यक्तिलाई आफ्नो तर्फबाट काम गर्ने अधिकार दिने कागजात। विदेशमा रहेका नेपालीका लागि सबैभन्दा आवश्यक कागजात।",
@@ -194,6 +203,15 @@ export const will: Template = {
   slug: "will",
   category: "family",
   priceNpr: 699,
+  /*
+   * One testator signs. The template's own "witnesses" clause already states that
+   * the signing happened before two witnesses — the old generic footer gave no
+   * actual line for either of them, so the document asserted something in its own
+   * text that its own signature block had no room to record.
+   */
+  signatures: { kind: "single", role: { ne: "इच्छापत्र लेख्ने व्यक्ति", en: "Testator" } },
+  witnessLines: 2,
+  notarised: true,
   title: { ne: "इच्छापत्र", en: "Will" },
   summary: {
     ne: "आफ्नो सम्पत्ति कसलाई दिने भन्ने इच्छा लेखिने कागजात। अंश हकसम्बन्धी कानुनी सीमा समेत स्पष्ट पारिएको।",

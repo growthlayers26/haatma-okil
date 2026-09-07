@@ -4,7 +4,137 @@ import { useLang } from "./language-provider";
 import { renderDocument } from "@/lib/render";
 import { formatBsLong, todayBs } from "@/lib/bs-date";
 import { toNepaliDigits } from "@/lib/nepal";
-import type { Template, Answers } from "@/lib/types";
+import type { Template, Answers, SignatureSpec, Bilingual } from "@/lib/types";
+
+const DEFAULT_SIGNATURES: SignatureSpec = {
+  kind: "parties",
+  roles: [
+    { ne: "पहिलो पक्ष", en: "First party" },
+    { ne: "दोस्रो पक्ष", en: "Second party" },
+  ],
+};
+
+function SignatureLine({ role }: { role?: Bilingual }) {
+  const { lang, bi } = useLang();
+  return (
+    <div>
+      <div className="h-10 border-b border-ink-3" />
+      <p className="mt-1.5 font-mono text-[0.7rem] text-ink-3">
+        {role ? role[lang] : bi({ ne: "हस्ताक्षर र मिति", en: "Signature and date" })}
+      </p>
+    </div>
+  );
+}
+
+/**
+ * The foot of an instrument, driven by `template.signatures` rather than a fixed
+ * two-box assumption.
+ *
+ * Every branch here answers a question the old, single hard-coded footer could not:
+ * how many people actually sign this document, and are any of them a witness rather
+ * than a party? A will signed by its testator alone got a line implying a second
+ * contracting party that does not exist, and no line at all for the two witnesses
+ * its own clause text says were present. This is the fix for that class of error,
+ * generalised so the next single-signer or N-signer template does not repeat it.
+ */
+function SignatureFooter({
+  template,
+  answers,
+  bi,
+}: {
+  template: Template;
+  answers: Answers;
+  bi: (b: Bilingual) => string;
+}) {
+  const spec = template.signatures ?? DEFAULT_SIGNATURES;
+
+  if (spec.kind === "embedded") {
+    // The clause content already ends with the sign-off — a letterhead-and-stamp
+    // block, a "From:" line. A footer here would be a second, contradictory one.
+    return null;
+  }
+
+  let body: React.ReactNode;
+
+  if (spec.kind === "parties") {
+    body = (
+      <div className="grid gap-8 sm:grid-cols-2">
+        {spec.roles.map((role, i) => (
+          <SignatureLine key={i} role={role} />
+        ))}
+      </div>
+    );
+  } else if (spec.kind === "single") {
+    body = (
+      <div className="max-w-xs">
+        <SignatureLine role={spec.role} />
+      </div>
+    );
+  } else if (spec.kind === "list") {
+    // Split on lines the way every multi-line "list your X, one per line" field in
+    // this catalogue is written to be read — see e.g. board-resolution's
+    // `directorsPresent` help text. Two blank lines stand in during preview, before
+    // the field has anything to split.
+    const raw = String(answers[spec.fieldId] ?? "").trim();
+    const names = raw
+      ? raw.split("\n").map((n) => n.trim()).filter(Boolean)
+      : ["", ""];
+    body = (
+      <div className="grid gap-8 sm:grid-cols-2">
+        {names.map((name, i) => (
+          <div key={i}>
+            <div className="h-10 border-b border-ink-3" />
+            <p className="mt-1.5 font-mono text-[0.7rem] text-ink-3">
+              {name || bi(spec.role)}
+            </p>
+          </div>
+        ))}
+      </div>
+    );
+  } else {
+    // "note" — a signatory count no field captures.
+    body = (
+      <div>
+        <p className="text-sm text-ink-2">{bi(spec.text)}</p>
+        <div className="mt-4 h-24 border-b border-ink-3" />
+      </div>
+    );
+  }
+
+  return (
+    <div className="mt-10 space-y-8 border-t border-rule pt-8">
+      {body}
+
+      {(template.witnessLines ?? 0) > 0 && (
+        <div>
+          <p className="font-mono text-[0.7rem] uppercase tracking-wider text-ink-3">
+            {bi({ ne: "साक्षी", en: "Witnesses" })}
+          </p>
+          <div className="mt-3 grid gap-8 sm:grid-cols-2">
+            {Array.from({ length: template.witnessLines ?? 0 }, (_, i) => (
+              <SignatureLine
+                key={i}
+                role={{
+                  ne: `साक्षी ${toNepaliDigits(i + 1)}`,
+                  en: `Witness ${i + 1}`,
+                }}
+              />
+            ))}
+          </div>
+        </div>
+      )}
+
+      {template.notarised && (
+        <div>
+          <div className="h-10 max-w-xs border-b border-ink-3" />
+          <p className="mt-1.5 font-mono text-[0.7rem] text-ink-3">
+            {bi({ ne: "नोटरी पब्लिकको प्रमाणीकरण", en: "Notary public attestation" })}
+          </p>
+        </div>
+      )}
+    </div>
+  );
+}
 
 /**
  * Renders the assembled document.
@@ -144,21 +274,7 @@ export function DocumentPreview({
               ))}
             </div>
 
-            {/*
-              Two signature lines, because an instrument binds two sides. A petition
-              has one signatory and carries them in its own closing line, which is
-              why this block is not rendered there.
-            */}
-            <div className="mt-10 grid gap-8 border-t border-rule pt-8 sm:grid-cols-2">
-              {[0, 1].map((i) => (
-                <div key={i}>
-                  <div className="h-10 border-b border-ink-3" />
-                  <p className="mt-1.5 font-mono text-[0.7rem] text-ink-3">
-                    {bi({ ne: "हस्ताक्षर र मिति", en: "Signature and date" })}
-                  </p>
-                </div>
-              ))}
-            </div>
+            <SignatureFooter template={template} answers={answers} bi={bi} />
           </>
         )}
       </div>
