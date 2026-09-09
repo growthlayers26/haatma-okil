@@ -1,175 +1,47 @@
 "use client";
 
 import Link from "next/link";
-import { Suspense, useEffect, useRef, useState } from "react";
-import { useSearchParams } from "next/navigation";
 import { useLang } from "@/components/language-provider";
 
-type State = "checking" | "paid" | "pending" | "failed";
-
 /**
- * Where the gateway sends the user back.
+ * Where an old payment link lands.
  *
- * This page never reads a status from the URL. It takes only the order id and asks
- * the server to confirm with the gateway — a redirect is an arrival, not a receipt.
+ * This page used to poll `/api/payment/verify` and wait for the gateway's answer.
+ * Bagisto owns checkout now, and that endpoint is gone — so the polling version would
+ * have sat on a spinner forever for anyone who reached it from a stale tab or a
+ * gateway callback configured before the move.
+ *
+ * Kept rather than deleted precisely for those people: the ones most likely to arrive
+ * here are mid-payment and anxious about money, and a 404 answers none of that. It
+ * says where the receipt is and where the document is, and asserts nothing about
+ * whether the payment succeeded, because this page has no way to know.
  */
-function PaymentReturn() {
+export default function PaymentReturnPage() {
   const { bi } = useLang();
-  const params = useSearchParams();
-  const orderId = params.get("order");
-
-  const [state, setState] = useState<State>("checking");
-  const startedRef = useRef(false);
-
-  useEffect(() => {
-    if (!orderId || startedRef.current) return;
-    startedRef.current = true;
-
-    let cancelled = false;
-
-    async function check(attempt: number): Promise<void> {
-      const response = await fetch("/api/payment/verify", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ orderId }),
-      }).catch(() => null);
-
-      if (cancelled) return;
-
-      const data = (await response?.json().catch(() => null)) as { status?: State } | null;
-      const status = data?.status;
-
-      if (status === "paid" || status === "failed") {
-        setState(status);
-        return;
-      }
-
-      // Wallet settlement can lag the redirect by a few seconds. Back off a little
-      // and retry rather than telling the user it failed.
-      if (attempt < 4) {
-        setTimeout(() => void check(attempt + 1), 1500 * attempt);
-        return;
-      }
-      setState("pending");
-    }
-
-    void check(1);
-    return () => {
-      cancelled = true;
-    };
-  }, [orderId]);
-
-  if (!orderId) {
-    return (
-      <Shell title={bi({ ne: "अर्डर भेटिएन", en: "No order found" })}>
-        <p className="text-ink-2">
-          {bi({
-            ne: "यो लिङ्कमा अर्डरको विवरण छैन।",
-            en: "This link doesn't carry an order reference.",
-          })}
-        </p>
-      </Shell>
-    );
-  }
-
-  if (state === "checking") {
-    return (
-      <Shell title={bi({ ne: "भुक्तानी जाँच गर्दै", en: "Confirming your payment" })}>
-        <p className="text-ink-2">
-          {bi({
-            ne: "हामी भुक्तानी सेवासँग पुष्टि गर्दैछौं। यो पृष्ठ बन्द नगर्नुहोस्।",
-            en: "We're confirming with the payment provider. Please don't close this page.",
-          })}
-        </p>
-      </Shell>
-    );
-  }
-
-  if (state === "paid") {
-    return (
-      <Shell title={bi({ ne: "भुक्तानी सफल भयो", en: "Payment confirmed" })} tone="good">
-        <p className="text-ink-2">
-          {bi({
-            ne: "तपाईंको कागजात अब वाटरमार्कबिना डाउनलोड गर्न सकिन्छ।",
-            en: "Your document is now available without the watermark.",
-          })}
-        </p>
-        <Link
-          href="/dashboard"
-          className="mt-5 inline-block bg-accent px-5 py-2.5 text-sm font-semibold text-white transition-opacity hover:opacity-90"
-        >
-          {bi({ ne: "मेरो खातामा जानुहोस्", en: "Go to your dashboard" })}
-        </Link>
-      </Shell>
-    );
-  }
-
-  if (state === "pending") {
-    return (
-      <Shell title={bi({ ne: "भुक्तानी प्रक्रियामा छ", en: "Payment still processing" })} tone="warn">
-        <p className="text-ink-2">
-          {bi({
-            ne: "भुक्तानी सेवाले अझै पुष्टि गरेको छैन। रकम कटेको भए केही समयमै तपाईंको खातामा देखिनेछ। दोहोर्‍याएर भुक्तानी नगर्नुहोस्।",
-            en: "The provider hasn't confirmed yet. If money left your account it will appear shortly. Please don't pay again.",
-          })}
-        </p>
-        <p className="mt-3 font-mono text-xs text-ink-3">
-          {bi({ ne: "अर्डर नं.", en: "Order ref." })} {orderId}
-        </p>
-      </Shell>
-    );
-  }
 
   return (
-    <Shell title={bi({ ne: "भुक्तानी सफल भएन", en: "Payment not completed" })} tone="bad">
-      <p className="text-ink-2">
-        {bi({
-          ne: "यो भुक्तानी पूरा भएन। तपाईंको कागजात ड्राफ्टमै सुरक्षित छ र फेरि प्रयास गर्न सक्नुहुन्छ।",
-          en: "This payment didn't go through. Your draft is safe and you can try again.",
-        })}
-      </p>
-      <Link
-        href="/dashboard"
-        className="mt-5 inline-block border border-accent px-5 py-2.5 text-sm font-semibold text-accent transition-colors hover:bg-accent-soft"
-      >
-        {bi({ ne: "ड्राफ्टमा फर्कनुहोस्", en: "Back to your drafts" })}
-      </Link>
-    </Shell>
-  );
-}
+    <div className="mx-auto max-w-lg px-4 py-20 sm:px-6">
+      <div className="border-l-2 border-accent bg-surface p-6">
+        <h1 className="font-serif text-2xl font-semibold tracking-tight">
+          {bi({ ne: "भुक्तानी अब पसलबाट हुन्छ", en: "Payment is handled by the shop" })}
+        </h1>
 
-function Shell({
-  title,
-  tone = "neutral",
-  children,
-}: {
-  title: string;
-  tone?: "neutral" | "good" | "warn" | "bad";
-  children: React.ReactNode;
-}) {
-  const border =
-    tone === "good"
-      ? "border-malachite"
-      : tone === "warn"
-        ? "border-orpiment"
-        : tone === "bad"
-          ? "border-cinnabar"
-          : "border-rule-strong";
+        <p className="mt-3 text-ink-2">
+          {bi({
+            ne: "तपाईंको अर्डर र रसिद पसलको खातामा छ। भुक्तानी सफल भएको भए, कागजात खोल्न ड्यासबोर्डमा जानुहोस्।",
+            en: "Your order and receipt live in your shop account. If the payment went through, open your dashboard to apply it to a document.",
+          })}
+        </p>
 
-  return (
-    <div className="mx-auto max-w-2xl px-4 py-20 sm:px-6">
-      <div className={`border-l-2 ${border} bg-surface p-6`}>
-        <h1 className="font-serif text-2xl font-semibold tracking-tight">{title}</h1>
-        <div className="mt-3">{children}</div>
+        <div className="mt-5 flex flex-wrap gap-3">
+          <Link
+            href="/dashboard"
+            className="bg-accent px-5 py-2.5 text-sm font-semibold text-white transition-opacity hover:opacity-90"
+          >
+            {bi({ ne: "ड्यासबोर्ड खोल्नुहोस्", en: "Open dashboard" })}
+          </Link>
+        </div>
       </div>
     </div>
-  );
-}
-
-export default function PaymentReturnPage() {
-  return (
-    <Suspense fallback={<div className="mx-auto max-w-2xl px-4 py-20 sm:px-6" />}>
-      <PaymentReturn />
-    </Suspense>
   );
 }

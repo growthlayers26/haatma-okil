@@ -1,27 +1,27 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
-import { createClient } from "@/lib/supabase/server";
-import {
-  createPendingOrder,
-  attachReference,
-  approvalBlocks,
-  priceNprOf,
-  describeItem,
-  type PurchaseItem,
-} from "@/lib/payments/orders";
-import { initiateKhalti, isKhaltiConfigured } from "@/lib/payments/khalti";
-import { initiateEsewa, isEsewaConfigured } from "@/lib/payments/esewa";
-import { toPaisa } from "@/lib/payments/types";
+import { getCustomerId } from "@/lib/auth/session";
+import { approvalBlocks, priceNprOf, skuOf, type PurchaseItem } from "@/lib/payments/orders";
 
 /**
  * Opens a payment.
  *
- * The client says *what* it wants to buy, never *how much* it costs. Price comes from
- * the registry, server-side, every time.
+ * Bagisto takes it from here. This route decides *what* is being bought and whether
+ * the customer is allowed to buy it; the cart, the payment method, the gateway call
+ * and the invoice all belong to Bagisto's checkout, which the browser is handed off
+ * to.
+ *
+ * The client still never says what something costs. Price comes from the registry,
+ * server-side — and it is checked here even though nothing is charged from this
+ * response, because a request naming an item that has no price is a bug worth
+ * refusing rather than passing to the shop.
  */
 
 const Body = z.object({
-  gateway: z.enum(["khalti", "esewa", "fonepay", "card"]),
+  // Kept so the existing checkout component posts unchanged. The gateway is no longer
+  // chosen here — Bagisto's checkout offers whatever payment methods the firm has
+  // enabled, which is where that choice belongs now.
+  gateway: z.enum(["khalti", "esewa", "fonepay", "card"]).optional(),
   documentId: z.string().uuid().optional(),
   item: z.discriminatedUnion("type", [
     z.object({
@@ -49,44 +49,26 @@ const Body = z.object({
   ]),
 });
 
-function siteUrl(request: Request): string {
-  return process.env.NEXT_PUBLIC_SITE_URL ?? new URL(request.url).origin;
-}
-
 export async function POST(request: Request) {
   const parsed = Body.safeParse(await request.json().catch(() => null));
   if (!parsed.success) {
     return NextResponse.json({ message: "Invalid request." }, { status: 400 });
   }
 
-  const { gateway, item, documentId } = parsed.data;
+  const { item, documentId } = parsed.data;
 
-  const npr = priceNprOf(item as PurchaseItem);
-  if (npr === null) {
+  if (priceNprOf(item as PurchaseItem) === null) {
     return NextResponse.json({ message: "Unknown item." }, { status: 404 });
-  }
-
-  if (gateway === "fonepay" || gateway === "card") {
-    return NextResponse.json({
-      message: `${gateway} is not enabled yet. Use Khalti or eSewa.`,
-    });
-  }
-
-  const configured = gateway === "khalti" ? isKhaltiConfigured() : isEsewaConfigured();
-  if (!configured) {
-    return NextResponse.json({
-      message:
-        `${gateway} is not configured in this environment. ` +
-        `Add its credentials to .env.local to enable live payment.`,
-    });
   }
 
   // Payment is the first point an account is genuinely required — everything before
   // it works anonymously, because every field before payment is friction.
-  const supabase = await createClient();
-  const { data: auth } = (await supabase?.auth.getUser()) ?? { data: { user: null } };
-  if (!auth.user) {
-    return NextResponse.json({ message: "Sign in to complete payment.", requiresAuth: true }, { status: 401 });
+  const customerId = await getCustomerId();
+  if (!customerId) {
+    return NextResponse.json(
+      { message: "Sign in to complete payment.", requiresAuth: true },
+      { status: 401 },
+    );
   }
 
   // An organisation running an approval workflow gates payment, not just display.
@@ -101,45 +83,19 @@ export async function POST(request: Request) {
     );
   }
 
-  const order = await createPendingOrder({
-    userId: auth.user.id,
-    gateway,
-    item: item as PurchaseItem,
-    documentId,
+  const bagistoUrl = process.env.BAGISTO_URL ?? "http://localhost";
+  const sku = skuOf(item as PurchaseItem);
+
+  /*
+   * A redirect rather than a fetch. Bagisto's cart lives in the session, so the cart
+   * has to be built by the customer's own browser — a cart assembled from this server
+   * would belong to this server.
+   *
+   * The customer signs in again on the shop. That is the visible seam of running two
+   * applications against one account, and it is left visible rather than papered over
+   * with a shared cookie, which is a decision about cookie scope for the firm to make.
+   */
+  return NextResponse.json({
+    handoff: { mode: "redirect", url: `${bagistoUrl}/legal/buy/${encodeURIComponent(sku)}` },
   });
-
-  if (!order) {
-    return NextResponse.json({ message: "Could not open the order." }, { status: 500 });
-  }
-
-  const base = siteUrl(request);
-  const returnUrl = `${base}/payment/return?order=${order.id}`;
-
-  try {
-    if (gateway === "khalti") {
-      const handoff = await initiateKhalti({
-        orderId: order.id,
-        amountPaisa: toPaisa(npr),
-        productName: describeItem(item as PurchaseItem),
-        returnUrl,
-        websiteUrl: base,
-        customer: { email: auth.user.email ?? undefined },
-      });
-      await attachReference(order.id, handoff.reference);
-      return NextResponse.json({ orderId: order.id, handoff });
-    }
-
-    const handoff = initiateEsewa({
-      orderId: order.id,
-      amountPaisa: toPaisa(npr),
-      successUrl: returnUrl,
-      failureUrl: `${base}/payment/return?order=${order.id}&failed=1`,
-    });
-    // eSewa's reference is our own transaction_uuid, so the order id is the reference.
-    await attachReference(order.id, handoff.reference);
-    return NextResponse.json({ orderId: order.id, handoff });
-  } catch (error) {
-    const message = error instanceof Error ? error.message : "Gateway error.";
-    return NextResponse.json({ message }, { status: 502 });
-  }
 }

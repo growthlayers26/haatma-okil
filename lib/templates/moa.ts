@@ -23,6 +23,17 @@ export const memorandumOfAssociation: Template = {
   slug: "company-moa",
   category: "business",
   priceNpr: 2_499,
+  /*
+   * The memorandum's own "shareholders" clause already lists every founder by
+   * name against the shares they take — {{subscriberDetails}} below. A fixed
+   * two-box footer either invented a second founder for a sole-promoter company or
+   * silently dropped every subscriber past the second for anything larger.
+   */
+  signatures: {
+    kind: "list",
+    fieldId: "subscriberDetails",
+    role: { ne: "संस्थापक शेयरधनी", en: "Founding shareholder" },
+  },
   title: { ne: "प्रबन्धपत्र", en: "Memorandum of Association" },
   summary: {
     ne: "कम्पनी ऐन, २०६३ बमोजिम प्राइभेट लिमिटेड कम्पनीको प्रबन्धपत्र। कम्पनी रजिस्ट्रारको कार्यालयमा पेस गर्न मिल्ने ढाँचामा।",

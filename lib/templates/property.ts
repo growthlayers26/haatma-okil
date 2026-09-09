@@ -26,6 +26,17 @@ export const landSaleDeed: Template = {
   slug: "land-sale-deed",
   category: "property",
   priceNpr: 1_499,
+  signatures: {
+    kind: "parties",
+    roles: [
+      { ne: "बिक्रेता", en: "Seller" },
+      { ne: "क्रेता", en: "Buyer" },
+    ],
+  },
+  // The execution notes below already require two witnesses (EXECUTION.twoWitnesses);
+  // the old footer gave the seller and buyer a line each and no witness ever a line
+  // at all.
+  witnessLines: 2,
   title: { ne: "राजीनामा (घरजग्गा किनबेच)", en: "Sale Deed for Land" },
   summary: {
     ne: "घरजग्गा किनबेचको लिखत। मालपोत कार्यालयमा दर्ता नभएसम्म हक हस्तान्तरण नहुने कुरा स्पष्ट पारिएको।",
@@ -198,6 +209,15 @@ export const giftDeed: Template = {
   slug: "gift-deed",
   category: "property",
   priceNpr: 999,
+  signatures: {
+    kind: "parties",
+    roles: [
+      { ne: "दाता", en: "Donor" },
+      { ne: "ग्रहणकर्ता", en: "Recipient" },
+    ],
+  },
+  witnessLines: 2,
+  notarised: true,
   title: { ne: "दान बकसपत्र", en: "Gift Deed" },
   summary: {
     ne: "बिना मूल्य सम्पत्ति हस्तान्तरण गर्ने लिखत। परिवारभित्रको हस्तान्तरणमा प्रयोग हुने।",
@@ -328,6 +348,10 @@ export const rentReceipt: Template = {
   slug: "rent-receipt",
   category: "property",
   priceNpr: 149,
+  // A receipt is signed by the one person who received the money. Its own
+  // "landlord" clause already names them — the old footer added two more blank
+  // boxes beneath a receipt that had already been signed once, in its own text.
+  signatures: { kind: "embedded" },
   title: { ne: "बहाल भुक्तानी रसिद", en: "Rent Receipt" },
   summary: {
     ne: "बहाल बुझेको प्रमाण। विवाद परेमा बहालवालाले देखाउन सक्ने एक मात्र कागजात प्राय: यही हुन्छ।",

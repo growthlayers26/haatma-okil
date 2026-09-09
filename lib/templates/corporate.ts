@@ -172,6 +172,17 @@ export const boardResolution: Template = {
   slug: "board-resolution",
   category: "business",
   priceNpr: 299,
+  /*
+   * Signed by "all directors present" — a count this template already asks the
+   * user to list (directorsPresent), and one that is almost never exactly two. A
+   * five-member board got a two-box footer that quietly excluded three of its own
+   * directors from the record.
+   */
+  signatures: {
+    kind: "list",
+    fieldId: "directorsPresent",
+    role: { ne: "सञ्चालक", en: "Director" },
+  },
   title: { ne: "सञ्चालक समितिको निर्णय", en: "Board Resolution" },
   summary: {
     ne: "कम्पनीको सञ्चालक समितिले गरेको निर्णयको औपचारिक अभिलेख। बैंक, रजिस्ट्रार र कारोबारी पक्षले माग्ने कागजात।",
@@ -327,6 +338,21 @@ export const articlesOfAssociation: Template = {
   slug: "articles-of-association",
   category: "business",
   priceNpr: 2_499,
+  /*
+   * Its own execution note says every founding shareholder must sign, and that
+   * count is not fixed at two and is not collected anywhere in this template's own
+   * fields — unlike the memorandum it is filed alongside, which does collect a
+   * subscriber list. Rather than force a wrong count or invent a field this
+   * template does not otherwise need, the footer states the requirement and
+   * leaves the ruled space open for however many actually sign.
+   */
+  signatures: {
+    kind: "note",
+    text: {
+      ne: "सबै संस्थापक शेयरधनीले यहाँ हस्ताक्षर गर्नुपर्नेछ।",
+      en: "Every founding shareholder must sign below.",
+    },
+  },
   title: { ne: "नियमावली", en: "Articles of Association" },
   summary: {
     ne: "कम्पनी ऐन, २०६३ बमोजिम प्राइभेट कम्पनीको नियमावली। शेयर हस्तान्तरण, सञ्चालक समिति र साधारण सभाको व्यवस्था समावेश।",

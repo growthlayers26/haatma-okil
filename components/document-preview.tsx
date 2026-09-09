@@ -3,7 +3,138 @@
 import { useLang } from "./language-provider";
 import { renderDocument } from "@/lib/render";
 import { formatBsLong, todayBs } from "@/lib/bs-date";
-import type { Template, Answers } from "@/lib/types";
+import { toNepaliDigits } from "@/lib/nepal";
+import type { Template, Answers, SignatureSpec, Bilingual } from "@/lib/types";
+
+const DEFAULT_SIGNATURES: SignatureSpec = {
+  kind: "parties",
+  roles: [
+    { ne: "पहिलो पक्ष", en: "First party" },
+    { ne: "दोस्रो पक्ष", en: "Second party" },
+  ],
+};
+
+function SignatureLine({ role }: { role?: Bilingual }) {
+  const { lang, bi } = useLang();
+  return (
+    <div>
+      <div className="h-10 border-b border-ink-3" />
+      <p className="mt-1.5 font-mono text-[0.7rem] text-ink-3">
+        {role ? role[lang] : bi({ ne: "हस्ताक्षर र मिति", en: "Signature and date" })}
+      </p>
+    </div>
+  );
+}
+
+/**
+ * The foot of an instrument, driven by `template.signatures` rather than a fixed
+ * two-box assumption.
+ *
+ * Every branch here answers a question the old, single hard-coded footer could not:
+ * how many people actually sign this document, and are any of them a witness rather
+ * than a party? A will signed by its testator alone got a line implying a second
+ * contracting party that does not exist, and no line at all for the two witnesses
+ * its own clause text says were present. This is the fix for that class of error,
+ * generalised so the next single-signer or N-signer template does not repeat it.
+ */
+function SignatureFooter({
+  template,
+  answers,
+  bi,
+}: {
+  template: Template;
+  answers: Answers;
+  bi: (b: Bilingual) => string;
+}) {
+  const spec = template.signatures ?? DEFAULT_SIGNATURES;
+
+  if (spec.kind === "embedded") {
+    // The clause content already ends with the sign-off — a letterhead-and-stamp
+    // block, a "From:" line. A footer here would be a second, contradictory one.
+    return null;
+  }
+
+  let body: React.ReactNode;
+
+  if (spec.kind === "parties") {
+    body = (
+      <div className="grid gap-8 sm:grid-cols-2">
+        {spec.roles.map((role, i) => (
+          <SignatureLine key={i} role={role} />
+        ))}
+      </div>
+    );
+  } else if (spec.kind === "single") {
+    body = (
+      <div className="max-w-xs">
+        <SignatureLine role={spec.role} />
+      </div>
+    );
+  } else if (spec.kind === "list") {
+    // Split on lines the way every multi-line "list your X, one per line" field in
+    // this catalogue is written to be read — see e.g. board-resolution's
+    // `directorsPresent` help text. Two blank lines stand in during preview, before
+    // the field has anything to split.
+    const raw = String(answers[spec.fieldId] ?? "").trim();
+    const names = raw
+      ? raw.split("\n").map((n) => n.trim()).filter(Boolean)
+      : ["", ""];
+    body = (
+      <div className="grid gap-8 sm:grid-cols-2">
+        {names.map((name, i) => (
+          <div key={i}>
+            <div className="h-10 border-b border-ink-3" />
+            <p className="mt-1.5 font-mono text-[0.7rem] text-ink-3">
+              {name || bi(spec.role)}
+            </p>
+          </div>
+        ))}
+      </div>
+    );
+  } else {
+    // "note" — a signatory count no field captures.
+    body = (
+      <div>
+        <p className="text-sm text-ink-2">{bi(spec.text)}</p>
+        <div className="mt-4 h-24 border-b border-ink-3" />
+      </div>
+    );
+  }
+
+  return (
+    <div className="mt-10 space-y-8 border-t border-rule pt-8">
+      {body}
+
+      {(template.witnessLines ?? 0) > 0 && (
+        <div>
+          <p className="font-mono text-[0.7rem] uppercase tracking-wider text-ink-3">
+            {bi({ ne: "साक्षी", en: "Witnesses" })}
+          </p>
+          <div className="mt-3 grid gap-8 sm:grid-cols-2">
+            {Array.from({ length: template.witnessLines ?? 0 }, (_, i) => (
+              <SignatureLine
+                key={i}
+                role={{
+                  ne: `साक्षी ${toNepaliDigits(i + 1)}`,
+                  en: `Witness ${i + 1}`,
+                }}
+              />
+            ))}
+          </div>
+        </div>
+      )}
+
+      {template.notarised && (
+        <div>
+          <div className="h-10 max-w-xs border-b border-ink-3" />
+          <p className="mt-1.5 font-mono text-[0.7rem] text-ink-3">
+            {bi({ ne: "नोटरी पब्लिकको प्रमाणीकरण", en: "Notary public attestation" })}
+          </p>
+        </div>
+      )}
+    </div>
+  );
+}
 
 /**
  * Renders the assembled document.
@@ -25,6 +156,26 @@ export function DocumentPreview({
   const { lang, t, bi } = useLang();
   const doc = renderDocument(template, answers, lang);
   const today = todayBs();
+  const isPetition = doc.layout === "petition";
+
+  /*
+   * Paragraph numbering for the petition layout, computed rather than counted
+   * during render.
+   *
+   * A running counter mutated inside the JSX below would be reset only on
+   * re-render, not on remount — but React may invoke a render function more than
+   * once for the same commit, and a mutable counter shared across those calls
+   * gives paragraphs the wrong numbers on the second invocation. This assigns
+   * every numbered clause its number up front, so the number is a pure function
+   * of the clause's position rather than of how many times render happened to run.
+   *
+   * Counted over the numbered clauses only, so the request is १ and the declaration
+   * २ — matching the forms, where the preamble above them carries no number at all.
+   */
+  const paragraphNumbers = new Map<string, number>();
+  for (const clause of doc.clauses) {
+    if (clause.numbered) paragraphNumbers.set(clause.id, paragraphNumbers.size + 1);
+  }
 
   // Repeat the mark down the page so every screenful carries it, the way a stamped
   // draft does — a single centred word leaves most pages unmarked.
@@ -49,52 +200,83 @@ export function DocumentPreview({
       )}
 
       <div className="px-6 py-8 sm:px-10 sm:py-10">
-        <header className="border-b border-rule pb-7 text-center">
-          <h1 className="font-serif text-3xl font-semibold leading-tight tracking-[-0.015em] sm:text-[2.1rem]">
-            {doc.title}
-          </h1>
-          <p className="mt-3 font-mono text-[0.7rem] uppercase tracking-[0.1em] text-ink-3">
-            {bi({ ne: "मिति", en: "Date" })}: {formatBsLong(today, lang)}
-          </p>
-        </header>
+        {/*
+          A petition carries no title and no date at its head.
 
-        <div className="mt-8 space-y-8">
-          {doc.clauses.map((clause, index) => (
-            <section key={clause.id}>
-              <h2 className="flex flex-wrap items-baseline gap-x-2 font-serif text-lg font-semibold tracking-tight">
-                <span className="font-mono text-xs text-accent">{index + 1}.</span>
-                {clause.heading}
-                {clause.locked && (
-                  <span className="font-mono text-[0.65rem] font-normal uppercase tracking-wider text-malachite">
-                    {t("statutoryLocked")}
+          It opens straight into "श्री … अदालतमा पेस गरेको निवेदन पत्र" and dates
+          itself at the foot, in the closing इति संवत् line. A centred title and a
+          "Date:" stamp above it are the marks of a private instrument, and putting
+          them on a court filing makes it look like something other than a filing.
+        */}
+        {isPetition ? null : (
+          <header className="border-b border-rule pb-7 text-center">
+            <h1 className="font-serif text-3xl font-semibold leading-tight tracking-[-0.015em] sm:text-[2.1rem]">
+              {doc.title}
+            </h1>
+            <p className="mt-3 font-mono text-[0.7rem] uppercase tracking-[0.1em] text-ink-3">
+              {bi({ ne: "मिति", en: "Date" })}: {formatBsLong(today, lang)}
+            </p>
+          </header>
+        )}
+
+        {isPetition ? (
+          /*
+           * The government's own layout: one continuous document.
+           *
+           * No clause headings, because the forms have none — the court address, the
+           * subject line, the parties and the fee run on as a preamble, and only the
+           * substantive paragraphs are numbered. No statutory badges and no citation
+           * arrows either: those are this platform explaining itself to a reader, and
+           * on a filing they read as annotations someone forgot to delete.
+           */
+          <div className="mt-2 space-y-5">
+            {doc.clauses.map((clause) => (
+              <p
+                key={clause.id}
+                className="max-w-[68ch] whitespace-pre-line text-[1.0625rem] leading-[1.9] text-ink"
+              >
+                {clause.numbered && (
+                  <span className="font-semibold">
+                    {lang === "ne"
+                      ? `${toNepaliDigits(paragraphNumbers.get(clause.id)!)}. `
+                      : `${paragraphNumbers.get(clause.id)}. `}
                   </span>
                 )}
-              </h2>
-
-              <p className="mt-2.5 max-w-[68ch] whitespace-pre-line text-[1.0625rem] leading-[1.75] text-ink-2">
                 {clause.body}
               </p>
+            ))}
+          </div>
+        ) : (
+          <>
+            <div className="mt-8 space-y-8">
+              {doc.clauses.map((clause, index) => (
+                <section key={clause.id}>
+                  <h2 className="flex flex-wrap items-baseline gap-x-2 font-serif text-lg font-semibold tracking-tight">
+                    <span className="font-mono text-xs text-accent">{index + 1}.</span>
+                    {clause.heading}
+                    {clause.locked && (
+                      <span className="font-mono text-[0.65rem] font-normal uppercase tracking-wider text-malachite">
+                        {t("statutoryLocked")}
+                      </span>
+                    )}
+                  </h2>
 
-              {clause.citation && (
-                <p className="mt-2 font-mono text-[0.7rem] leading-relaxed text-ink-3">
-                  → {clause.citation.act[lang]} {clause.citation.section[lang]}
-                </p>
-              )}
-            </section>
-          ))}
-        </div>
+                  <p className="mt-2.5 max-w-[68ch] whitespace-pre-line text-[1.0625rem] leading-[1.75] text-ink-2">
+                    {clause.body}
+                  </p>
 
-        {/* The signature block belongs in the document, not in the UI chrome around it. */}
-        <div className="mt-10 grid gap-8 border-t border-rule pt-8 sm:grid-cols-2">
-          {[0, 1].map((i) => (
-            <div key={i}>
-              <div className="h-10 border-b border-ink-3" />
-              <p className="mt-1.5 font-mono text-[0.7rem] text-ink-3">
-                {bi({ ne: "हस्ताक्षर र मिति", en: "Signature and date" })}
-              </p>
+                  {clause.citation && (
+                    <p className="mt-2 font-mono text-[0.7rem] leading-relaxed text-ink-3">
+                      → {clause.citation.act[lang]} {clause.citation.section[lang]}
+                    </p>
+                  )}
+                </section>
+              ))}
             </div>
-          ))}
-        </div>
+
+            <SignatureFooter template={template} answers={answers} bi={bi} />
+          </>
+        )}
       </div>
     </article>
   );

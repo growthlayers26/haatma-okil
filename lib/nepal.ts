@@ -28,6 +28,41 @@ export const ACTS = {
   },
   incomeTax: { act: { ne: "आयकर ऐन, २०५८", en: "Income Tax Act, 2058" } },
   vat: { act: { ne: "मूल्य अभिवृद्धि कर ऐन, २०५२", en: "Value Added Tax Act, 2052" } },
+
+  /*
+   * The procedural codes and court rules a litigation petition actually cites.
+   * These govern HOW a matter already before a court is conducted — deadlines,
+   * evidence, custody, security — not the underlying right in dispute, which is
+   * why they sit apart from the substantive acts above.
+   */
+  criminalProcedure: {
+    act: { ne: "मुलुकी फौजदारी कार्यविधि संहिता, २०७४", en: "Muluki Criminal Procedure Code, 2074" },
+  },
+  civilProcedureRules: {
+    act: { ne: "मुलुकी देवानी कार्यविधि नियमावली, २०७५", en: "Muluki Civil Procedure Rules, 2075" },
+  },
+  criminalProcedureRules: {
+    act: { ne: "मुलुकी फौजदारी कार्यविधि नियमावली, २०७५", en: "Muluki Criminal Procedure Rules, 2075" },
+  },
+  summaryProcedure: {
+    act: { ne: "संक्षिप्त कार्यविधि ऐन, २०२८", en: "Summary Procedure Act, 2028" },
+  },
+  specialCourt: { act: { ne: "विशेष अदालत ऐन, २०५९", en: "Special Court Act, 2059" } },
+  supremeCourtRules: {
+    act: { ne: "सर्वोच्च अदालत नियमावली, २०७४", en: "Supreme Court Regulation, 2074" },
+  },
+  judicialAdministration: {
+    act: { ne: "न्याय प्रशासन ऐन, २०७३", en: "Administration of Justice Act, 2073" },
+  },
+  dharautNirdeshika: {
+    act: { ne: "धरौट तथा जमानत निर्देशिका, २०७५", en: "Deposit and Guarantee Directive, 2075" },
+  },
+  onlineHearingDirective: {
+    act: {
+      ne: "सूचना प्रविधिको प्रयोग (अनलाइन) बाट तारिख लिने सम्बन्धी निर्देशिका, २०७२",
+      en: "Directive on Taking Hearing Dates Online, 2072",
+    },
+  },
 } as const;
 
 export function cite(
@@ -201,3 +236,50 @@ export const RESTRAINT = cite(
   "व्यापार बन्देज सम्बन्धी व्यवस्था",
   "provisions on restraint of trade",
 );
+
+/*
+ * ---------------------------------------------------------------- litigation
+ *
+ * The 52 petition forms below are transcribed from the official templates the
+ * Supreme Court of Nepal itself publishes, not drafted independently:
+ *   https://supremecourt.gov.np/web/supform  (by form type)
+ *   https://supremecourt.gov.np/web/suptemp  (the same forms, by court level)
+ *
+ * That distinction matters for how much these citations can be trusted. Every other
+ * citation in this file is this firm's own reading of a statute, confirmed by an
+ * advocate before the template that depends on it ships. These are not — they are a
+ * transcription of the section number the government's own form already prints on
+ * itself. The risk that remains is transcription error, not legal judgement, and it
+ * is why each one below is checked against the source form rather than looked up
+ * independently.
+ */
+
+/** The four levels a litigation petition may be filed at, and how each is addressed. */
+export const COURT_LEVELS = [
+  {
+    value: "supreme",
+    label: { ne: "सर्वोच्च अदालत", en: "Supreme Court" },
+    greeting: { ne: "श्री सर्वोच्च अदालत, काठमाडौँ", en: "The Supreme Court of Nepal, Kathmandu" },
+  },
+  {
+    value: "high",
+    label: { ne: "उच्च अदालत", en: "High Court" },
+    greeting: { ne: "श्री उच्च अदालत", en: "The High Court" },
+  },
+  {
+    value: "district",
+    label: { ne: "जिल्ला अदालत", en: "District Court" },
+    greeting: { ne: "श्री जिल्ला अदालत", en: "The District Court" },
+  },
+  {
+    value: "tribunal",
+    label: { ne: "न्यायाधिकरण", en: "Tribunal" },
+    greeting: { ne: "श्री न्यायाधिकरण", en: "The Tribunal" },
+  },
+] as const;
+
+/**
+ * The flat filing fee nearly every one of these petitions states on its face.
+ * Separate from the firm's own service price — this is what the court itself charges.
+ */
+export const PETITION_COURT_FEE_NPR = 10;

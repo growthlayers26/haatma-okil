@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useState } from "react";
 import { useLang } from "@/components/language-provider";
 import { answerEnquiry, type DeskState, type DeskMatter } from "@/app/actions/desk";
+import { signOutDeskAction } from "@/app/actions/auth";
 import { SERVICES, AREAS_OF_LAW } from "@/lib/services";
 
 export function DeskClient({ desk }: { desk: DeskState }) {
@@ -41,7 +42,7 @@ export function DeskClient({ desk }: { desk: DeskState }) {
         {desk.reason === "unauthenticated" ? (
           <p className="mt-3 text-ink-2">
             {bi({ ne: "जारी राख्न लगइन गर्नुहोस्।", en: "Sign in to continue." })}{" "}
-            <Link href="/login?next=/desk" className="text-accent underline">
+            <Link href="/desk/login" className="text-accent underline">
               {bi({ ne: "लगइन", en: "Sign in" })}
             </Link>
           </p>
@@ -169,12 +170,29 @@ export function DeskClient({ desk }: { desk: DeskState }) {
 
   return (
     <div className="mx-auto max-w-4xl px-4 py-10 sm:px-6">
-      <h1 className="font-serif text-4xl font-semibold tracking-[-0.02em] sm:text-5xl">
-        {bi({ ne: "अधिवक्ता डेस्क", en: "Advocate desk" })}
-      </h1>
-      <p className="mt-2 font-mono text-xs uppercase tracking-wider text-ink-3">
-        {desk.advocateName}
-      </p>
+      <div className="flex flex-wrap items-start justify-between gap-3">
+        <div>
+          <h1 className="font-serif text-4xl font-semibold tracking-[-0.02em] sm:text-5xl">
+            {bi({ ne: "अधिवक्ता डेस्क", en: "Advocate desk" })}
+          </h1>
+          <p className="mt-2 font-mono text-xs uppercase tracking-wider text-ink-3">
+            {desk.advocateName}
+          </p>
+        </div>
+
+        {/*
+          Clears the desk cookie specifically. The header's sign-out ends the client
+          session, which would leave a shared machine showing a queue of other
+          people's matters to whoever sat down next.
+        */}
+        <button
+          type="button"
+          onClick={() => void signOutDeskAction()}
+          className="border border-rule-strong px-3 py-2 font-mono text-[0.7rem] uppercase tracking-wider text-ink-2 transition-colors hover:border-accent hover:text-accent"
+        >
+          {bi({ ne: "डेस्कबाट बाहिरिनुहोस्", en: "Leave the desk" })}
+        </button>
+      </div>
 
       {notice && (
         <p className="mt-4 border-l-2 border-orpiment bg-surface p-3 text-sm text-ink-2" role="status">

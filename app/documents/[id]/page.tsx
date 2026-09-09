@@ -10,9 +10,14 @@ import { ExecutionNotice } from "@/components/execution-notice";
  * A purchased document, without the watermark.
  *
  * This is what the customer actually bought, and until it existed the purchase
- * changed nothing they could see. Access is the document's own RLS plus the explicit
- * status check below: a draft is never served here, because an unmarked draft is
- * indistinguishable from a paid one once it leaves the screen.
+ * changed nothing they could see.
+ *
+ * Access rests on two things, and it is worth being exact about them because one of
+ * them used to be a database guarantee and no longer is. `getDocument` matches on
+ * `customer_id`, and that predicate IS the ownership check now — row-level security
+ * used to refuse the row regardless, and there is no such backstop on MySQL. The
+ * status check below is the second: a draft is never served here, because an unmarked
+ * draft is indistinguishable from a paid one once it leaves the screen.
  */
 export default async function DocumentPage({
   params,

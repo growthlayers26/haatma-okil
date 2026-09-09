@@ -18,6 +18,10 @@ export const rentTerminationNotice: Template = {
   slug: "rent-termination-notice",
   category: "property",
   priceNpr: 299,
+  // Unilateral — the recipient does not sign. Its own "sign" clause below already
+  // names and addresses the one person who does; a generic two-box footer beneath
+  // it would imply a second signatory who has no role in ending a tenancy notice.
+  signatures: { kind: "embedded" },
   title: { ne: "बहाल अन्त्यको सूचना", en: "Notice to Terminate Tenancy" },
   summary: {
     ne: "घरबहाल सम्झौता अन्त्य गर्न दिइने लिखित सूचना। घरधनी वा बहालवाला दुवैले प्रयोग गर्न सकिने।",
@@ -157,6 +161,10 @@ export const salaryCertificate: Template = {
   slug: "salary-certificate",
   category: "employment",
   priceNpr: 199,
+  // The document already ends in its own "issuer" clause — name, designation,
+  // employer, and a company-stamp placeholder. A certificate has one issuer and
+  // no countersigning employee; the old generic footer implied there was one.
+  signatures: { kind: "embedded" },
   title: { ne: "तलब प्रमाणपत्र", en: "Salary Certificate" },
   summary: {
     ne: "रोजगारदाताले जारी गर्ने तलब प्रमाणपत्र। भिसा, बैंक ऋण र बहालका लागि आवश्यक पर्ने कागजात।",
@@ -281,6 +289,9 @@ export const experienceLetter: Template = {
   slug: "experience-letter",
   category: "employment",
   priceNpr: 199,
+  // Same shape as the salary certificate: one issuer, already signed off in its
+  // own closing clause.
+  signatures: { kind: "embedded" },
   title: { ne: "कार्य अनुभव पत्र", en: "Experience Letter" },
   summary: {
     ne: "रोजगारदाताले कर्मचारीलाई दिने कार्य अनुभवको प्रमाण। नयाँ रोजगारी र वैदेशिक अवसरका लागि आवश्यक।",

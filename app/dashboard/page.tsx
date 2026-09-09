@@ -10,7 +10,13 @@ import { toNepaliDigits, formatNpr } from "@/lib/nepal";
 import { formatBsShort, parseBsString, bsToGregorianLabel, fromBs } from "@/lib/bs-date";
 import { usePersistentMap } from "@/lib/use-persistent-state";
 import { draftKey } from "@/components/wizard";
-import { listDocuments, claimLocalDrafts, type SavedDocument } from "@/app/actions/documents";
+import {
+  listDocuments,
+  claimLocalDrafts,
+  documentCreditsAvailable,
+  releaseDocument,
+  type SavedDocument,
+} from "@/app/actions/documents";
 import { listMyEnquiries, type ClientEnquiry } from "@/app/actions/enquiries";
 import { SERVICES, AREAS_OF_LAW } from "@/lib/services";
 import { PageHeader, SectionLabel, Callout, Rows, Empty, type Tone } from "@/components/ui";
@@ -60,6 +66,9 @@ export default function DashboardPage() {
   const local = usePersistentMap<Answers>(DRAFT_KEYS, EMPTY_ANSWERS);
   const [saved, setSaved] = useState<SavedDocument[]>([]);
   const [enquiries, setEnquiries] = useState<ClientEnquiry[]>([]);
+  // Paid document credits not yet spent on a draft.
+  const [credits, setCredits] = useState(0);
+  const [releasing, setReleasing] = useState<string | null>(null);
   const claimedRef = useRef(false);
 
   /*
@@ -80,9 +89,14 @@ export default function DashboardPage() {
         claimedRef.current = true;
         if (pending.length > 0) await claimLocalDrafts(pending);
       }
-      const [docs, enq] = await Promise.all([listDocuments(), listMyEnquiries()]);
+      const [docs, enq, held] = await Promise.all([
+        listDocuments(),
+        listMyEnquiries(),
+        documentCreditsAvailable(),
+      ]);
       setSaved(docs);
       setEnquiries(enq);
+      setCredits(held);
     }
 
     void sync();
@@ -90,6 +104,23 @@ export default function DashboardPage() {
     // re-running it on every keystroke elsewhere would spam the server.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user]);
+
+  /*
+   * Spend one paid credit on this draft.
+   *
+   * Payment happens in the shop, which cannot carry a draft id through its cart, so
+   * the credit arrives unattached and the customer chooses what it releases.
+   */
+  async function applyCredit(documentId: string) {
+    setReleasing(documentId);
+    const result = await releaseDocument(documentId);
+    if (result.ok) {
+      const [docs, held] = await Promise.all([listDocuments(), documentCreditsAvailable()]);
+      setSaved(docs);
+      setCredits(held);
+    }
+    setReleasing(null);
+  }
 
   const localDrafts = useMemo(
     () =>
@@ -258,6 +289,23 @@ export default function DashboardPage() {
         <div>
           <SectionLabel>{bi({ ne: "मेरा कागजात", en: "My documents" })}</SectionLabel>
 
+          {/*
+            A paid credit that has not been spent yet.
+
+            Said plainly because the alternative is a customer who has paid, sees
+            nothing different, and concludes the payment failed.
+          */}
+          {user && credits > 0 && (
+            <div className="mt-3">
+              <Callout tone="good">
+                {bi({
+                  ne: `तपाईंसँग ${num(credits)} भुक्तानी भएको कागजात क्रेडिट छ। तल कुनै ड्राफ्टमा प्रयोग गर्नुहोस्।`,
+                  en: `You have ${credits} paid document ${credits === 1 ? "credit" : "credits"}. Apply one to any draft below to get the final copy without the watermark.`,
+                })}
+              </Callout>
+            </div>
+          )}
+
           {documents.length === 0 ? (
             <div className="mt-3">
               <Empty>
@@ -271,37 +319,60 @@ export default function DashboardPage() {
             <div className="mt-3">
               <Rows>
                 {documents.map((doc) => (
-                  <Link
-                    key={doc.key}
-                    /*
-                     * A purchased document goes to its finished, unwatermarked copy;
-                     * a draft goes back to the wizard.
-                     */
-                    href={
-                      doc.status === "purchased"
-                        ? `/documents/${doc.key}`
-                        : `/create/${doc.template.slug}`
-                    }
-                    className="group flex flex-wrap items-baseline gap-3 bg-surface p-4 transition-colors hover:bg-accent-soft"
-                  >
-                    <div className="min-w-0 flex-1">
-                      <p className="font-serif text-lg font-semibold tracking-tight group-hover:text-accent">
-                        {bi(doc.template.title)}
-                      </p>
-                      <p className="mt-0.5 font-mono text-[0.7rem] leading-tight text-ink-3">
-                        {bi(doc.template.governingAct.act)} {bi(doc.template.governingAct.section)}
-                      </p>
-                    </div>
-                    <span
-                      className={`font-mono text-[0.7rem] uppercase tracking-wider ${
-                        doc.status === "purchased" ? "text-malachite" : "text-orpiment"
-                      }`}
+                  <div key={doc.key} className="bg-surface">
+                    <Link
+                      /*
+                       * A purchased document goes to its finished, unwatermarked copy;
+                       * a draft goes back to the wizard.
+                       */
+                      href={
+                        doc.status === "purchased"
+                          ? `/documents/${doc.key}`
+                          : `/create/${doc.template.slug}`
+                      }
+                      className="group flex flex-wrap items-baseline gap-3 p-4 transition-colors hover:bg-accent-soft"
                     >
-                      {doc.status === "purchased"
-                        ? bi({ ne: "खरिद गरिएको", en: "Purchased" })
-                        : `${bi({ ne: "ड्राफ्ट", en: "Draft" })} · ${num(doc.percent)}%`}
-                    </span>
-                  </Link>
+                      <div className="min-w-0 flex-1">
+                        <p className="font-serif text-lg font-semibold tracking-tight group-hover:text-accent">
+                          {bi(doc.template.title)}
+                        </p>
+                        <p className="mt-0.5 font-mono text-[0.7rem] leading-tight text-ink-3">
+                          {bi(doc.template.governingAct.act)} {bi(doc.template.governingAct.section)}
+                        </p>
+                      </div>
+                      <span
+                        className={`font-mono text-[0.7rem] uppercase tracking-wider ${
+                          doc.status === "purchased" ? "text-malachite" : "text-orpiment"
+                        }`}
+                      >
+                        {doc.status === "purchased"
+                          ? bi({ ne: "खरिद गरिएको", en: "Purchased" })
+                          : `${bi({ ne: "ड्राफ्ट", en: "Draft" })} · ${num(doc.percent)}%`}
+                      </span>
+                    </Link>
+
+                    {/*
+                      Offered only where it can actually be spent. Outside the Link
+                      because a button nested in an anchor is not a real control.
+                    */}
+                    {user && credits > 0 && doc.status === "draft" && (
+                      <div className="border-t border-rule px-4 py-3">
+                        <button
+                          type="button"
+                          onClick={() => void applyCredit(doc.key)}
+                          disabled={releasing !== null}
+                          className="font-mono text-[0.7rem] uppercase tracking-wider text-accent underline underline-offset-4 disabled:opacity-40"
+                        >
+                          {releasing === doc.key
+                            ? "…"
+                            : bi({
+                                ne: "भुक्तानी भएको क्रेडिट यसमा प्रयोग गर्नुहोस्",
+                                en: "Use a paid credit on this document",
+                              })}
+                        </button>
+                      </div>
+                    )}
+                  </div>
                 ))}
               </Rows>
             </div>

@@ -122,6 +122,38 @@ body {
   font-family: var(--deva);
 }
 
+/*
+ * The small-caps label idiom, in Devanagari.
+ *
+ * Latin labels across this site are set in the mono face, uppercased and tracked
+ * out — eyebrows, section headings, status chips, nav. Applied to Devanagari all
+ * three of those choices are wrong, and the result was genuinely unreadable:
+ *
+ * - Tracking is the serious one. Devanagari joins the letters of a word under the
+ *   शिरोरेखा, the horizontal headline, and letter-spacing prises that bar apart. It
+ *   does not merely look loose, it stops reading as a word.
+ * - The mono face carries no Devanagari at all, so every glyph fell through the
+ *   whole stack — JetBrains, ui-monospace, Menlo, Consolas — and landed on a
+ *   last-resort serif with no relation to the rest of the page.
+ * - Uppercasing does nothing, since Devanagari has no case. Harmless, but it is the
+ *   reason the other two were never questioned: the idiom was carried over whole.
+ *
+ * Latin fragments inside these labels — a date, a price, an address — lose their
+ * tracking here too. That is the right trade: they are incidental, and the
+ * alternative is styling by script, which CSS cannot do.
+ */
+[lang="ne"] .font-mono {
+  font-family: var(--deva);
+  letter-spacing: normal;
+  text-transform: none;
+  /*
+   * Devanagari needs more room than Latin at the same nominal size — the matras sit
+   * above and below the baseline, and at 12px they collide or simply disappear.
+   */
+  font-size: 0.82rem;
+  line-height: 1.7;
+}
+
 :focus-visible {
   outline: 2px solid var(--accent);
   outline-offset: 2px;

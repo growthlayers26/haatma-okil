@@ -25,6 +25,16 @@ export const partnershipDeed: Template = {
   slug: "partnership-deed",
   category: "business",
   priceNpr: 799,
+  signatures: {
+    kind: "parties",
+    roles: [
+      { ne: "पहिलो साझेदार", en: "First partner" },
+      { ne: "दोस्रो साझेदार", en: "Second partner" },
+    ],
+  },
+  // EXECUTION.twoWitnesses is already among this deed's execution notes below; the
+  // old generic footer never gave either witness an actual line to sign on.
+  witnessLines: 2,
   title: { ne: "साझेदारी संलेख", en: "Partnership Deed" },
   summary: {
     ne: "साझेदारी ऐन, २०२० बमोजिम दुई वा बढी व्यक्तिबीचको व्यावसायिक साझेदारीको लिखित संलेख।",
