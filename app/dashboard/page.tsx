@@ -68,6 +68,18 @@ export default function DashboardPage() {
   const [enquiries, setEnquiries] = useState<ClientEnquiry[]>([]);
   // Paid document credits not yet spent on a draft.
   const [credits, setCredits] = useState(0);
+
+  /*
+   * `daysUntil` converts a BS deadline through a JS Date, and that conversion is
+   * built on the runtime's local timezone. Vercel renders in UTC; a visitor in
+   * Nepal is UTC+5:45, so the "N days left" text computed on the server can differ
+   * from what the client computes for the same deadline — a guaranteed hydration
+   * mismatch, not an occasional one. Rather than fight the timezone math, the
+   * deadline items are simply left out of the very first render (server and
+   * pre-hydration client agree: none) and added once mounted, a moment later.
+   */
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
   const [releasing, setReleasing] = useState<string | null>(null);
   const claimedRef = useRef(false);
 
@@ -197,24 +209,26 @@ export default function DashboardPage() {
       });
     }
 
-    for (const dl of DEADLINES) {
-      const days = daysUntil(dl.bs);
-      if (days === null || days < 0 || days > DEADLINE_HORIZON_DAYS) continue;
-      items.push({
-        id: `deadline-${dl.bs}`,
-        tone: days <= 7 ? "danger" : "caution",
-        label: dl.label,
-        detail: {
-          ne: `${toNepaliDigits(days)} दिन बाँकी`,
-          en: days === 0 ? "Due today" : `${days} days left`,
-        },
-        href: "/advocate",
-        action: { ne: "सोध्नुहोस्", en: "Ask about it" },
-      });
+    if (mounted) {
+      for (const dl of DEADLINES) {
+        const days = daysUntil(dl.bs);
+        if (days === null || days < 0 || days > DEADLINE_HORIZON_DAYS) continue;
+        items.push({
+          id: `deadline-${dl.bs}`,
+          tone: days <= 7 ? "danger" : "caution",
+          label: dl.label,
+          detail: {
+            ne: `${toNepaliDigits(days)} दिन बाँकी`,
+            en: days === 0 ? "Due today" : `${days} days left`,
+          },
+          href: "/advocate",
+          action: { ne: "सोध्नुहोस्", en: "Ask about it" },
+        });
+      }
     }
 
     return items;
-  }, [enquiries, documents]);
+  }, [enquiries, documents, mounted]);
 
   const num = (n: number) => (lang === "ne" ? toNepaliDigits(n) : String(n));
 

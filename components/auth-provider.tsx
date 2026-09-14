@@ -4,6 +4,7 @@ import {
   createContext,
   useCallback,
   useContext,
+  useEffect,
   useMemo,
   useState,
   useTransition,
@@ -45,6 +46,18 @@ export function AuthProvider({
   const router = useRouter();
   const [user, setUser] = useState<Customer | null>(initialUser);
   const [isPending, startTransition] = useTransition();
+
+  /*
+   * `useState(initialUser)` only reads the prop on the first render. Sign-in and
+   * sign-up both resolve by calling router.refresh(), which re-runs the root layout
+   * and hands this component a new `initialUser` — but without this effect that new
+   * value never reaches `user`, so the header keeps showing "Log in" and a page
+   * gated on useAuth().user keeps asking the just-signed-in customer to sign in
+   * again, until they reload the page by hand.
+   */
+  useEffect(() => {
+    setUser(initialUser);
+  }, [initialUser]);
 
   const signOut = useCallback(async () => {
     await signOutAction();
