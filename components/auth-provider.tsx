@@ -44,7 +44,20 @@ export function AuthProvider({
 }) {
   const router = useRouter();
   const [user, setUser] = useState<Customer | null>(initialUser);
+  const [prevInitialUser, setPrevInitialUser] = useState<Customer | null>(initialUser);
   const [isPending, startTransition] = useTransition();
+
+  // AuthProvider lives in the root layout and is never remounted across navigation, so
+  // the useState initializer above only ever runs once. Sign-in and register both call
+  // router.refresh() to get a fresh initialUser from the server, and without re-deriving
+  // state here that new value would arrive as a prop but never reach `user` — leaving
+  // the header showing signed-out indefinitely after a successful sign-in. Adjusted
+  // during render rather than in an effect, per React's guidance for this exact case,
+  // to avoid an extra render pass.
+  if (initialUser !== prevInitialUser) {
+    setPrevInitialUser(initialUser);
+    setUser(initialUser);
+  }
 
   const signOut = useCallback(async () => {
     await signOutAction();
