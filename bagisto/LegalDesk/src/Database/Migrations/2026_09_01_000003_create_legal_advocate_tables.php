@@ -118,9 +118,13 @@ return new class extends Migration
          */
         $areas = json_encode(['employment', 'property', 'business', 'family', 'other']);
 
+        // No portrait file has actually been supplied for any of the three yet — see
+        // the comment on the advocate card in app/advocate/page.tsx. Leave `photo_path`
+        // null here until a real one is dropped in `public/advocates/` and this row is
+        // updated to match; a path with nothing behind it 404s on every page view.
         foreach ([
-            ['बिष्णु प्रकाश मणि', 'Bishnu Prakash Mani', 'bishnu@haatmaokil.com', '/advocates/bishnu-prakash-mani.jpg'],
-            ['प्रताप रत्न श्रेष्ठ', 'Pratap Ratna Shrestha', 'pratap@haatmaokil.com', '/advocates/pratap-ratna-shrestha.jpg'],
+            ['बिष्णु प्रकाश मणि', 'Bishnu Prakash Mani', 'bishnu@haatmaokil.com', null],
+            ['प्रताप रत्न श्रेष्ठ', 'Pratap Ratna Shrestha', 'pratap@haatmaokil.com', null],
             ['प्रश्रय दाहाल', 'Prashray Dahal', 'prashray@haatmaokil.com', null],
         ] as [$ne, $en, $email, $photo]) {
             DB::table('legal_advocates')->insertOrIgnore([
