@@ -4,15 +4,18 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Support\Facades\DB;
 
 /**
- * Only offer the two gateways that actually work.
+ * Only offer payment methods this firm can actually settle through.
  *
- * Bagisto's checkout showed nine payment methods before this — Stripe, Razorpay,
- * PayU, PhonePe, both PayPal variants, Cash On Delivery and Money Transfer — every
- * one of them "available" only because its package ships `active => true` with
- * placeholder test credentials that happen to satisfy its own hasValidCredentials()
- * check. None of them settle real money for this firm; eSewa and Fonepay are the
- * only two gateways actually built to. A customer picking any of the other seven
- * would reach a dead end at best.
+ * Checkout showed nine payment methods, but only eSewa and Fonepay are gateways
+ * this firm actually built and can settle Nepali money through. Stripe and both
+ * PayPal methods are kept active deliberately — for a client paying from abroad,
+ * not Nepal, and worth leaving visible even though (like every method here) they
+ * currently run on placeholder test credentials rather than a funded merchant
+ * account. Razorpay, PayU, PhonePe, Cash On Delivery and Money Transfer serve no
+ * one this firm has a way to accept money from and are disabled: each one only
+ * appeared because its package ships `active => true` with placeholder test
+ * credentials that happen to satisfy its own hasValidCredentials() check, and a
+ * customer picking one would reach a dead end.
  *
  * Written to core_config rather than each package's own config file — this is the
  * same override an admin flipping "Disabled" in Configure > Sales > Payment Methods
@@ -22,11 +25,8 @@ use Illuminate\Support\Facades\DB;
 return new class extends Migration
 {
     private const DISABLE = [
-        'stripe',
         'razorpay',
         'phonepe',
-        'paypal_smart_button',
-        'paypal_standard',
         'cashondelivery',
         'moneytransfer',
         'payu',
