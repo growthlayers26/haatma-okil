@@ -15,7 +15,9 @@ import { GatewayNotConfigured, type Handoff, type VerifyResult, toNpr } from "./
 
 const LIVE_FORM = "https://epay.esewa.com.np/api/epay/main/v2/form";
 const TEST_FORM = "https://rc-epay.esewa.com.np/api/epay/main/v2/form";
-const LIVE_STATUS = "https://epay.esewa.com.np/api/epay/transaction/status/";
+// No "epay." prefix on the production status host — confirmed against eSewa's own
+// docs at developer.esewa.com.np/pages/Epay, unlike the form URL above.
+const LIVE_STATUS = "https://esewa.com.np/api/epay/transaction/status/";
 const TEST_STATUS = "https://rc.esewa.com.np/api/epay/transaction/status/";
 
 function config() {
