@@ -3,6 +3,7 @@
 namespace Webkul\Esewa\Payment;
 
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Storage;
 use Webkul\Checkout\Facades\Cart;
 use Webkul\Payment\Payment\Payment;
 
@@ -68,6 +69,19 @@ class EsewaPayment extends Payment
     public function getDescription()
     {
         return $this->getConfigData('description') ?? 'Pay with your eSewa wallet.';
+    }
+
+    /**
+     * eSewa's own icon, the same shape as Stripe.php's getImage() in Bagisto core:
+     * an admin-uploaded logo if one exists, otherwise the bundled default — this
+     * package's own, since Bagisto's core Shop package only bundles logos for the
+     * payment methods it ships upstream.
+     */
+    public function getImage()
+    {
+        $url = $this->getConfigData('image');
+
+        return $url ? Storage::url($url) : asset('vendor/esewa/esewa.png');
     }
 
     public function isSandbox()
