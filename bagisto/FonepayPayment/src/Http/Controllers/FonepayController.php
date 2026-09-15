@@ -152,7 +152,15 @@ class FonepayController extends Controller
 
             session()->flash('order_id', $order->id);
 
-            return redirect()->route('shop.checkout.onepage.success');
+            /*
+             * Not Bagisto's own onepage.success — the customer never chose to be
+             * here, and Bagisto's own "thank you" page is a shop's, not the firm's.
+             * Sending them back to the application's dashboard means the moment
+             * they see confirmation is inside Haatma Okil, and it is also where
+             * documentCreditsAvailable() sweeps this invoice into an entitlement
+             * the instant they land.
+             */
+            return redirect()->away(rtrim(env('LEGAL_APP_URL', 'http://localhost:3000'), '/').'/dashboard');
         } catch (\Throwable $e) {
             report($e);
 
