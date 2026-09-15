@@ -1,0 +1,19 @@
+{
+    "name": "haatmaokil/esewa-payment",
+    "license": "MIT",
+    "require": {},
+    "autoload": {
+        "psr-4": {
+            "Webkul\\Esewa\\": "src/"
+        }
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Webkul\\Esewa\\Providers\\EsewaServiceProvider"
+            ],
+            "aliases": {}
+        }
+    },
+    "minimum-stability": "dev"
+}

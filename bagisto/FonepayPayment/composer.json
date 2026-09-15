@@ -1,0 +1,19 @@
+{
+    "name": "haatmaokil/fonepay-payment",
+    "license": "MIT",
+    "require": {},
+    "autoload": {
+        "psr-4": {
+            "Webkul\\Fonepay\\": "src/"
+        }
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Webkul\\Fonepay\\Providers\\FonepayServiceProvider"
+            ],
+            "aliases": {}
+        }
+    },
+    "minimum-stability": "dev"
+}

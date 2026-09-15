@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { getCustomerId } from "@/lib/auth/session";
+import { mintCheckoutHandoff } from "@/lib/payments/checkoutHandoff";
 import { approvalBlocks, priceNprOf, skuOf, type PurchaseItem } from "@/lib/payments/orders";
 
 /**
@@ -85,17 +86,22 @@ export async function POST(request: Request) {
 
   const bagistoUrl = process.env.BAGISTO_URL ?? "http://localhost";
   const sku = skuOf(item as PurchaseItem);
+  const handoffToken = await mintCheckoutHandoff(customerId, sku);
 
   /*
    * A redirect rather than a fetch. Bagisto's cart lives in the session, so the cart
    * has to be built by the customer's own browser — a cart assembled from this server
    * would belong to this server.
    *
-   * The customer signs in again on the shop. That is the visible seam of running two
-   * applications against one account, and it is left visible rather than papered over
-   * with a shared cookie, which is a decision about cookie scope for the firm to make.
+   * `handoff` is what keeps that browser's Bagisto session honest. Bagisto spends it
+   * to confirm — or, if the browser's own session is stale or belongs to someone else,
+   * to correct — which customer it is signing in as, rather than trusting whatever
+   * session already happened to be active there. See mintCheckoutHandoff().
    */
   return NextResponse.json({
-    handoff: { mode: "redirect", url: `${bagistoUrl}/legal/buy/${encodeURIComponent(sku)}` },
+    handoff: {
+      mode: "redirect",
+      url: `${bagistoUrl}/legal/buy/${encodeURIComponent(sku)}?handoff=${handoffToken}`,
+    },
   });
 }
