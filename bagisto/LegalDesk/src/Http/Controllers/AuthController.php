@@ -135,6 +135,79 @@ class AuthController extends Controller
         ], 201);
     }
 
+    /**
+     * Sign in — or create an account for — a customer Google has already vouched for.
+     *
+     * This never touches a password, so it cannot be the open door login()/register()
+     * are not: unlike those, nothing here proves the caller is the person named. That
+     * proof already happened, server-to-server, between the Next.js application and
+     * Google, when the application exchanged an authorization code only it could hold
+     * for an access token and used it to read the profile back from Google's own API.
+     * What reaches this endpoint is the outcome of that exchange, not a claim the
+     * browser could have made up — which is exactly why it is behind the same shared
+     * secret as MailController::send() rather than open to the browser directly:
+     * without that secret, anyone could POST an arbitrary email here and be signed in
+     * as its owner.
+     */
+    public function social(Request $request): JsonResponse
+    {
+        $expected = (string) env('LEGAL_API_SECRET', '');
+
+        if ($expected === '') {
+            return response()->json(['error' => 'not_configured'], 503);
+        }
+
+        if (! hash_equals($expected, (string) $request->header('X-Legal-Secret'))) {
+            return response()->json(['error' => 'forbidden'], 403);
+        }
+
+        $data = $request->validate([
+            'email'      => ['required', 'email'],
+            'first_name' => ['required', 'string', 'max:255'],
+            'last_name'  => ['nullable', 'string', 'max:255'],
+        ]);
+
+        $customer = Customer::where('email', $data['email'])->first();
+
+        if ($customer) {
+            if ($customer->is_suspended) {
+                return response()->json(['error' => 'suspended'], 403);
+            }
+
+            if (! $customer->status) {
+                return response()->json(['error' => 'inactive'], 403);
+            }
+        } else {
+            $customer = Customer::create([
+                'first_name'        => $data['first_name'],
+                'last_name'         => $data['last_name'] ?? '',
+                'email'             => $data['email'],
+                // Never used to sign in — Google is this account's only door — but the
+                // column is not nullable, and a random value here closes off password
+                // guessing as a path into an account that was never given one on purpose.
+                'password'          => Hash::make(Str::random(40)),
+                'api_token'         => Str::random(80),
+                'customer_group_id' => CustomerGroup::where('code', 'general')->value('id'),
+                'channel_id'        => core()->getCurrentChannel()->id,
+                'status'            => 1,
+                // Google authenticating the owner of this address is what email
+                // verification exists to establish in the first place — asking them to
+                // click a link proving it again would be re-deriving a fact already in
+                // hand.
+                'is_verified'       => true,
+            ]);
+
+            Event::dispatch('customer.registration.after', $customer);
+        }
+
+        $customer->tokens()->delete();
+
+        return response()->json([
+            'token'    => $customer->createToken('haatma-okil')->plainTextToken,
+            'customer' => $this->present($customer),
+        ]);
+    }
+
     public function me(Request $request): JsonResponse
     {
         $token = PersonalAccessToken::findToken((string) $request->bearerToken());
