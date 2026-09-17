@@ -12,8 +12,17 @@ export function SiteFooter() {
       <div className="mx-auto max-w-6xl px-4 py-8 sm:px-6">
         <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
           <Image src="/icon.png" alt="" width={28} height={28} className="h-7 w-7 flex-none rounded-sm" />
-          <span className="font-serif text-base font-semibold">Haatma Okil</span>
-          <span className="font-deva text-sm text-accent">हातमा वकिल</span>
+          {lang === "ne" ? (
+            <>
+              <span className="font-deva text-base font-semibold">हातमा वकिल</span>
+              <span className="font-serif text-sm text-ink-3">Haatma Okil</span>
+            </>
+          ) : (
+            <>
+              <span className="font-serif text-base font-semibold">Haatma Okil</span>
+              <span className="font-deva text-sm text-accent">हातमा वकिल</span>
+            </>
+          )}
         </div>
 
         <p className="mt-3 max-w-[62ch] text-sm text-ink-2">{t("disclaimer")}</p>
