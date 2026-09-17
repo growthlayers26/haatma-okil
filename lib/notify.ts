@@ -98,18 +98,21 @@ const bagistoEmail: NotificationSender = {
   },
 };
 
-/** The configured sender, or null when the shared secret has not been set. */
-export function getSender(): NotificationSender | null {
-  return process.env.LEGAL_API_SECRET ? bagistoEmail : null;
-}
-
 /**
  * The address everything is sent from, and replied to.
  *
  * A reply-to that nobody reads is worse than no email at all: someone answering a
- * notification about their own legal matter must reach the firm, not a void.
+ * notification about their own legal matter must reach the firm, not a void. FIRM.email
+ * is null until the firm supplies a real inbox, which is exactly why getSender() below
+ * refuses to dispatch anything while it is unset, rather than send mail with a reply-to
+ * that goes nowhere.
  */
 export const SENDER_ADDRESS = FIRM.email;
+
+/** The configured sender, or null when the shared secret or the firm's own reply-to address has not been set. */
+export function getSender(): NotificationSender | null {
+  return process.env.LEGAL_API_SECRET && SENDER_ADDRESS ? bagistoEmail : null;
+}
 
 export function isDispatchConfigured(): boolean {
   return getSender() !== null;

@@ -13,8 +13,16 @@ export const FIRM = {
   nameEn: "Haatma Okil",
   nameNe: "हातमा वकिल",
 
-  /** Shared inbox. Also the From and Reply-To on everything the product sends. */
-  email: "mandalalawfirm00@gmail.com",
+  /**
+   * Shared inbox. Also the From and Reply-To on everything the product sends —
+   * see SENDER_ADDRESS in lib/notify.ts, which refuses to dispatch mail at all
+   * while this is unset rather than send it with nowhere for a client to reply.
+   *
+   * Not yet supplied. "mandalalawfirm00@gmail.com" was never this firm's own
+   * inbox — the same class of leftover placeholder as the Vercel favicon and
+   * the Webkul copyright line found and removed earlier.
+   */
+  email: null as string | null,
 
   /**
    * Practising advocates at the firm.
