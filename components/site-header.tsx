@@ -49,32 +49,18 @@ export function SiteHeader() {
             priority
           />
           {/*
-            The Latin form is a transliteration of the Nepali rather than a
-            translation. हातमा वकिल is the name, "lawyer in hand", so the two are set
-            as one lockup instead of a name and a subtitle. Whichever script the
-            reader is currently in leads; the other is the muted second line, and on
-            a phone-width header only the leading one fits — it should never be the
-            one the reader can't read, so a Nepali reader must not be shown only the
-            Latin transliteration on mobile.
+            The Latin form is a transliteration of हातमा वकिल, not a separate name —
+            showing both together read as two names stacked on top of each other, so
+            only the one matching the reader's current language shows.
           */}
           {lang === "ne" ? (
-            <>
-              <span className="whitespace-nowrap font-deva text-lg font-semibold sm:text-xl">
-                हातमा वकिल
-              </span>
-              <span className="hidden whitespace-nowrap font-serif text-base font-semibold tracking-[-0.02em] text-ink-3 sm:inline sm:text-lg">
-                Haatma Okil
-              </span>
-            </>
+            <span className="whitespace-nowrap font-deva text-lg font-semibold sm:text-xl">
+              हातमा वकिल
+            </span>
           ) : (
-            <>
-              <span className="whitespace-nowrap font-serif text-lg font-semibold tracking-[-0.02em] sm:text-xl">
-                Haatma Okil
-              </span>
-              <span className="hidden whitespace-nowrap font-deva text-base font-semibold text-ink-3 sm:inline sm:text-lg">
-                हातमा वकिल
-              </span>
-            </>
+            <span className="whitespace-nowrap font-serif text-lg font-semibold tracking-[-0.02em] sm:text-xl">
+              Haatma Okil
+            </span>
           )}
         </Link>
 

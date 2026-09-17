@@ -12,16 +12,15 @@ export function SiteFooter() {
       <div className="mx-auto max-w-6xl px-4 py-8 sm:px-6">
         <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
           <Image src="/icon.png" alt="" width={28} height={28} className="h-7 w-7 flex-none rounded-sm" />
+          {/*
+            The Latin form is a transliteration of हातमा वकिल, not a separate name —
+            showing both together read as two names stacked on top of each other, so
+            only the one matching the reader's current language shows.
+          */}
           {lang === "ne" ? (
-            <>
-              <span className="font-deva text-base font-semibold">हातमा वकिल</span>
-              <span className="font-serif text-sm text-ink-3">Haatma Okil</span>
-            </>
+            <span className="font-deva text-base font-semibold">हातमा वकिल</span>
           ) : (
-            <>
-              <span className="font-serif text-base font-semibold">Haatma Okil</span>
-              <span className="font-deva text-sm text-accent">हातमा वकिल</span>
-            </>
+            <span className="font-serif text-base font-semibold">Haatma Okil</span>
           )}
         </div>
 
