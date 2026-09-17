@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { useLang } from "./language-provider";
@@ -38,7 +39,15 @@ export function SiteHeader() {
   return (
     <header className="no-print sticky top-0 z-30 border-b border-rule bg-surface/95 backdrop-blur">
       <div className="mx-auto flex max-w-6xl items-center gap-x-6 px-4 py-3 sm:px-6">
-        <Link href="/" className="flex items-baseline gap-2.5 py-1.5">
+        <Link href="/" className="flex items-center gap-2.5 py-1.5">
+          <Image
+            src="/icon.png"
+            alt=""
+            width={32}
+            height={32}
+            className="h-8 w-8 flex-none rounded-sm"
+            priority
+          />
           {/*
             The Latin form is a transliteration of the Nepali rather than a
             translation. हातमा वकिल is the name, "lawyer in hand", so the two are set
