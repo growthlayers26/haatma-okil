@@ -220,6 +220,15 @@ export const DIVORCE = cite(
   "सम्बन्ध विच्छेद सम्बन्धी व्यवस्था",
   "provisions on dissolution of marriage",
 );
+export const PARTITION = cite(
+  ACTS.civilCode,
+  "अंशबण्डा सम्बन्धी व्यवस्था",
+  "provisions on partition of family property",
+);
+/** Civil Procedure Code appellate provisions, as the real filings in this practice cite them. */
+export const APPEAL_PROVISIONS = cite(ACTS.civilProcedure, "दफा १९०–१९२", "§§190–192");
+/** Which High Court bench an appeal from a District Court judgment goes to. */
+export const APPELLATE_JURISDICTION = cite(ACTS.judicialAdministration, "दफा ८(३)", "§8(3)");
 export const ADOPTION = cite(ACTS.civilCode, "धर्मपुत्र-धर्मपुत्री सम्बन्धी व्यवस्था", "provisions on adoption");
 export const AFFIDAVIT = cite(
   ACTS.civilProcedure,
