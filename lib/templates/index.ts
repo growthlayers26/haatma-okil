@@ -82,6 +82,7 @@ import {
   petitionOnlineHearingEnrolment,
   petitionRule62Order,
 } from "./litigation";
+import { partitionPlaint, partitionWrittenStatement, partitionAppeal } from "./partition";
 
 /**
  * Template registry.
@@ -130,11 +131,21 @@ export const TEMPLATES: Template[] = [
   affidavit,
   legalNotice,
   /*
+   * The documents a lawsuit is actually made of — transcribed from real, filed
+   * examples of each, the way the 52 forms below are transcribed from the Supreme
+   * Court's own templates. Partition (अंशचलन) first: it is the single most common
+   * cause of action in the filings this catalogue draws from.
+   */
+  partitionPlaint,
+  partitionWrittenStatement,
+  partitionAppeal,
+  /*
    * Court petitions, in the government's own form order (1–52).
    *
    * Deliberately last. Every template above is a private instrument drafted before
-   * any dispute; these are filed inside a case that already exists, and someone
-   * browsing for a lease should not meet a bail application first.
+   * any dispute, or a document that opens or answers one; these are filed inside a
+   * case that already exists, and someone browsing for a lease should not meet a
+   * bail application first.
    */
   petitionOfficeDeadlineAcknowledged,
   petitionDateSelfTakenOver,
@@ -227,8 +238,8 @@ export const CATEGORIES: { id: Category; label: Bilingual; blurb: Bilingual }[] 
     id: "litigation",
     label: { ne: "अदालती निवेदन", en: "Court petitions" },
     blurb: {
-      ne: "सर्वोच्च अदालतले प्रकाशित गरेका ५२ निवेदनका ढाँचा — पहिले नै दायर भइसकेको मुद्दाभित्र पेस गरिने।",
-      en: "The 52 petition forms the Supreme Court itself publishes, filed inside a case that is already running.",
+      ne: "मुद्दा खोल्ने फिराद र जवाफ दिने प्रतिउत्तरदेखि, सर्वोच्च अदालतले प्रकाशित गरेका ५२ प्रक्रियागत निवेदनसम्म।",
+      en: "From the plaint that opens a case and the written statement that answers it, to the 52 procedural petitions the Supreme Court itself publishes.",
     },
   },
   {
