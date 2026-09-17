@@ -14,6 +14,7 @@ use HaatmaOkil\LegalDesk\Http\Controllers\MailController;
  */
 Route::post('auth/login', [AuthController::class, 'login']);
 Route::post('auth/register', [AuthController::class, 'register']);
+Route::post('auth/social', [AuthController::class, 'social']);
 Route::get('auth/me', [AuthController::class, 'me']);
 
 // The advocate desk. Advocates are staff, so they sign in as Bagisto admins.

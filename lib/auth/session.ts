@@ -256,12 +256,48 @@ async function authenticate(
   path: "login" | "register",
   body: Record<string, string>,
 ): Promise<AuthResult> {
+  return callBagistoAuth(path, body, {});
+}
+
+/**
+ * Sign in with a Google identity Google itself has already vouched for.
+ *
+ * Called only from app/api/auth/google/callback/route.ts, after that route has
+ * exchanged an authorization code for an access token directly with Google and read
+ * the profile back from Google's own API — never from anything the browser could have
+ * asserted on its own. `email`/`firstName`/`lastName` here are that verified profile,
+ * not user input.
+ *
+ * Bagisto's /auth/social endpoint trusts this call precisely because it is
+ * authenticated the same way lib/notify.ts's mail dispatch is: a shared secret this
+ * application and Bagisto both hold, never sent to the browser.
+ */
+export async function signInWithGoogleProfile(profile: {
+  email: string;
+  firstName: string;
+  lastName: string;
+}): Promise<AuthResult> {
+  const secret = process.env.LEGAL_API_SECRET;
+  if (!secret) return { ok: false, error: "unavailable" };
+
+  return callBagistoAuth(
+    "social",
+    { email: profile.email, first_name: profile.firstName, last_name: profile.lastName },
+    { "X-Legal-Secret": secret },
+  );
+}
+
+async function callBagistoAuth(
+  path: "login" | "register" | "social",
+  body: Record<string, string>,
+  extraHeaders: Record<string, string>,
+): Promise<AuthResult> {
   let response: Response;
 
   try {
     response = await fetch(`${BAGISTO_URL}/api/legal/auth/${path}`, {
       method: "POST",
-      headers: { "Content-Type": "application/json", Accept: "application/json" },
+      headers: { "Content-Type": "application/json", Accept: "application/json", ...extraHeaders },
       body: JSON.stringify(body),
       cache: "no-store",
     });
