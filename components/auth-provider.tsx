@@ -4,7 +4,6 @@ import {
   createContext,
   useCallback,
   useContext,
-  useEffect,
   useMemo,
   useState,
   useTransition,
@@ -50,14 +49,20 @@ export function AuthProvider({
   /*
    * `useState(initialUser)` only reads the prop on the first render. Sign-in and
    * sign-up both resolve by calling router.refresh(), which re-runs the root layout
-   * and hands this component a new `initialUser` — but without this effect that new
-   * value never reaches `user`, so the header keeps showing "Log in" and a page
-   * gated on useAuth().user keeps asking the just-signed-in customer to sign in
-   * again, until they reload the page by hand.
+   * and hands this component a new `initialUser` — but on its own that new value
+   * never reaches `user`, so the header keeps showing "Log in" and a page gated on
+   * useAuth().user keeps asking the just-signed-in customer to sign in again, until
+   * they reload the page by hand.
+   *
+   * Compared during render rather than synced in an effect: an effect would render
+   * the stale value first and only then correct it, and calling setState from one
+   * costs an extra render pass for every refresh.
    */
-  useEffect(() => {
+  const [prevInitialUser, setPrevInitialUser] = useState<Customer | null>(initialUser);
+  if (initialUser !== prevInitialUser) {
+    setPrevInitialUser(initialUser);
     setUser(initialUser);
-  }, [initialUser]);
+  }
 
   const signOut = useCallback(async () => {
     await signOutAction();
