@@ -3,8 +3,10 @@
 namespace Webkul\Esewa\Http\Controllers;
 
 use App\Http\Controllers\Controller;
+use Illuminate\Database\QueryException;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
 use Webkul\Checkout\Facades\Cart;
 use Webkul\Esewa\Payment\EsewaPayment;
@@ -142,6 +144,30 @@ class EsewaController extends Controller
             return redirect()->route('shop.checkout.cart.index');
         }
 
+        /*
+         * A verified, COMPLETE, amount-matched result is still only proof this
+         * transaction_uuid was paid once — not proof it has not been shown to this
+         * endpoint before. Without this, a captured or replayed success redirect
+         * (browser history, a leaked URL) could be resubmitted against a fresh cart
+         * of the same total and mint a second, unpaid order: the signature still
+         * verifies and eSewa's status endpoint still reports COMPLETE, because eSewa
+         * has no way to know the merchant already fulfilled it. The unique index on
+         * (gateway, transaction_ref) is what actually enforces "at most once."
+         */
+        try {
+            DB::table('legal_payment_confirmations')->insert([
+                'gateway' => 'esewa',
+                'transaction_ref' => (string) $decoded['transaction_uuid'],
+                'created_at' => now(),
+            ]);
+        } catch (QueryException $e) {
+            report(new \RuntimeException("eSewa transaction {$decoded['transaction_uuid']} was already used to complete an order"));
+
+            session()->flash('error', 'This payment has already been processed.');
+
+            return redirect()->route('shop.checkout.cart.index');
+        }
+
         return $this->handlePaymentSuccess($cart, $decoded, $status);
     }
 
@@ -158,6 +184,11 @@ class EsewaController extends Controller
             $orderData = (new OrderResource($cart))->jsonSerialize();
 
             $order = $this->orderRepository->create($orderData);
+
+            DB::table('legal_payment_confirmations')
+                ->where('gateway', 'esewa')
+                ->where('transaction_ref', (string) $decoded['transaction_uuid'])
+                ->update(['order_id' => $order->id]);
 
             if ($order->payment) {
                 $order->payment->update([

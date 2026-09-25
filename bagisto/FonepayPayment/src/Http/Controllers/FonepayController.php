@@ -3,8 +3,10 @@
 namespace Webkul\Fonepay\Http\Controllers;
 
 use App\Http\Controllers\Controller;
+use Illuminate\Database\QueryException;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Webkul\Checkout\Facades\Cart;
 use Webkul\Fonepay\Payment\FonepayPayment;
 use Webkul\Sales\Models\Invoice;
@@ -109,6 +111,30 @@ class FonepayController extends Controller
             return redirect()->route('shop.checkout.cart.index');
         }
 
+        /*
+         * Fonepay, unlike eSewa, offers no independent server-to-server status check —
+         * a verified signature on the return redirect is the only confirmation this
+         * integration ever gets. That makes it more important here, not less, that a
+         * given PRN can only ever complete one order: without this, a captured or
+         * replayed return URL (browser history, a leaked link) could be resubmitted
+         * against a fresh cart of the same total and mint a second, unpaid order,
+         * since PS/RC/DV would all still verify. The unique index on
+         * (gateway, transaction_ref) is what actually enforces "at most once."
+         */
+        try {
+            DB::table('legal_payment_confirmations')->insert([
+                'gateway' => 'fonepay',
+                'transaction_ref' => (string) $response['PRN'],
+                'created_at' => now(),
+            ]);
+        } catch (QueryException $e) {
+            report(new \RuntimeException("Fonepay transaction {$response['PRN']} was already used to complete an order"));
+
+            session()->flash('error', 'This payment has already been processed.');
+
+            return redirect()->route('shop.checkout.cart.index');
+        }
+
         return $this->handlePaymentSuccess($cart, $response);
     }
 
@@ -118,6 +144,11 @@ class FonepayController extends Controller
             $orderData = (new OrderResource($cart))->jsonSerialize();
 
             $order = $this->orderRepository->create($orderData);
+
+            DB::table('legal_payment_confirmations')
+                ->where('gateway', 'fonepay')
+                ->where('transaction_ref', (string) $response['PRN'])
+                ->update(['order_id' => $order->id]);
 
             if ($order->payment) {
                 $order->payment->update([

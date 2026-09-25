@@ -1,6 +1,6 @@
 "use client";
 
-import { Suspense, useEffect, useState } from "react";
+import { Suspense, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useLang } from "@/components/language-provider";
 import { registerAction, signInAction } from "@/app/actions/auth";
@@ -28,8 +28,21 @@ function LoginForm() {
   const [lastName, setLastName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [state, setState] = useState<"idle" | "working" | "error">("idle");
-  const [message, setMessage] = useState("");
+  /*
+   * Google sign-in redirects back here with ?error=... on failure — the only case this
+   * page needs to show anything for, since success lands straight on `next`. Read as
+   * the initial state during the first render rather than applied by an effect
+   * afterwards: the value is in the URL before anything renders, so an effect would
+   * only paint the form once without the error and then again with it.
+   *
+   * `explain` is a hoisted function declaration, so it is callable here.
+   */
+  const initialError = params.get("error");
+
+  const [state, setState] = useState<"idle" | "working" | "error">(
+    initialError ? "error" : "idle",
+  );
+  const [message, setMessage] = useState(initialError ? explain(initialError) : "");
 
   function explain(error: string): string {
     switch (error) {
@@ -65,22 +78,15 @@ function LoginForm() {
           ne: "गुगल लगइन अहिले उपलब्ध छैन।",
           en: "Google sign-in is not available right now.",
         });
+      case "email_in_use":
+        return bi({
+          ne: "यो इमेलमा पहिले नै पासवर्डसहितको खाता छ। कृपया पासवर्डद्वारा लगइन गर्नुहोस्।",
+          en: "An account with this email already exists. Please sign in with your password instead.",
+        });
       default:
         return error;
     }
   }
-
-  // Google sign-in redirects back here with ?error=... on failure — the only case
-  // this page needs to show anything for, since success lands straight on `next`.
-  useEffect(() => {
-    const error = params.get("error");
-    if (error) {
-      setState("error");
-      setMessage(explain(error));
-    }
-    // Only ever meant to run once, against whatever the page loaded with.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();

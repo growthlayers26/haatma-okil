@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
 import { useLang } from "@/components/language-provider";
 import { useAuth } from "@/components/auth-provider";
 import { TEMPLATES, getTemplate } from "@/lib/templates";
@@ -26,6 +26,14 @@ import type { Answers, Bilingual } from "@/lib/types";
 // Stable across renders — TEMPLATES is a module constant.
 const DRAFT_KEYS = TEMPLATES.map((t) => draftKey(t.slug));
 const EMPTY_ANSWERS: Answers = {};
+
+// Backs the `mounted` check below. Module scope because useSyncExternalStore
+// resubscribes whenever the subscribe function's identity changes, and this store
+// never emits: the answer only ever changes once, when hydration replaces the
+// server snapshot with the client one.
+const subscribeNothing = () => () => {};
+const onClient = () => true;
+const onServer = () => false;
 
 /**
  * Compliance deadlines are the reason to come back — documents alone don't retain.
@@ -77,9 +85,12 @@ export default function DashboardPage() {
    * mismatch, not an occasional one. Rather than fight the timezone math, the
    * deadline items are simply left out of the very first render (server and
    * pre-hydration client agree: none) and added once mounted, a moment later.
+   *
+   * useSyncExternalStore rather than a state-plus-effect pair: it is the one hook
+   * that can answer differently on the server than after hydration without storing
+   * anything, so there is no second render pass to schedule.
    */
-  const [mounted, setMounted] = useState(false);
-  useEffect(() => setMounted(true), []);
+  const mounted = useSyncExternalStore(subscribeNothing, onClient, onServer);
   const [releasing, setReleasing] = useState<string | null>(null);
   const claimedRef = useRef(false);
 

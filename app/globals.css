@@ -109,8 +109,19 @@ body {
 /*
  * Devanagari runs taller than Latin at the same size, so line-height and tap
  * targets are set from the Devanagari metrics and Latin inherits the extra room.
+ *
+ * Targets body itself, via :lang() rather than the [lang] attribute selector used
+ * below — body declares its own font-family and line-height a few lines up, and an
+ * element's own declaration always wins over an inherited one, however specific the
+ * inherited rule is. So a bare `[lang="ne"] { font-family: var(--deva) }` only ever
+ * changed <html>'s own font, and every ordinary paragraph kept inheriting body's
+ * Source Sans stack instead — which has no Devanagari glyphs at all, so the browser
+ * silently substituted its own generic fallback font for every Nepali sentence on
+ * the site except headings and labels, which happen to carry their own font class.
+ * :lang(ne) can target body directly because it matches on the inherited language,
+ * not on body's own (absent) lang attribute.
  */
-[lang="ne"] {
+body:lang(ne) {
   font-family: var(--deva);
   line-height: 1.85;
 }
