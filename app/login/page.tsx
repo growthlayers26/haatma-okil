@@ -78,6 +78,11 @@ function LoginForm() {
           ne: "गुगल लगइन अहिले उपलब्ध छैन।",
           en: "Google sign-in is not available right now.",
         });
+      case "email_in_use":
+        return bi({
+          ne: "यो इमेलमा पहिले नै पासवर्डसहितको खाता छ। कृपया पासवर्डद्वारा लगइन गर्नुहोस्।",
+          en: "An account with this email already exists. Please sign in with your password instead.",
+        });
       default:
         return error;
     }
