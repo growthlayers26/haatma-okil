@@ -17,15 +17,19 @@ import { execute } from "@/lib/db/mysql";
  * redirect, so a leaked database row grants nothing on its own, and reusing it
  * (a stale bookmark, a replayed request) grants nothing either — Bagisto marks it
  * spent the moment it is read.
+ *
+ * The row also records what goes in the cart, comma-separated, and Bagisto builds the
+ * cart from that row rather than from the URL. The URL is something a browser can edit;
+ * this row is something only this server wrote.
  */
-export async function mintCheckoutHandoff(customerId: number, sku: string): Promise<string> {
+export async function mintCheckoutHandoff(customerId: number, skus: string[]): Promise<string> {
   const token = randomBytes(32).toString("hex");
   const tokenHash = createHash("sha256").update(token).digest("hex");
 
   await execute(
     `INSERT INTO legal_checkout_handoffs (id, customer_id, token_hash, sku, expires_at, created_at)
      VALUES (?, ?, ?, ?, DATE_ADD(NOW(), INTERVAL 2 MINUTE), NOW())`,
-    [randomUUID(), customerId, tokenHash, sku],
+    [randomUUID(), customerId, tokenHash, skus.join(",")],
   );
 
   return token;

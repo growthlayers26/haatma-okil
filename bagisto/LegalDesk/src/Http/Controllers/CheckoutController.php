@@ -23,7 +23,7 @@ use Webkul\Product\Repositories\ProductRepository;
  * this browser happens to be carrying. It could be stale, or it could belong to
  * someone who used this browser before — either way, buy() must not just trust it.
  * The `handoff` query parameter is how the application vouches for who is actually
- * buying; see resolveHandoffCustomer() and mintCheckoutHandoff() in
+ * buying, and for what; see findHandoff() and mintCheckoutHandoff() in
  * lib/payments/checkoutHandoff.ts.
  */
 class CheckoutController extends Controller
@@ -31,29 +31,52 @@ class CheckoutController extends Controller
     public function __construct(protected ProductRepository $productRepository) {}
 
     /**
-     * Put one purchasable item in the cart and go straight to checkout.
+     * Put the purchase in the cart and go straight to checkout.
      *
-     * The SKU is the join between the two halves of the system — see skuOf() in
-     * lib/payments/orders.ts. Anything not in the catalogue is refused rather than
-     * silently dropping the customer into an empty cart with no explanation.
+     * The SKUs are the join between the two halves of the system — see skusOf() in
+     * lib/payments/catalogue.ts. They come from the hand-off row the application wrote,
+     * not from the URL: a purchase can be more than one line (a document plus an
+     * advocate review), and the URL can only name one. The URL's SKU must still be the
+     * row's first, so a hand-off minted for one purchase cannot be spent on another.
+     *
+     * Anything that cannot be bought — a token that is missing or spent, an item that
+     * is not in the catalogue — sends the customer back to the application, which
+     * explains and offers another go. It used to land them on Bagisto's own home page,
+     * which has nothing on it now and nothing to say what had just gone wrong.
      */
     public function buy(Request $request, string $sku): RedirectResponse
     {
-        $product = $this->productRepository->findOneByField('sku', $sku);
+        $handoff = $this->findHandoff($request);
 
-        if (! $product || ! $product->status) {
-            return redirect()
-                ->route('shop.home.index')
-                ->with('error', 'That item is not available.');
+        if (! $handoff) {
+            return $this->backToApp();
         }
 
-        $customerId = $this->resolveHandoffCustomer($request);
+        $skus = array_values(array_filter(array_map('trim', explode(',', (string) $handoff->sku))));
 
-        if (! $customerId) {
-            return redirect()
-                ->route('shop.home.index')
-                ->with('error', 'Start checkout again from your Haatma Okil account.');
+        if ($skus === [] || $skus[0] !== $sku) {
+            return $this->backToApp();
         }
+
+        // Every product is checked before the hand-off is spent, so an item that is
+        // not available does not also burn the customer's token.
+        $products = [];
+
+        foreach ($skus as $itemSku) {
+            $product = $this->productRepository->findOneByField('sku', $itemSku);
+
+            if (! $product || ! $product->status) {
+                return $this->backToApp();
+            }
+
+            $products[] = $product;
+        }
+
+        if (! $this->spendHandoff($handoff)) {
+            return $this->backToApp();
+        }
+
+        $customerId = (int) $handoff->customer_id;
 
         if ((int) Auth::guard('customer')->id() !== $customerId) {
             // Whatever was active belonged to nobody, or to somebody else. The
@@ -73,30 +96,42 @@ class CheckoutController extends Controller
             // choose this time.
             Cart::deActivateCart();
 
-            Cart::addProduct($product, [
-                'product_id' => $product->id,
-                'quantity'   => 1,
-            ]);
+            foreach ($products as $product) {
+                Cart::addProduct($product, [
+                    'product_id' => $product->id,
+                    'quantity'   => 1,
+                ]);
+            }
         } catch (\Throwable $e) {
-            return redirect()
-                ->route('shop.home.index')
-                ->with('error', $e->getMessage());
+            report($e);
+
+            return $this->backToApp();
         }
 
         return redirect()->route('shop.checkout.onepage.index');
     }
 
     /**
-     * Spends the one-time handoff token minted by the application, returning the
-     * customer id it vouches for — or null if the token is missing, unknown,
-     * expired, or already spent.
-     *
-     * The UPDATE against `used_at IS NULL` is what makes spending atomic: two
-     * requests racing on the same token (a double-tapped link, a retried redirect)
-     * can both read the row, but only one of them flips it to spent, so only one
-     * gets a customer id back.
+     * Where a purchase that could not start is sent: a page in the application that
+     * says nothing was charged and offers another attempt.
      */
-    protected function resolveHandoffCustomer(Request $request): ?int
+    protected function backToApp(): RedirectResponse
+    {
+        return redirect()->away(rtrim(env('LEGAL_APP_URL', 'http://localhost:3000'), '/').'/payment/problem');
+    }
+
+    /**
+     * The hand-off row this request's token names, if it is still good — not yet
+     * spent and not yet expired. Reading it does not spend it; see spendHandoff().
+     *
+     * Compared using the database's own clock, not PHP's now(). This row is written
+     * by a Node process and read by this PHP one — app.timezone (Asia/Kolkata) has
+     * nothing to do with either of them, and the one clock both already agree on is
+     * the connection they share. Comparing expires_at (set with MySQL's NOW()) against
+     * PHP's now() compares a UTC timestamp against a UTC+5:30 one, which made every
+     * token look expired the instant it was minted.
+     */
+    protected function findHandoff(Request $request): ?object
     {
         $token = $request->query('handoff');
 
@@ -104,32 +139,26 @@ class CheckoutController extends Controller
             return null;
         }
 
-        $hash = hash('sha256', $token);
-
-        /*
-         * Compared and stamped using the database's own clock throughout, not
-         * PHP's now(). This row is written by a Node process and read by this
-         * PHP one — app.timezone (Asia/Kolkata) has nothing to do with either of
-         * them, and the one clock both already agree on is the connection they
-         * share. Comparing expires_at (set with MySQL's NOW()) against PHP's
-         * now() compares a UTC timestamp against a UTC+5:30 one, which made
-         * every token look expired the instant it was minted.
-         */
-        $handoff = DB::table('legal_checkout_handoffs')
-            ->where('token_hash', $hash)
+        return DB::table('legal_checkout_handoffs')
+            ->where('token_hash', hash('sha256', $token))
             ->whereRaw('expires_at > NOW()')
             ->whereNull('used_at')
             ->first();
+    }
 
-        if (! $handoff) {
-            return null;
-        }
-
-        $spent = DB::table('legal_checkout_handoffs')
+    /**
+     * Marks the hand-off spent, returning whether this request is the one that did.
+     *
+     * The UPDATE against `used_at IS NULL` is what makes spending atomic: two
+     * requests racing on the same token (a double-tapped link, a retried redirect)
+     * can both read the row, but only one of them flips it to spent, so only one
+     * gets to build a cart.
+     */
+    protected function spendHandoff(object $handoff): bool
+    {
+        return (bool) DB::table('legal_checkout_handoffs')
             ->where('id', $handoff->id)
             ->whereNull('used_at')
             ->update(['used_at' => DB::raw('NOW()')]);
-
-        return $spent ? (int) $handoff->customer_id : null;
     }
 }

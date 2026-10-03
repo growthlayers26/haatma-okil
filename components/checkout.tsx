@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useLang } from "./language-provider";
 import { useAuth } from "./auth-provider";
@@ -8,6 +8,7 @@ import { DocumentPreview } from "./document-preview";
 import { ExecutionNotice } from "./execution-notice";
 import { validate, hasBlockingIssues } from "@/lib/render";
 import { formatNpr } from "@/lib/nepal";
+import { ADVOCATE_REVIEW_NPR } from "@/lib/payments/catalogue";
 import { parseBsString, formatBsShort } from "@/lib/bs-date";
 import { saveDocument } from "@/app/actions/documents";
 import type { Handoff } from "@/lib/payments/types";
@@ -32,32 +33,18 @@ function submitGatewayForm(action: string, fields: Record<string, string>) {
   form.submit();
 }
 
-const ADVOCATE_REVIEW_NPR = 2_500;
-
-type Gateway = "khalti" | "esewa" | "fonepay" | "card";
-
-/** Khalti leads: cleanest API of the three and its sandbox matches production. */
-const GATEWAYS: { id: Gateway; label: string; note: { ne: string; en: string } }[] = [
-  {
-    id: "khalti",
-    label: "Khalti",
-    note: { ne: "वालेट वा बैंक", en: "Wallet or bank" },
-  },
-  {
-    id: "esewa",
-    label: "eSewa",
-    note: { ne: "सबैभन्दा धेरै प्रयोग हुने", en: "Widest reach" },
-  },
-  {
-    id: "fonepay",
-    label: "Fonepay QR",
-    note: { ne: "कुनै पनि बैंक एप", en: "Any connected bank app" },
-  },
-  {
-    id: "card",
-    label: "Visa / Mastercard",
-    note: { ne: "विदेशबाट भुक्तानी", en: "For payment from abroad" },
-  },
+/**
+ * What the shop accepts, shown so nobody is surprised by it — not chosen from.
+ *
+ * Payment methods are picked on Bagisto's checkout, the next screen, from whatever the
+ * firm has enabled there. This list used to be a set of radio buttons whose answer was
+ * thrown away, led with Khalti (which Bagisto has no extension for, so the default was
+ * a method that does not exist) and made people choose twice.
+ */
+const ACCEPTED: { label: string; note: { ne: string; en: string } }[] = [
+  { label: "eSewa", note: { ne: "सबैभन्दा धेरै प्रयोग हुने", en: "Widest reach" } },
+  { label: "Fonepay QR", note: { ne: "कुनै पनि बैंक एप", en: "Any connected bank app" } },
+  { label: "Visa / Mastercard", note: { ne: "विदेशबाट भुक्तानी", en: "For payment from abroad" } },
 ];
 
 export function Checkout({
@@ -72,7 +59,6 @@ export function Checkout({
   const { t, bi, lang } = useLang();
   const { user } = useAuth();
   const router = useRouter();
-  const [gateway, setGateway] = useState<Gateway>("khalti");
   const [wantsReview, setWantsReview] = useState(false);
   const [pending, setPending] = useState(false);
   const [notice, setNotice] = useState("");
@@ -85,16 +71,39 @@ export function Checkout({
 
   const reviewed = parseBsString(template.review.reviewedOnBs);
 
+  /*
+   * Pressing Back from the payment screen restores this page from the browser's memory
+   * exactly as it was left — which is with the button disabled and showing "…". Nothing
+   * re-runs, so nothing would ever re-enable it.
+   */
+  useEffect(() => {
+    function onPageShow(event: PageTransitionEvent) {
+      if (event.persisted) setPending(false);
+    }
+    window.addEventListener("pageshow", onPageShow);
+    return () => window.removeEventListener("pageshow", onPageShow);
+  }, []);
+
+  // `checkout=1` is what makes the wizard reopen on this screen rather than step one.
+  const signInThenReturn = () =>
+    `/login?next=${encodeURIComponent(`${window.location.pathname}?checkout=1`)}`;
+
   async function pay() {
     setPending(true);
     setNotice("");
+
+    // Once the browser is on its way somewhere else the button has to stay disabled.
+    // Re-enabling it mid-navigation invites a second press, and a second press mints a
+    // second hand-off for the same purchase.
+    let leaving = false;
 
     try {
       // Payment is the first point an account is genuinely needed. Everything up to
       // here works anonymously; the draft is already in localStorage, so bouncing
       // through login loses nothing.
       if (!user) {
-        router.push(`/login?next=${encodeURIComponent(window.location.pathname)}`);
+        leaving = true;
+        router.push(signInThenReturn());
         return;
       }
 
@@ -112,42 +121,56 @@ export function Checkout({
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          gateway,
           documentId: saved.ok ? saved.id : undefined,
           item: { type: "document", slug: template.slug, advocateReview: wantsReview },
         }),
       });
 
-      const data = (await response.json()) as {
+      // A gateway timeout or an error page is not JSON; that is a failure to report,
+      // not a reason for the click to do nothing at all.
+      const data = (await response.json().catch(() => null)) as {
         handoff?: Handoff;
         message?: string;
         requiresAuth?: boolean;
-      };
+      } | null;
 
-      if (data.requiresAuth) {
-        router.push(`/login?next=${encodeURIComponent(window.location.pathname)}`);
+      if (data?.requiresAuth) {
+        leaving = true;
+        router.push(signInThenReturn());
         return;
       }
 
-      if (data.handoff?.mode === "redirect") {
+      if (data?.handoff?.mode === "redirect") {
+        leaving = true;
         window.location.href = data.handoff.url;
         return;
       }
 
-      if (data.handoff?.mode === "form") {
+      if (data?.handoff?.mode === "form") {
+        leaving = true;
         submitGatewayForm(data.handoff.action, data.handoff.fields);
         return;
       }
 
       setNotice(
-        data.message ??
+        data?.message ??
           bi({
             ne: "भुक्तानी सुरु गर्न सकिएन।",
             en: "Could not start the payment.",
           }),
       );
+    } catch {
+      // saveDocument is a server action and throws when the database is unreachable;
+      // fetch throws when the network is. Either way the person was left looking at a
+      // button that came back to life with no word on why.
+      setNotice(
+        bi({
+          ne: "भुक्तानी सुरु गर्न सकिएन। इन्टरनेट जाँचेर फेरि प्रयास गर्नुहोस्।",
+          en: "Could not start the payment. Check your connection and try again.",
+        }),
+      );
     } finally {
-      setPending(false);
+      if (!leaving) setPending(false);
     }
   }
 
@@ -218,27 +241,25 @@ export function Checkout({
             <p className="font-mono text-[0.7rem] font-semibold uppercase tracking-wider text-ink-3">
               {t("paymentMethod")}
             </p>
-            <div className="mt-3 space-y-2">
-              {GATEWAYS.map((g) => (
-                <label
-                  key={g.id}
-                  className={`flex cursor-pointer items-center gap-3 border px-3 py-2.5 text-sm transition-colors ${
-                    gateway === g.id ? "border-accent bg-accent-soft" : "border-rule-strong"
-                  }`}
+            <ul className="mt-3 space-y-2">
+              {ACCEPTED.map((method) => (
+                <li
+                  key={method.label}
+                  className="flex items-center gap-3 border border-rule-strong px-3 py-2.5 text-sm"
                 >
-                  <input
-                    type="radio"
-                    name="gateway"
-                    value={g.id}
-                    checked={gateway === g.id}
-                    onChange={() => setGateway(g.id)}
-                    className="accent-[var(--accent)]"
-                  />
-                  <span className="font-semibold">{g.label}</span>
-                  <span className="ml-auto font-mono text-[0.7rem] text-ink-3">{bi(g.note)}</span>
-                </label>
+                  <span className="font-semibold">{method.label}</span>
+                  <span className="ml-auto font-mono text-[0.7rem] text-ink-3">
+                    {bi(method.note)}
+                  </span>
+                </li>
               ))}
-            </div>
+            </ul>
+            <p className="mt-3 text-sm text-ink-3">
+              {bi({
+                ne: "भुक्तानी विधि अर्को पृष्ठमा छान्नुहुनेछ।",
+                en: "You'll pick one on the next screen.",
+              })}
+            </p>
           </div>
 
           <label className="flex cursor-pointer items-start gap-3 border border-rule bg-surface p-4 text-sm">

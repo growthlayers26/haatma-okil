@@ -179,6 +179,23 @@ export default function DashboardPage() {
   const attention = useMemo<Attention[]>(() => {
     const items: Attention[] = [];
 
+    // First, because it is the answer to the question a customer who has just paid
+    // arrives with. The page used to open with "nothing needs you" in that moment —
+    // while the credit they paid for sat further down, unspent.
+    if (user && credits > 0) {
+      items.push({
+        id: "credit",
+        tone: "good",
+        label: { ne: "भुक्तानी प्राप्त भयो", en: "Payment received" },
+        detail: {
+          ne: `${toNepaliDigits(credits)} कागजात क्रेडिट प्रयोगका लागि तयार`,
+          en: `${credits} document ${credits === 1 ? "credit" : "credits"} ready to use`,
+        },
+        href: "#documents",
+        action: { ne: "प्रयोग गर्नुहोस्", en: "Use it" },
+      });
+    }
+
     for (const e of enquiries) {
       if (e.status !== "answered" || !e.answer) continue;
       items.push({
@@ -228,7 +245,7 @@ export default function DashboardPage() {
     }
 
     return items;
-  }, [enquiries, documents, mounted]);
+  }, [user, credits, enquiries, documents, mounted]);
 
   const num = (n: number) => (lang === "ne" ? toNepaliDigits(n) : String(n));
 
@@ -300,7 +317,7 @@ export default function DashboardPage() {
       </section>
 
       <div className="mt-12 grid gap-10 lg:grid-cols-[1fr_18rem] lg:gap-14">
-        <div>
+        <div id="documents" className="scroll-mt-24">
           <SectionLabel>{bi({ ne: "मेरा कागजात", en: "My documents" })}</SectionLabel>
 
           {/*

@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest";
 import { toPaisa, toNpr } from "@/lib/payments/types";
-import { priceNprOf, meaningOfSku, skuOf } from "@/lib/payments/catalogue";
+import { priceNprOf, meaningOfSku, skuOf, skusOf } from "@/lib/payments/catalogue";
 import { planPriceNpr, annualSavingPercent, PLANS } from "@/lib/plans";
 import { TEMPLATES } from "@/lib/templates";
 
@@ -43,6 +43,49 @@ describe("server-side pricing", () => {
 
   it("refuses to sell the free plan", () => {
     expect(priceNprOf({ type: "plan", id: "free", period: "annual" })).toBeNull();
+  });
+});
+
+describe("what goes in the cart", () => {
+  it("is just the document when no review is asked for", () => {
+    expect(skusOf({ type: "document", slug: "employment-contract" })).toEqual([
+      "doc-employment-contract",
+    ]);
+  });
+
+  /*
+   * Regression: the review-and-pay page added NPR 2,500 to its total when the review
+   * box was ticked, but only the document's SKU ever reached Bagisto's cart. The buyer
+   * was quoted a total they were never charged and never received the review.
+   */
+  it("carries the review as a second line, the document still first", () => {
+    expect(
+      skusOf({ type: "document", slug: "employment-contract", advocateReview: true }),
+    ).toEqual(["doc-employment-contract", "svc-document_review"]);
+  });
+
+  it("totals, line by line, to exactly what the page quotes", () => {
+    const quoted = priceNprOf({
+      type: "document",
+      slug: "employment-contract",
+      advocateReview: true,
+    });
+    const charged =
+      priceNprOf({ type: "document", slug: "employment-contract" })! +
+      priceNprOf({ type: "service", id: "document_review" })!;
+    expect(charged).toBe(quoted);
+  });
+
+  it("grants a review entitlement for the review line, not a second document", () => {
+    expect(meaningOfSku("svc-document_review")?.kind).toBe("review");
+    expect(meaningOfSku("doc-employment-contract")?.kind).toBe("document");
+  });
+
+  it("puts only one line in the cart for anything that is not a document", () => {
+    expect(skusOf({ type: "service", id: "question" })).toEqual(["svc-question"]);
+    expect(skusOf({ type: "plan", id: "business", period: "annual" })).toEqual([
+      "plan-business-annual",
+    ]);
   });
 });
 
