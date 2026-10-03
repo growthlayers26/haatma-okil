@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useState, useSyncExternalStore } from "react";
 import Link from "next/link";
 import { useLang } from "./language-provider";
 import { DocumentPreview } from "./document-preview";
@@ -16,6 +16,25 @@ export const draftKey = (slug: string) => `haatmaokil.draft.${slug}`;
 // Module-level so the fallback identity is stable across renders.
 const EMPTY_ANSWERS: Answers = {};
 
+const subscribeToNothing = () => () => {};
+
+/**
+ * Whether this page was opened to resume at checkout — `?checkout=1`, which
+ * components/checkout.tsx appends to the address it asks sign-in to return to.
+ *
+ * Read through useSyncExternalStore, not useSearchParams: this page is prerendered,
+ * and useSearchParams would push the whole wizard out of the static HTML and behind a
+ * Suspense boundary. The server snapshot is always false, so the first paint is the
+ * normal wizard and the client switches over right after hydration.
+ */
+function useResumesAtCheckout(): boolean {
+  return useSyncExternalStore(
+    subscribeToNothing,
+    () => new URLSearchParams(window.location.search).get("checkout") === "1",
+    () => false,
+  );
+}
+
 export function Wizard({ slug }: { slug: string }) {
   const { lang, t, bi } = useLang();
   const template = getTemplate(slug);
@@ -28,7 +47,10 @@ export function Wizard({ slug }: { slug: string }) {
    */
   const [answers, setAnswers] = usePersistentState<Answers>(draftKey(slug), EMPTY_ANSWERS);
 
-  const [stepIndex, setStepIndex] = useState(0);
+  // Null until the person moves: until then the step is derived, so arriving from the
+  // sign-in page can land on checkout without an effect setting it.
+  const [chosenStep, setChosenStep] = useState<number | null>(null);
+  const resumesAtCheckout = useResumesAtCheckout();
   const [showPreview, setShowPreview] = useState(false);
   // Missing-field errors stay quiet until the user tries to leave the step, so an
   // untouched form doesn't open covered in red.
@@ -53,6 +75,16 @@ export function Wizard({ slug }: { slug: string }) {
   }
 
   const totalSteps = template.steps.length;
+
+  /*
+   * Payment is where sign-in is demanded, and sign-in leaves the page. Coming back used
+   * to restart at step one — the answers were kept, but the person had to click through
+   * every step again to reach the button they had already pressed. Resume at checkout
+   * instead, unless the draft cannot be paid for yet, in which case the first step is
+   * the honest place to start.
+   */
+  const stepIndex =
+    chosenStep ?? (resumesAtCheckout && !hasBlockingIssues(issues) ? totalSteps : 0);
   const isCheckout = stepIndex >= totalSteps;
   const step = template.steps[stepIndex];
   const stepIssues = isCheckout ? [] : issuesForStep(template, stepIndex, issues);
@@ -66,7 +98,7 @@ export function Wizard({ slug }: { slug: string }) {
 
   function goTo(next: number) {
     setRevealErrors(false);
-    setStepIndex(next);
+    setChosenStep(next);
   }
 
   function onContinue() {
@@ -82,7 +114,7 @@ export function Wizard({ slug }: { slug: string }) {
       <Checkout
         template={template}
         answers={answers}
-        onBack={() => setStepIndex(totalSteps - 1)}
+        onBack={() => setChosenStep(totalSteps - 1)}
       />
     );
   }

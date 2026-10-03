@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 import { getCustomerId } from "@/lib/auth/session";
 import { mintCheckoutHandoff } from "@/lib/payments/checkoutHandoff";
-import { approvalBlocks, priceNprOf, skuOf, type PurchaseItem } from "@/lib/payments/orders";
+import { approvalBlocks, priceNprOf, skusOf, type PurchaseItem } from "@/lib/payments/orders";
 
 /**
  * Opens a payment.
@@ -19,10 +19,6 @@ import { approvalBlocks, priceNprOf, skuOf, type PurchaseItem } from "@/lib/paym
  */
 
 const Body = z.object({
-  // Kept so the existing checkout component posts unchanged. The gateway is no longer
-  // chosen here — Bagisto's checkout offers whatever payment methods the firm has
-  // enabled, which is where that choice belongs now.
-  gateway: z.enum(["khalti", "esewa", "fonepay", "card"]).optional(),
   documentId: z.string().uuid().optional(),
   item: z.discriminatedUnion("type", [
     z.object({
@@ -85,8 +81,9 @@ export async function POST(request: Request) {
   }
 
   const bagistoUrl = process.env.BAGISTO_URL ?? "http://localhost";
-  const sku = skuOf(item as PurchaseItem);
-  const handoffToken = await mintCheckoutHandoff(customerId, sku);
+  // The item first, then anything that rides along with it (an advocate review).
+  const skus = skusOf(item as PurchaseItem);
+  const handoffToken = await mintCheckoutHandoff(customerId, skus);
 
   /*
    * A redirect rather than a fetch. Bagisto's cart lives in the session, so the cart
@@ -101,7 +98,7 @@ export async function POST(request: Request) {
   return NextResponse.json({
     handoff: {
       mode: "redirect",
-      url: `${bagistoUrl}/legal/buy/${encodeURIComponent(sku)}?handoff=${handoffToken}`,
+      url: `${bagistoUrl}/legal/buy/${encodeURIComponent(skus[0])}?handoff=${handoffToken}`,
     },
   });
 }

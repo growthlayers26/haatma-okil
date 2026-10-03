@@ -30,6 +30,7 @@ export {
   priceNprOf,
   describeItem,
   skuOf,
+  skusOf,
   meaningOfSku,
   type PurchaseItem,
   type EntitlementKind,

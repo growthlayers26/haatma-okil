@@ -17,7 +17,15 @@ export type PurchaseItem =
   | { type: "service"; id: ServiceId }
   | { type: "plan"; id: PlanId; period: BillingPeriod };
 
-const ADVOCATE_REVIEW_NPR = 2_500;
+/**
+ * What a document purchase adds when the buyer asks for an advocate's review.
+ *
+ * Read from the service's own price rather than restated, because that price is also
+ * what Bagisto's `svc-document_review` product is seeded with — the review is a real
+ * second line in the cart, so the total shown here and the total Bagisto charges can
+ * only agree if they come from the same number.
+ */
+export const ADVOCATE_REVIEW_NPR = SERVICES.document_review.priceNpr;
 
 /**
  * The price of an item, computed server-side from the registry.
@@ -62,6 +70,23 @@ export function skuOf(item: PurchaseItem): string {
   if (item.type === "plan") return `plan-${item.id}-${item.period}`;
   if (item.type === "service") return `svc-${item.id}`;
   return `doc-${item.slug}`;
+}
+
+/**
+ * Every SKU that goes in the cart for one purchase, the one being bought first.
+ *
+ * An advocate review is its own product and its own entitlement, so ticking it adds a
+ * second line rather than raising the price of the first. Without this the review was
+ * added to the total on the review-and-pay page and then silently dropped: Bagisto's
+ * cart held only the document, so the buyer was quoted a total they were never
+ * charged and never received the review.
+ */
+export function skusOf(item: PurchaseItem): string[] {
+  const primary = skuOf(item);
+  if (item.type === "document" && item.advocateReview) {
+    return [primary, skuOf({ type: "service", id: "document_review" })];
+  }
+  return [primary];
 }
 
 export type EntitlementKind =

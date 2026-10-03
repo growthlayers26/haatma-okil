@@ -27,9 +27,9 @@ return new class extends Migration
             $table->char('id', 36)->primary();
             $table->unsignedInteger('customer_id');
             $table->char('token_hash', 64)->unique();
-            // The item the application minted this for. Not consulted to decide what
-            // goes in the cart — the SKU in the URL still does that — kept only so a
-            // handoff row is legible on its own when something needs debugging.
+            // What the application minted this for: one SKU, or several separated by
+            // commas when a purchase has more than one line (a document plus an advocate
+            // review). CheckoutController builds the cart from this, not from the URL.
             $table->string('sku');
             $table->dateTime('expires_at');
             $table->dateTime('used_at')->nullable();

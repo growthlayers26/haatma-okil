@@ -87,6 +87,38 @@ export async function saveDocument(input: {
 
   const answers = JSON.stringify(parsed.data.answers);
 
+  /*
+   * No id means "this customer's draft of this template", and there is only ever one:
+   * the local draft is keyed by template slug, and claimLocalDrafts refuses a second.
+   * Checkout calls this without an id on every press of Pay, and inserting each time
+   * meant a cancelled payment and a retry left two identical drafts on the dashboard —
+   * each with its own "use a credit" button, so a paid credit could land on the stale
+   * copy. Found rows are updated and returned as they are, without checking how many
+   * rows changed: re-saving identical answers can change none, and that is not a
+   * reason to insert a copy.
+   */
+  if (!parsed.data.id) {
+    const existing = await one<{ id: string }>(
+      `SELECT id FROM legal_documents
+        WHERE customer_id = ? AND template_slug = ? AND status = 'draft'
+        ORDER BY updated_at DESC
+        LIMIT 1`,
+      [customerId, parsed.data.templateSlug],
+    );
+
+    if (existing) {
+      await execute(
+        `UPDATE legal_documents
+            SET answers = ?, updated_at = NOW()
+          WHERE id = ? AND customer_id = ? AND status = 'draft'`,
+        [answers, existing.id, customerId],
+      );
+
+      revalidatePath("/dashboard");
+      return { ok: true, id: existing.id };
+    }
+  }
+
   // A purchased document is immutable — editing it after payment would let a buyer
   // alter an instrument the firm has already put its name to.
   if (parsed.data.id) {
