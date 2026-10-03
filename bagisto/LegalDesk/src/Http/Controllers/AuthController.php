@@ -148,6 +148,18 @@ class AuthController extends Controller
      * secret as MailController::send() rather than open to the browser directly:
      * without that secret, anyone could POST an arbitrary email here and be signed in
      * as its owner.
+     *
+     * What it does NOT prove is that whatever customers row already holds this email
+     * belongs to the person Google just authenticated. An attacker can `auth/register`
+     * someone else's address today — verification is the firm's own optional setting,
+     * easy to leave off — and simply hold the password. If the real owner later signs
+     * in with Google and this endpoint logged them into that existing row, the attacker
+     * would still hold a working password into whatever the owner goes on to store
+     * there. So this only ever signs in to a row this same endpoint created; anything
+     * else is refused rather than silently adopted, matching how most identity
+     * providers handle an email collision (Auth0, Firebase Auth's default) — surfaced
+     * to the visitor as "already registered," not merged. The address's owner still has
+     * every route in: their password, if they know it, or the firm resetting it.
      */
     public function social(Request $request): JsonResponse
     {
@@ -170,6 +182,10 @@ class AuthController extends Controller
         $customer = Customer::where('email', $data['email'])->first();
 
         if ($customer) {
+            if (! $customer->is_google_linked) {
+                return response()->json(['error' => 'email_in_use'], 409);
+            }
+
             if ($customer->is_suspended) {
                 return response()->json(['error' => 'suspended'], 403);
             }
@@ -195,6 +211,9 @@ class AuthController extends Controller
                 // click a link proving it again would be re-deriving a fact already in
                 // hand.
                 'is_verified'       => true,
+                // The one column that makes the check above meaningful: only a row
+                // this branch itself created is ever eligible for the check above.
+                'is_google_linked'  => true,
             ]);
 
             Event::dispatch('customer.registration.after', $customer);

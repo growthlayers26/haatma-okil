@@ -1,6 +1,23 @@
+import { createHash, timingSafeEqual } from "node:crypto";
 import { NextResponse } from "next/server";
 import { redeemPaidOrders } from "@/lib/payments/orders";
 import { dispatchQueued } from "@/lib/notify";
+
+/**
+ * `a !== b` short-circuits at the first mismatched byte, so how long the comparison
+ * takes leaks how many leading bytes of the secret a guess got right — a timing
+ * side-channel an attacker can average out over enough requests.
+ *
+ * Hashed first rather than compared directly: timingSafeEqual throws on a length
+ * mismatch, and an unauthenticated caller controls the length of `provided` — a
+ * thrown exception versus a returned `false` is itself a timing (and status-code)
+ * signal. Hashing both sides to the same fixed digest length sidesteps that.
+ */
+function secretsMatch(provided: string, expected: string): boolean {
+  const a = createHash("sha256").update(provided).digest();
+  const b = createHash("sha256").update(expected).digest();
+  return timingSafeEqual(a, b);
+}
 
 /**
  * Turns paid orders into entitlements, and sends what is queued.
@@ -23,8 +40,8 @@ export async function POST(request: Request) {
     return NextResponse.json({ message: "Reconciliation is not configured." }, { status: 503 });
   }
 
-  const provided = request.headers.get("authorization");
-  if (provided !== `Bearer ${secret}`) {
+  const provided = request.headers.get("authorization") ?? "";
+  if (!secretsMatch(provided, `Bearer ${secret}`)) {
     return NextResponse.json({ message: "Not authorised." }, { status: 401 });
   }
 

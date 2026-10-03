@@ -1,4 +1,4 @@
-import type { Template, Field } from "../types";
+import type { Template } from "../types";
 import { pendingReview, bsDateField, yesNoField } from "./common";
 import { litigantFields, litigantLine, signatureDateField } from "./litigation-common";
 import { PARTITION, APPEAL_PROVISIONS, APPELLATE_JURISDICTION, cite, ACTS } from "../nepal";
