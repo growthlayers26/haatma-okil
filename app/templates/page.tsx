@@ -5,6 +5,8 @@ import { Suspense, useMemo, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { useLang } from "@/components/language-provider";
 import { TEMPLATES, CATEGORIES } from "@/lib/templates";
+import { AUDIENCES, getAudience, matchesAudienceKeyword, type AudienceId } from "@/lib/audiences";
+import { SERVICES, SERVICE_PATH } from "@/lib/services";
 import { formatNpr, toNepaliDigits } from "@/lib/nepal";
 import type { Category, Template } from "@/lib/types";
 
@@ -22,22 +24,39 @@ function TemplateLibrary() {
 
   const initialCategory = (params.get("category") as Category | null) ?? null;
   const [category, setCategory] = useState<Category | null>(initialCategory);
+  const [audience, setAudience] = useState<AudienceId | null>(
+    getAudience(params.get("audience"))?.id ?? null,
+  );
   const [query, setQuery] = useState(params.get("q") ?? "");
+
+  // Who it is for is a second way into the same catalogue, so it filters alongside
+  // the category rather than replacing it.
+  const shelf = getAudience(audience);
 
   const results = useMemo(() => {
     const needle = query.trim().toLowerCase();
-    return TEMPLATES.filter((tpl) => {
+    const matches = TEMPLATES.filter((tpl) => {
       if (category && tpl.category !== category) return false;
+      if (shelf && !shelf.documents.includes(tpl.slug)) return false;
       if (!needle) return true;
       // Search both scripts, so "करार" and "contract" both find the same document.
       return (
         tpl.title.en.toLowerCase().includes(needle) ||
         tpl.title.ne.includes(query.trim()) ||
         tpl.summary.en.toLowerCase().includes(needle) ||
-        tpl.summary.ne.includes(query.trim())
+        tpl.summary.ne.includes(query.trim()) ||
+        // "startup" or "freelancer" is a description of the reader, not a word in any
+        // document, so it is matched against who each document is for.
+        matchesAudienceKeyword(query, tpl.slug)
       );
     });
-  }, [category, query]);
+
+    // A shelf reads in the order someone at that stage needs things, not in the order
+    // the catalogue happens to list them.
+    return shelf
+      ? matches.sort((a, b) => shelf.documents.indexOf(a.slug) - shelf.documents.indexOf(b.slug))
+      : matches;
+  }, [category, shelf, query]);
 
   /*
    * Grouped under category headings when nothing is filtering, flat when something
@@ -45,14 +64,14 @@ function TemplateLibrary() {
    * read in relevance order rather than be re-sorted into sections.
    */
   const grouped = useMemo(() => {
-    const filtering = category !== null || query.trim().length > 0;
+    const filtering = category !== null || audience !== null || query.trim().length > 0;
     if (filtering) return [{ id: null as Category | null, items: results }];
 
     return CATEGORIES.map((cat) => ({
       id: cat.id,
       items: results.filter((tpl) => tpl.category === cat.id),
     })).filter((g) => g.items.length > 0);
-  }, [results, category, query]);
+  }, [results, category, audience, query]);
 
   const priceLabel = (npr: number) => formatNpr(npr, lang);
   const num = (n: number) => (lang === "ne" ? toNepaliDigits(n) : String(n));
@@ -97,7 +116,12 @@ function TemplateLibrary() {
       </h1>
 
       <div className="mt-10 grid gap-10 lg:grid-cols-[14rem_1fr] lg:gap-16">
-        <aside className="lg:sticky lg:top-24 lg:self-start">
+        {/*
+          Scrolls within itself when taller than the screen. It is sticky, so on a short
+          window the filters below the fold would otherwise be unreachable — the page
+          scrolls, the sidebar stays put, and the last filter is never in view.
+        */}
+        <aside className="lg:sticky lg:top-24 lg:max-h-[calc(100vh-7rem)] lg:self-start lg:overflow-y-auto">
           <input
             value={query}
             onChange={(e) => setQuery(e.target.value)}
@@ -139,9 +163,47 @@ function TemplateLibrary() {
               );
             })}
           </nav>
+
+          <p className="mt-8 font-mono text-[0.68rem] uppercase tracking-[0.12em] text-ink-3">
+            {bi({ ne: "कसका लागि", en: "Who it's for" })}
+          </p>
+          <nav className="mt-1 flex flex-wrap gap-x-5 gap-y-2 lg:flex-col lg:gap-y-3">
+            <button
+              type="button"
+              onClick={() => setAudience(null)}
+              aria-current={audience === null}
+              className={`py-2 text-left font-mono text-[0.72rem] uppercase tracking-[0.08em] transition-colors ${
+                audience === null ? "text-accent" : "text-ink-3 hover:text-accent"
+              }`}
+            >
+              {bi({ ne: "सबै", en: "Anyone" })}
+            </button>
+            {AUDIENCES.map((a) => (
+              <button
+                key={a.id}
+                type="button"
+                onClick={() => setAudience(a.id)}
+                aria-current={audience === a.id}
+                className={`py-2 text-left font-mono text-[0.72rem] uppercase tracking-[0.08em] transition-colors ${
+                  audience === a.id ? "text-accent" : "text-ink-3 hover:text-accent"
+                }`}
+              >
+                {bi(a.label)} · {num(a.documents.length)}
+              </button>
+            ))}
+          </nav>
         </aside>
 
         <div>
+          {shelf && (
+            <div className="mb-8 border-l-2 border-accent bg-surface p-5">
+              <h2 className="font-serif text-2xl font-semibold tracking-tight">{bi(shelf.label)}</h2>
+              <p className="mt-1.5 max-w-[60ch] text-sm leading-relaxed text-ink-2">
+                {bi(shelf.blurb)}
+              </p>
+            </div>
+          )}
+
           {results.length === 0 ? (
             <p className="border border-dashed border-rule-strong p-8 text-ink-2">
               {bi({
@@ -177,6 +239,42 @@ function TemplateLibrary() {
                 </section>
               );
             })
+          )}
+
+          {/*
+            The filings that belong beside these documents, and a way out for whoever
+            needs something the shelf does not have. Both are existing pages — this is
+            a route to them, not a second copy.
+          */}
+          {shelf && (
+            <section className="mt-12 border-t-2 border-ink pt-4">
+              <h2 className="font-mono text-[0.72rem] font-semibold uppercase tracking-[0.12em]">
+                {bi({ ne: "यिनसँग जाने सेवा", en: "Services that go with these" })}
+              </h2>
+              <div className="mt-3 grid gap-px border border-rule bg-rule sm:grid-cols-3">
+                {shelf.services.map((id) => (
+                  <Link
+                    key={id}
+                    href={SERVICE_PATH[id]}
+                    className="group bg-surface p-4 transition-colors hover:bg-accent-soft"
+                  >
+                    <p className="font-serif text-lg font-semibold tracking-tight group-hover:text-accent">
+                      {bi(SERVICES[id].title)}
+                    </p>
+                    <p className="mt-1.5 text-sm text-ink-2">{bi(SERVICES[id].blurb)}</p>
+                    <p className="mt-3 font-mono text-xs tabular-nums text-ink-3">
+                      {formatNpr(SERVICES[id].priceNpr, lang)}
+                    </p>
+                  </Link>
+                ))}
+              </div>
+              <p className="mt-5 text-sm text-ink-2">
+                {bi({ ne: "चाहिएको कागजात यहाँ छैन?", en: "Need something that is not listed?" })}{" "}
+                <Link href="/advocate" className="text-accent underline underline-offset-4">
+                  {bi({ ne: "अधिवक्तालाई सोध्नुहोस्।", en: "Ask an advocate." })}
+                </Link>
+              </p>
+            </section>
           )}
         </div>
       </div>

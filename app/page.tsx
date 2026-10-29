@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useLang } from "@/components/language-provider";
 import { TEMPLATES, CATEGORIES, getTemplate } from "@/lib/templates";
+import { AUDIENCES } from "@/lib/audiences";
 import { formatNpr, toNepaliDigits } from "@/lib/nepal";
 import { FIRM } from "@/lib/firm";
 
@@ -185,6 +186,36 @@ export default function HomePage() {
               </Link>
             );
           })}
+        </div>
+      </section>
+
+      {/*
+        The same catalogue, entered by who is reading rather than by what they need.
+        A founder rarely knows the name of the document; they know they are starting a
+        company, hiring a developer or taking on a client. Each tile opens the existing
+        browse page with that filter on — there is no separate section behind it.
+      */}
+      <section className="mx-auto max-w-6xl px-4 pb-14 sm:px-6">
+        <h2 className="font-mono text-xs font-semibold uppercase tracking-[0.12em] text-ink-3">
+          {bi({ ne: "कसका लागि", en: "Who it's for" })}
+        </h2>
+        <div className="mt-5 grid gap-px border border-rule bg-rule sm:grid-cols-3">
+          {AUDIENCES.map((a) => (
+            <Link
+              key={a.id}
+              href={`/templates?audience=${a.id}`}
+              className="group bg-surface p-6 transition-colors hover:bg-accent-soft"
+            >
+              <h3 className="font-serif text-xl font-semibold tracking-tight group-hover:text-accent">
+                {bi(a.label)}
+              </h3>
+              <p className="mt-2 text-sm leading-relaxed text-ink-2">{bi(a.blurb)}</p>
+              <p className="mt-4 font-mono text-[0.7rem] tabular-nums text-ink-3">
+                {num(a.documents.length)} {bi({ ne: "कागजात", en: "documents" })} ·{" "}
+                {num(a.services.length)} {bi({ ne: "सेवा", en: "services" })}
+              </p>
+            </Link>
+          ))}
         </div>
       </section>
 

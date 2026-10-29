@@ -105,3 +105,13 @@ export const AREAS_OF_LAW: { id: string; label: Bilingual }[] = [
   { id: "family", label: { ne: "पारिवारिक", en: "Family" } },
   { id: "other", label: { ne: "अन्य", en: "Other" } },
 ];
+
+/** Where each service is bought. */
+export const SERVICE_PATH: Record<ServiceId, string> = {
+  question: "/advocate",
+  consultation: "/advocate",
+  document_review: "/review",
+  company_registration: "/register-company",
+  trademark: "/trademark",
+  tax_registration: "/tax-registration",
+};
